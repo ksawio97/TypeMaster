@@ -10,8 +10,14 @@
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
-    <StackPanel Orientation="Vertical" Margin="10">
-        <TextBlock Text="{Binding WikiContent}"
-                   TextWrapping="Wrap"/>
-    </StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="9*"/>
+        </Grid.RowDefinitions>
+
+        <Frame Grid.Row="1"
+               Content="{Binding WindowContent}"
+               NavigationUIVisibility="Hidden"/>
+    </Grid>
 </Window>
