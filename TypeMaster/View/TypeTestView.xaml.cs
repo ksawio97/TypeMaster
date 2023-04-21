@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,7 +26,8 @@ namespace TypeMaster.View
         {
             InitializeComponent();
 
-            DataContext = new TypeTestViewModel();
+            DataContext = new TypeTestViewModel(WikiTextBlock.Inlines);
         }
+
     }
 }

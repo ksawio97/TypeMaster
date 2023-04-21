@@ -15,7 +15,13 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="9*"/>
         </Grid.RowDefinitions>
-
+        <Viewbox Grid.Row="0">
+            <TextBlock
+                Text="TypeMaster"
+                FontSize="100"
+                VerticalAlignment="Center"
+                />
+        </Viewbox>
         <Frame Grid.Row="1"
                Content="{Binding WindowContent}"
                NavigationUIVisibility="Hidden"/>
