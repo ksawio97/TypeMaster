@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-
-namespace TypeMaster.ViewModel;
+﻿namespace TypeMaster.ViewModel;
 
 public partial class BaseViewModel : ObservableObject
 {

@@ -3,6 +3,8 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:mybehaviors="clr-namespace:TypeMaster.Behaviors"
       xmlns:local="clr-namespace:TypeMaster.View"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
@@ -24,7 +26,11 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 TextWrapping="Wrap"
-                TextTrimming ="None"/>
+                TextTrimming ="None">
+            <behaviors:Interaction.Behaviors>
+                <mybehaviors:InlinesBindingBehavior InlinesCollection="{Binding Inlines}"/>
+            </behaviors:Interaction.Behaviors>
+        </TextBlock>
 
         <TextBox
             Grid.Row="2"

@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-
-namespace TypeMaster.ViewModel;
+﻿namespace TypeMaster.ViewModel;
 
 public partial class MainViewModel : BaseViewModel
 {
@@ -8,11 +6,12 @@ public partial class MainViewModel : BaseViewModel
     string? _title;
 
     [ObservableProperty]
-    Page _windowContent;
+    INavigationService _navigation;
 
-    public MainViewModel()
+    public MainViewModel(INavigationService navigation)
     {
+        Navigation = navigation;
+        Navigation.NavigateTo<HomeViewModel>();
         Title = "TypeMaster";
-        WindowContent = new HomeView();
     }
 }

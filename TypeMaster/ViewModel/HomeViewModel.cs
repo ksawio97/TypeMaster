@@ -1,15 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using System.Windows;
 
 namespace TypeMaster.ViewModel;
 
 public partial class HomeViewModel : BaseViewModel
 {
+    [ObservableProperty]
+    INavigationService _navigation;
+    public HomeViewModel(INavigationService navigation)
+    {
+       Navigation = navigation;
+    }
     [RelayCommand]
     public void ChangePage()
     {
-        Page viewModel = new TypeTestView();
-        var mainWindowViewModel = (MainViewModel)Application.Current.MainWindow.DataContext;
-        mainWindowViewModel.WindowContent = viewModel;
+        Navigation.NavigateTo<TypeTestViewModel>();
     }
 }

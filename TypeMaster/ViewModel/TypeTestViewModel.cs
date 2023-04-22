@@ -1,7 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
@@ -15,18 +12,17 @@ public partial class TypeTestViewModel : BaseViewModel
     [ObservableProperty]
     string? _userTypeInput;
 
-    private InlineCollection Inlines { get; set; }
+    [ObservableProperty]
+    private Inline[] _inlines;
 
-    WikipediaService wikipediaService;
+    WikipediaService _wikipediaService;
 
     string[] _wikiContent;
     int wordsCompleted = 0;
 
-    public TypeTestViewModel(InlineCollection inlines)
+    public TypeTestViewModel(WikipediaService wikipediaService)
     {
-        wikipediaService = new WikipediaService();
-        Inlines = inlines;
-
+        _wikipediaService = wikipediaService;
         LoadDataAsync();
     }
 
@@ -36,7 +32,7 @@ public partial class TypeTestViewModel : BaseViewModel
 
         await Task.Run(async () =>
         {
-            _wikiContent = (await wikipediaService.TryGetWikipediaPageAsync(600, "en")).Split(" ").Select(word => word + " ").ToArray();
+            _wikiContent = (await _wikipediaService.TryGetWikipediaPageAsync(600, "en")).Split(" ").Select(word => word + " ").ToArray();
         });
 
         SetInlines();
@@ -45,10 +41,7 @@ public partial class TypeTestViewModel : BaseViewModel
 
     private void SetInlines()
     {
-        foreach (var word in _wikiContent)
-        {
-            Inlines.Add(new Run(word) { Foreground = Brushes.Black });
-        }
+        Inlines = _wikiContent.Select(word => new Run(word) { Foreground = Brushes.Black }).ToArray();
     }
 
     partial void OnUserTypeInputChanged(string? value)
@@ -86,23 +79,12 @@ public partial class TypeTestViewModel : BaseViewModel
             }
             word.Inlines.Add(character);
         }
-        if (ReplaceInlineAt(wordsCompleted, word))
-            new IndexOutOfRangeException();
+        ReplaceInlineAt(wordsCompleted, word);
     }
 
-    private bool ReplaceInlineAt(int index, Inline newElement)
+    //event not working properly so I need to do this
+    private void ReplaceInlineAt(int index, Inline inline)
     {
-        var iter = Inlines.GetEnumerator();
-
-        while (0 <= index--)
-        {
-            if (!iter.MoveNext())
-                return false;
-        }
-        var newInlines = Inlines.Select(word => word == iter.Current ? newElement : word).ToArray();
-        Inlines.Clear();
-        Inlines.AddRange(newInlines);
-
-        return true;
+        Inlines = Inlines.Select((word, i) => i == index ? inline : word).ToArray();
     }
 }
