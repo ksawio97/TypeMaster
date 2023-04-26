@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
@@ -19,10 +20,12 @@ public partial class TypeTestViewModel : BaseViewModel
 
     string[] _wikiContent;
     int wordsCompleted = 0;
+    int lastWordChangedIndex;
 
     public TypeTestViewModel(WikipediaService wikipediaService)
     {
         _wikipediaService = wikipediaService;
+        lastWordChangedIndex = 0;
         LoadDataAsync();
     }
 
@@ -32,7 +35,7 @@ public partial class TypeTestViewModel : BaseViewModel
 
         await Task.Run(async () =>
         {
-            _wikiContent = (await _wikipediaService.TryGetWikipediaPageAsync(600, "en")).Split(" ").Select(word => word + " ").ToArray();
+            _wikiContent = (await _wikipediaService.TryGetWikipediaPageAsync(600, "en")).Split(" ").Select(word => word.Trim() + " ").ToArray();
         });
 
         SetInlines();
@@ -58,31 +61,60 @@ public partial class TypeTestViewModel : BaseViewModel
         }
         else
         {
-            CheckCurrentWord(value);
+            CheckInput((value == null ? "" : value));
         }
     }
-
-    private void CheckCurrentWord(string? value)
+    
+    //maybe add something that will change only changes that were added from last input (good for performence)
+    private void CheckInput(string input)
     {
-        var colors = value.Substring(0, (_wikiContent[wordsCompleted].Length < value.Length ? _wikiContent[wordsCompleted].Length : value.Length)).Select((c, i) => (c == _wikiContent[wordsCompleted][i]) ? Brushes.Green : Brushes.Red).ToArray();
-        Span word = new Span();
-        for (int i = 0; i < _wikiContent[wordsCompleted].Length; i++)
-        {
-            Run character = new Run(_wikiContent[wordsCompleted][i].ToString());
 
-            if (_wikiContent[wordsCompleted][i] != ' ')
+        Func<char, char, SolidColorBrush> colorPick = (c1, c2) => c1 == c2 ? Brushes.Green : Brushes.Red;
+
+        int currWord = wordsCompleted;
+        int charsLeft = input.Length;
+        int startIndex = 0;
+        while (0 < charsLeft)
+        {
+            if (charsLeft <= _wikiContent[currWord].Length)
+            {
+                CheckCurrentWord(input.Substring(startIndex, (startIndex + _wikiContent[currWord].Length < input.Length ? _wikiContent[currWord].Length : input.Length - startIndex)), currWord, colorPick);
+            }
+            charsLeft -= _wikiContent[currWord].Length;
+            startIndex += _wikiContent[currWord].Length;
+            currWord++;
+        }
+        lastWordChangedIndex = currWord - 1;
+    }
+
+    private void CheckCurrentWord(string input, int wordIndex, Func<char, char, SolidColorBrush> colorPick)
+    {
+        var colors = input.Substring(0, (_wikiContent[wordIndex].Length < input.Length ? _wikiContent[wordIndex].Length : input.Length)).Select((c, i) => colorPick(c, _wikiContent[wordIndex][i])).ToArray();
+
+        Span word = new Span();
+        for (int i = 0; i < _wikiContent[wordIndex].Length; i++)
+        {
+            Run character = new Run(_wikiContent[wordIndex][i].ToString());
+
+            if (_wikiContent[wordIndex][i] != ' ')
                 character.TextDecorations = TextDecorations.Underline;
 
             if (i < colors.Length)
             {
                 character.Foreground = colors[i];
+                character.Background = Brushes.Transparent;
             }
+            else if (i == colors.Length)
+            {
+                character.Background = Brushes.Purple;
+            }
+
             word.Inlines.Add(character);
         }
-        ReplaceInlineAt(wordsCompleted, word);
+        ReplaceInlineAt(wordIndex, word);
     }
 
-    //event not working properly so I need to do this
+    //temporary solution
     private void ReplaceInlineAt(int index, Inline inline)
     {
         Inlines = Inlines.Select((word, i) => i == index ? inline : word).ToArray();

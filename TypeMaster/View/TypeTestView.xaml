@@ -21,7 +21,6 @@
         <TextBlock 
                 Grid.Row="1"
                 Grid.Column="1"
-                x:Name="WikiTextBlock"
                 FontSize="20"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"

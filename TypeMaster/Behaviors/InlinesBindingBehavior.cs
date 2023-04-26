@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xaml.Behaviors;
-using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
 
@@ -27,12 +27,28 @@ public class InlinesBindingBehavior : Behavior<TextBlock>
 
     private void OnInlinesListChanged(Inline[] inlines)
     {
-        AssociatedObject.Inlines.Clear();
-        if (inlines != null)
+
+        if (AssociatedObject.Inlines.Count != inlines.Length)
         {
-            foreach (var inline in inlines)
+            AssociatedObject.Inlines.Clear();
+            if (inlines != null)
             {
-                AssociatedObject.Inlines.Add(inline);
+                foreach (var inline in inlines)
+                {
+                    AssociatedObject.Inlines.Add(inline);
+                }
+            }
+        }
+        else
+        {
+            for(int i = 0; i < inlines.Length; i++)
+            {
+                Inline word = AssociatedObject.Inlines.ElementAt(i);
+                if (!word.Equals(inlines[i]))
+                {
+                    AssociatedObject.Inlines.InsertBefore(word, inlines[i]);
+                    AssociatedObject.Inlines.Remove(word);
+                }
             }
         }
     }
