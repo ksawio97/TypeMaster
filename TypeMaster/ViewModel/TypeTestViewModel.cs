@@ -1,15 +1,18 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace TypeMaster.ViewModel;
 
 public partial class TypeTestViewModel : BaseViewModel
 {
-
+    #region observable properties
     [ObservableProperty]
     string? _userTypeInput;
 
@@ -18,24 +21,31 @@ public partial class TypeTestViewModel : BaseViewModel
 
     WikipediaService _wikipediaService;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsNotBusy))]
+    [NotifyPropertyChangedFor(nameof(Cursor))]
+    private bool _isBusy;
+    public bool IsNotBusy => !IsBusy;
+
+    public Cursor Cursor => IsBusy ? Cursors.Wait : Cursors.Arrow;
+    #endregion
+
     string[] _wikiContent;
     int wordsCompleted = 0;
-    int lastWordChangedIndex;
 
     public TypeTestViewModel(WikipediaService wikipediaService)
     {
         _wikipediaService = wikipediaService;
-        lastWordChangedIndex = 0;
-        LoadDataAsync();
     }
 
+    [RelayCommand]
     private async Task LoadDataAsync()
     {
         IsBusy = true;
 
         await Task.Run(async () =>
         {
-            _wikiContent = (await _wikipediaService.TryGetWikipediaPageAsync(600, "en")).Split(" ").Select(word => word.Trim() + " ").ToArray();
+            _wikiContent = (await _wikipediaService.TryGetWikipediaPageAsync(600, "en")).Replace("\n", " ").Split(" ").Select(word => word.Trim() + " ").ToArray();
         });
 
         SetInlines();
@@ -57,6 +67,7 @@ public partial class TypeTestViewModel : BaseViewModel
         else if (value == _wikiContent[wordsCompleted])
         {
             ReplaceInlineAt(wordsCompleted, new Run(_wikiContent[wordsCompleted++]) { Foreground = Brushes.Green });
+            //Add pointer in next word
             UserTypeInput = "";
         }
         else
@@ -72,24 +83,22 @@ public partial class TypeTestViewModel : BaseViewModel
         Func<char, char, SolidColorBrush> colorPick = (c1, c2) => c1 == c2 ? Brushes.Green : Brushes.Red;
 
         int currWord = wordsCompleted;
-        int charsLeft = input.Length;
         int startIndex = 0;
-        while (0 < charsLeft)
+        while (0 < input.Length - startIndex)
         {
-            if (charsLeft <= _wikiContent[currWord].Length)
+            if (input.Length - startIndex <= _wikiContent[currWord].Length)
             {
                 CheckCurrentWord(input.Substring(startIndex, (startIndex + _wikiContent[currWord].Length < input.Length ? _wikiContent[currWord].Length : input.Length - startIndex)), currWord, colorPick);
             }
-            charsLeft -= _wikiContent[currWord].Length;
             startIndex += _wikiContent[currWord].Length;
             currWord++;
         }
-        lastWordChangedIndex = currWord - 1;
     }
 
     private void CheckCurrentWord(string input, int wordIndex, Func<char, char, SolidColorBrush> colorPick)
     {
         var colors = input.Substring(0, (_wikiContent[wordIndex].Length < input.Length ? _wikiContent[wordIndex].Length : input.Length)).Select((c, i) => colorPick(c, _wikiContent[wordIndex][i])).ToArray();
+        bool addedPointer = false;
 
         Span word = new Span();
         for (int i = 0; i < _wikiContent[wordIndex].Length; i++)
@@ -111,6 +120,7 @@ public partial class TypeTestViewModel : BaseViewModel
 
             word.Inlines.Add(character);
         }
+        
         ReplaceInlineAt(wordIndex, word);
     }
 

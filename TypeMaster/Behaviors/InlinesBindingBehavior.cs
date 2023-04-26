@@ -8,7 +8,7 @@ namespace TypeMaster.Behaviors;
 public class InlinesBindingBehavior : Behavior<TextBlock>
 {
     public static readonly DependencyProperty InlinesCollectionProperty =
-        DependencyProperty.Register("InlinesCollection", typeof(Inline[]), typeof(InlinesBindingBehavior), new PropertyMetadata(null, OnInlinesListPropertyChanged));
+        DependencyProperty.Register(nameof(InlinesCollection), typeof(Inline[]), typeof(InlinesBindingBehavior), new PropertyMetadata(null, InlinesCollectionPropertyChanged));
 
     public Inline[] InlinesCollection
     {
@@ -16,16 +16,16 @@ public class InlinesBindingBehavior : Behavior<TextBlock>
         set { SetValue(InlinesCollectionProperty, value); }
     }
 
-    private static void OnInlinesListPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    private static void InlinesCollectionPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var behavior = d as InlinesBindingBehavior;
         if (behavior != null)
         {
-            behavior.OnInlinesListChanged((Inline[])e.NewValue);
+            behavior.InlinesCollectionChanged((Inline[])e.NewValue);
         }
     }
 
-    private void OnInlinesListChanged(Inline[] inlines)
+    private void InlinesCollectionChanged(Inline[] inlines)
     {
 
         if (AssociatedObject.Inlines.Count != inlines.Length)

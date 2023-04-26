@@ -1,4 +1,6 @@
-﻿namespace TypeMaster.View
+﻿using System.Runtime.CompilerServices;
+
+namespace TypeMaster.View
 {
     /// <summary>
     /// Interaction logic for TypeTestView.xaml
@@ -9,6 +11,5 @@
         {
             InitializeComponent();
         }
-
     }
 }
