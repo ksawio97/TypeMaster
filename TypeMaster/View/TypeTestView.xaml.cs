@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace TypeMaster.View
+﻿namespace TypeMaster.View
 {
     /// <summary>
     /// Interaction logic for TypeTestView.xaml

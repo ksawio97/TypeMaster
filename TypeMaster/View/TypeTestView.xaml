@@ -44,8 +44,13 @@
             MaxHeight="50"
             FontSize="20"
             MaxLines="1"
+            SpellCheck.IsEnabled="False"
             IsEnabled="{Binding IsNotBusy}"
             Text="{Binding UserTypeInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-            Background="Transparent"/>
+            Background="Transparent">
+            <behaviors:Interaction.Behaviors>
+                <mybehaviors:TextBoxBehavior/>
+            </behaviors:Interaction.Behaviors>
+        </TextBox>
     </Grid>
 </Page>

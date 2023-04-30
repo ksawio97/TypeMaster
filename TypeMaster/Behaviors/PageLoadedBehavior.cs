@@ -26,7 +26,7 @@ public class PageLoadedBehavior : Behavior<Page>
 
     private void OnLoadAsyncCommandChanged()
     {
-        AssociatedObject.Loaded += async (s, e) =>
+        AssociatedObject.Loaded += (s, e) =>
         {
             OnLoadAsyncCommand.Execute(null);
         };

@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,10 +30,13 @@ public partial class TypeTestViewModel : BaseViewModel
     #endregion
 
     string[] _wikiContent;
-    int wordsCompleted = 0;
+    int wordsCompleted;
+    int lastInputLength;
 
     public TypeTestViewModel(WikipediaService wikipediaService)
     {
+        wordsCompleted = 0;
+        lastInputLength = 0;
         _wikipediaService = wikipediaService;
     }
 
@@ -55,11 +57,13 @@ public partial class TypeTestViewModel : BaseViewModel
     private void SetInlines()
     {
         Inlines = _wikiContent.Select(word => new Run(word) { Foreground = Brushes.Black }).ToArray();
+        CheckCurrentWord("", wordsCompleted, (c1, c2) => Brushes.Black);
     }
 
     partial void OnUserTypeInputChanged(string? value)
     {
-        if(wordsCompleted == _wikiContent.Length)
+        string v = value == null ? "" : value;
+        if (wordsCompleted == _wikiContent.Length)
         {
             //end of text implement later
             return;
@@ -67,13 +71,13 @@ public partial class TypeTestViewModel : BaseViewModel
         else if (value == _wikiContent[wordsCompleted])
         {
             ReplaceInlineAt(wordsCompleted, new Run(_wikiContent[wordsCompleted++]) { Foreground = Brushes.Green });
-            //Add pointer in next word
             UserTypeInput = "";
         }
         else
         {
-            CheckInput((value == null ? "" : value));
+            CheckInput(v);
         }
+        lastInputLength = v.Length;
     }
     
     //maybe add something that will change only changes that were added from last input (good for performence)
@@ -84,21 +88,23 @@ public partial class TypeTestViewModel : BaseViewModel
 
         int currWord = wordsCompleted;
         int startIndex = 0;
-        while (0 < input.Length - startIndex)
+        while(startIndex + _wikiContent[currWord].Length < input.Length)
         {
-            if (input.Length - startIndex <= _wikiContent[currWord].Length)
-            {
-                CheckCurrentWord(input.Substring(startIndex, (startIndex + _wikiContent[currWord].Length < input.Length ? _wikiContent[currWord].Length : input.Length - startIndex)), currWord, colorPick);
-            }
             startIndex += _wikiContent[currWord].Length;
             currWord++;
         }
+        CheckCurrentWord(input.Substring(startIndex, input.Length - startIndex), currWord, colorPick);
+
+        //if deleted char from input and is on word edge
+        if(input.Length - startIndex == _wikiContent[currWord].Length)
+            CheckCurrentWord("", currWord + 1, (c1, c2) => Brushes.Black);
+        else if (input.Length < lastInputLength && input.Length + 1 - startIndex == _wikiContent[currWord].Length)
+            ReplaceInlineAt(currWord + 1, new Run(_wikiContent[currWord + 1]) { Foreground = Brushes.Black });
     }
 
     private void CheckCurrentWord(string input, int wordIndex, Func<char, char, SolidColorBrush> colorPick)
     {
         var colors = input.Substring(0, (_wikiContent[wordIndex].Length < input.Length ? _wikiContent[wordIndex].Length : input.Length)).Select((c, i) => colorPick(c, _wikiContent[wordIndex][i])).ToArray();
-        bool addedPointer = false;
 
         Span word = new Span();
         for (int i = 0; i < _wikiContent[wordIndex].Length; i++)
@@ -107,7 +113,7 @@ public partial class TypeTestViewModel : BaseViewModel
 
             if (_wikiContent[wordIndex][i] != ' ')
                 character.TextDecorations = TextDecorations.Underline;
-
+            
             if (i < colors.Length)
             {
                 character.Foreground = colors[i];
