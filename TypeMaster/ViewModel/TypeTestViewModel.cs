@@ -1,11 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using TypeMaster.Behaviors;
 
 namespace TypeMaster.ViewModel;
 
@@ -15,8 +17,9 @@ public partial class TypeTestViewModel : BaseViewModel
     [ObservableProperty]
     string? _userTypeInput;
 
+    //TO DO get rid off this. reference orginal InlineCollection using TwoWay Binding
     [ObservableProperty]
-    private Inline[] _inlines;
+    private List<Inline> _inlines;
 
     WikipediaService _wikipediaService;
 
@@ -28,6 +31,8 @@ public partial class TypeTestViewModel : BaseViewModel
 
     public Cursor Cursor => IsBusy ? Cursors.Wait : Cursors.Arrow;
     #endregion
+
+    public event EventHandler<InlinesElementChangedEventArgs> InlinesElementChanged;
 
     string[] _wikiContent;
     int wordsCompleted;
@@ -56,7 +61,7 @@ public partial class TypeTestViewModel : BaseViewModel
 
     private void SetInlines()
     {
-        Inlines = _wikiContent.Select(word => new Run(word) { Foreground = Brushes.Black }).ToArray();
+        Inlines = _wikiContent.Select(word => new Run(word) { Foreground = Brushes.Black }).ToList<Inline>();
         CheckCurrentWord("", wordsCompleted, (c1, c2) => Brushes.Black);
     }
 
@@ -70,7 +75,7 @@ public partial class TypeTestViewModel : BaseViewModel
         }
         else if (value == _wikiContent[wordsCompleted])
         {
-            ReplaceInlineAt(wordsCompleted, new Run(_wikiContent[wordsCompleted++]) { Foreground = Brushes.Green });
+            ReplaceInline(Inlines[wordsCompleted], new Run(_wikiContent[wordsCompleted++]) { Foreground = Brushes.Green });
             UserTypeInput = "";
         }
         else
@@ -99,7 +104,7 @@ public partial class TypeTestViewModel : BaseViewModel
         if(input.Length - startIndex == _wikiContent[currWord].Length)
             CheckCurrentWord("", currWord + 1, (c1, c2) => Brushes.Black);
         else if (input.Length < lastInputLength && input.Length + 1 - startIndex == _wikiContent[currWord].Length)
-            ReplaceInlineAt(currWord + 1, new Run(_wikiContent[currWord + 1]) { Foreground = Brushes.Black });
+            ReplaceInline(Inlines[currWord + 1], new Run(_wikiContent[currWord + 1]) { Foreground = Brushes.Black });
     }
 
     private void CheckCurrentWord(string input, int wordIndex, Func<char, char, SolidColorBrush> colorPick)
@@ -126,13 +131,14 @@ public partial class TypeTestViewModel : BaseViewModel
 
             word.Inlines.Add(character);
         }
-        
-        ReplaceInlineAt(wordIndex, word);
+        ReplaceInline(Inlines[wordIndex], word);
+        Inlines.RemoveAt(wordIndex);
+        Inlines.Insert(wordIndex, word);
     }
 
-    //temporary solution
-    private void ReplaceInlineAt(int index, Inline inline)
+    private void ReplaceInline(Inline oldInline, Inline newInline)
     {
-        Inlines = Inlines.Select((word, i) => i == index ? inline : word).ToArray();
+        var args = new InlinesElementChangedEventArgs(oldInline, newInline);
+        InlinesElementChanged(this, args);
     }
 }

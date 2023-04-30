@@ -34,7 +34,7 @@
                 TextWrapping="Wrap"
                 TextTrimming ="None">
             <behaviors:Interaction.Behaviors>
-                <mybehaviors:InlinesBindingBehavior InlinesCollection="{Binding Inlines}"/>
+                <mybehaviors:InlinesBindingBehavior Inlines="{Binding Inlines}"/>
             </behaviors:Interaction.Behaviors>
         </TextBlock>
 
