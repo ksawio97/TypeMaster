@@ -48,6 +48,12 @@ public partial class TypeTestViewModel : BaseViewModel
     [RelayCommand]
     private async Task LoadDataAsync()
     {
+        void SetInlines()
+        {
+            Inlines = _wikiContent.Select(word => new Run(word) { Foreground = Brushes.Black }).ToList<Inline>();
+            CheckCurrentWord("", wordsCompleted, (c1, c2) => Brushes.Black);
+        }
+
         IsBusy = true;
 
         await Task.Run(async () =>
@@ -59,12 +65,7 @@ public partial class TypeTestViewModel : BaseViewModel
         IsBusy = false;
     }
 
-    private void SetInlines()
-    {
-        Inlines = _wikiContent.Select(word => new Run(word) { Foreground = Brushes.Black }).ToList<Inline>();
-        CheckCurrentWord("", wordsCompleted, (c1, c2) => Brushes.Black);
-    }
-
+    
     partial void OnUserTypeInputChanged(string? value)
     {
         string v = value == null ? "" : value;

@@ -49,7 +49,7 @@
             Text="{Binding UserTypeInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             Background="Transparent">
             <behaviors:Interaction.Behaviors>
-                <mybehaviors:TextBoxBehavior/>
+                <mybehaviors:TextBoxBehavior />
             </behaviors:Interaction.Behaviors>
         </TextBox>
     </Grid>
