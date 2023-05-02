@@ -7,6 +7,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using TypeMaster.Behaviors;
+using System.Text.RegularExpressions;
 
 namespace TypeMaster.ViewModel;
 
@@ -16,7 +17,8 @@ public partial class TypeTestViewModel : BaseViewModel
     [ObservableProperty]
     string? _userTypeInput;
 
-    WikipediaService _wikipediaService;
+    [ObservableProperty]
+    private int _charLimit;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotBusy))]
@@ -26,19 +28,25 @@ public partial class TypeTestViewModel : BaseViewModel
 
     public Cursor Cursor => IsBusy ? Cursors.Wait : Cursors.Arrow;
     #endregion
-
     public event EventHandler<InlinesElementChangedEventArgs> InlinesElementChanged;
     public event EventHandler<SetInlinesEventArgs> SetInlines;
 
+    WikipediaService _wikipediaService;
+
     string[] _wikiContent;
     int wordsCompleted;
-    int lastInputLength;
 
+    int currWord;
+    int startIndex;
+    int maxErrorCharsCount;
     public TypeTestViewModel(WikipediaService wikipediaService)
     {
         wordsCompleted = 0;
-        lastInputLength = 0;
         _wikipediaService = wikipediaService;
+
+        currWord = 0;
+        startIndex = 0;
+        maxErrorCharsCount = 12;
     }
 
     [RelayCommand]
@@ -48,18 +56,18 @@ public partial class TypeTestViewModel : BaseViewModel
 
         await Task.Run(async () =>
         {
-            _wikiContent = (await _wikipediaService.TryGetWikipediaPageAsync(600, "en")).Replace("\n", " ").Split(" ").Select(word => word.Trim() + " ").ToArray();
+            _wikiContent = Regex.Replace((await _wikipediaService.TryGetWikipediaPageAsync(600, "en")).Replace("\n", " "), @" {2,}", " ").Split(" ").Select(word => word + " ").ToArray();
         });
 
         SetInlines(this, new SetInlinesEventArgs(_wikiContent.Select(word => new Run(word) { Foreground = Brushes.Black })));
+        SetCharLimit();
         CheckCurrentWord("", wordsCompleted, (c1, c2) => Brushes.Black);
         IsBusy = false;
     }
 
-    
     partial void OnUserTypeInputChanged(string? value)
     {
-        string v = value == null ? "" : value;
+        string v = value ?? "";
         if (wordsCompleted == _wikiContent.Length)
         {
             //end of text implement later
@@ -68,36 +76,44 @@ public partial class TypeTestViewModel : BaseViewModel
         else if (value == _wikiContent[wordsCompleted])
         {
             ReplaceInlineAt(wordsCompleted, new[] { new CharStylePack(NewText: _wikiContent[wordsCompleted++], NewForeground: Brushes.Green) });
+            currWord++;
             UserTypeInput = "";
+            SetCharLimit();
         }
         else
         {
             CheckInput(v);
         }
-        lastInputLength = v.Length;
     }
     
-    //maybe add something that will change only changes that were added from last input (good for performence)
+    private void SetCharLimit()
+    {
+        if (currWord + 1 == _wikiContent.Length)
+            CharLimit = _wikiContent[currWord].Length;
+        else
+            CharLimit = _wikiContent[currWord].Length + maxErrorCharsCount;
+    }
     private void CheckInput(string input)
     {
-
-
-        int currWord = wordsCompleted;
-        int startIndex = 0;
-        while(startIndex + _wikiContent[currWord].Length < input.Length)
+        //go to next word
+        if (input.Length > startIndex + _wikiContent[currWord].Length)
         {
             startIndex += _wikiContent[currWord].Length;
             currWord++;
+
+            CheckCurrentWord("", currWord, (c1, c2) => Brushes.Black);
+        }
+        //go one word back
+        else if (startIndex > input.Length)
+        {
+            currWord--;
+            startIndex -= _wikiContent[currWord].Length;
+
+            ReplaceInlineAt(currWord + 1, new[] { new CharStylePack(NewText: _wikiContent[currWord + 1], NewForeground: Brushes.Black) });
         }
         //if types word he isnt supposed to type color is yellow
         Func<char, char, SolidColorBrush> colorPick = currWord == wordsCompleted ? (c1, c2) => c1 == c2 ? Brushes.Green : Brushes.Red : (c1, c2) => Brushes.Yellow;
         CheckCurrentWord(input.Substring(startIndex, input.Length - startIndex), currWord, colorPick);
-
-        //if deleted char from input and is on word edge
-        if(input.Length - startIndex == _wikiContent[currWord].Length)
-            CheckCurrentWord("", currWord + 1, (c1, c2) => Brushes.Black);
-        else if (input.Length < lastInputLength && input.Length + 1 - startIndex == _wikiContent[currWord].Length)
-            ReplaceInlineAt(currWord + 1, new[] { new CharStylePack(NewText: _wikiContent[currWord + 1], NewForeground: Brushes.Black) });
     }
 
     private void CheckCurrentWord(string input, int wordIndex, Func<char, char, SolidColorBrush> colorPick)

@@ -45,11 +45,12 @@
             FontSize="20"
             MaxLines="1"
             SpellCheck.IsEnabled="False"
+            MaxLength="{Binding CharLimit}"
             IsEnabled="{Binding IsNotBusy}"
             Text="{Binding UserTypeInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             Background="Transparent">
             <behaviors:Interaction.Behaviors>
-                <mybehaviors:TextBoxBehavior />
+                <mybehaviors:TextBoxBehavior/>
             </behaviors:Interaction.Behaviors>
         </TextBox>
     </Grid>

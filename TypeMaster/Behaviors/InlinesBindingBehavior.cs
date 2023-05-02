@@ -33,8 +33,7 @@ public class InlinesBindingBehavior : Behavior<TextBlock>
 
         if (word != null && word.Inlines.Count == e.NewInlineStyles.Length)
         {
-            //it will work when user type everything bad saves around 13% of cpu usage
-            if (e.NewInlineStyles.All(style => style.NewForeground == e.NewInlineStyles[0].NewForeground))
+            if (e.NewInlineStyles.All(style => style.NewForeground == e.NewInlineStyles[0].NewForeground) && e.NewInlineStyles.All(style => style.NewBackground == e.NewInlineStyles[0].NewBackground))
             {
                 ReplaceInline(oldInline, new Run
                 {
