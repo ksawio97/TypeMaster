@@ -17,32 +17,33 @@
         <StaticResourceExtension ResourceKey="PageLoadedBehavior" />
     </behaviors:Interaction.Behaviors>
     
-    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MinHeight="40" Margin="20, 20, 20, 20">
+    <Grid MinHeight="40" Margin="20, 20, 20, 20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="2*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
+        
         <TextBlock 
                 Grid.Row="1"
                 Grid.Column="1"
                 FontSize="20"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
                 TextWrapping="Wrap"
                 TextTrimming ="None">
-            <behaviors:Interaction.Behaviors>
-                <mybehaviors:InlinesBindingBehavior/>
-            </behaviors:Interaction.Behaviors>
-        </TextBlock>
+                <behaviors:Interaction.Behaviors>
+                    <mybehaviors:InlinesBindingBehavior/>
+                </behaviors:Interaction.Behaviors>
+            </TextBlock>
 
         <TextBox
             Grid.Row="2"
             Grid.Column="1"
             MaxHeight="50"
-            FontSize="20"
             MaxLines="1"
             SpellCheck.IsEnabled="False"
             MaxLength="{Binding CharLimit}"
