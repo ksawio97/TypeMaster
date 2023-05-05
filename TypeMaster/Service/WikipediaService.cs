@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -17,6 +19,8 @@ public class WikipediaService
             // Add more language codes and regex patterns as needed
         };
 
+    HashSet<WikipediaPageInfo> scores;
+
     readonly int minChars;
     readonly int maxChars;
 
@@ -24,37 +28,73 @@ public class WikipediaService
     {
         minChars = 10;
         maxChars = 1200;
+        scores = new HashSet<WikipediaPageInfo>();
     }
 
-    public async Task<string?> TryGetWikipediaPageAsync(int aroundChars, string language)
+    public async Task<WikipediaPageInfo?> TryGetRandomWikipediaPageInfoAsync(int aroundChars, string language)
     {
         if (aroundChars < minChars || maxChars < aroundChars || !languageRegex.ContainsKey(language))
             return null;
-        return await GetWikipediaPageAsync(aroundChars, language);
+        return await GetRandomWikipediaPageInfoAsync(aroundChars, language);
     }
 
-    private async Task<string> GetWikipediaPageAsync(int aroundChars, string language)
+    public async Task<string?> GetWikipediaPageContent(int id, int aroundChars)
+    {
+        using (HttpClient client = new HttpClient())
+        {
+            string url = $"https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&pageids={id}&explaintext=true&exchars={aroundChars}";
+            string response = await client.GetStringAsync(url);
+
+            JObject json = JObject.Parse(response);
+            JToken? pages = json?["query"]?["pages"];
+            JToken? page = pages?.First?.First();
+
+            return page?["extract"]?.ToString() ?? null;
+        }
+    }
+
+
+    private async Task<WikipediaPageInfo> GetRandomWikipediaPageInfoAsync(int aroundChars, string language)
     {
         using (HttpClient client = new HttpClient())
         {
             string url = $"https://{language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&generator=random&grnnamespace=0&grnlimit=1&exchars={aroundChars}";
             string response = await client.GetStringAsync(url);
-            //maybe add try?
-            JObject json = JObject.Parse(response);
-            JToken pages = json["query"]["pages"];
-            var page = pages.First.First();
 
-            string content = page["extract"].ToString();
+            try
+            {
+                JObject json = JObject.Parse(response);
+                JToken? pages = json["query"]?["pages"];
+                JToken? page = pages?.First?.First();
+                string? content = page?["extract"]?.ToString();
 
-            if (content.Length < aroundChars || !Regex.IsMatch(content, languageRegex[language]))
-                return await GetWikipediaPageAsync(aroundChars, language);
-
-            //return new WikipediaPageScore { 
-            //    PageIndex = Int32.Parse(page["pageid"].ToString()),
-            //    PageTitle = page["title"].ToString(),
-            //    UserScore = 0
-            //};
-            return content;
+                if (Int32.TryParse(page?["pageid"]?.ToString(), out int Id) && content?.Length >= aroundChars && Regex.IsMatch(content, languageRegex[language]))
+                {
+                    var score = new WikipediaPageInfo
+                    {
+                        Id = Id,
+                        Title = page?["title"]?.ToString() ?? throw new NullReferenceException("title not found!"),
+                        WPM = 0,
+                        Words = 0,
+                        AroundChars = aroundChars
+                    };
+                    scores.Add(score);
+                    return score;
+                }
+            }
+            catch(NullReferenceException ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            return await GetRandomWikipediaPageInfoAsync(aroundChars, language);
         }
+    }
+}
+
+public static class HashSetExtensions 
+{ 
+    public static WikipediaPageInfo? GetWikipediaPageScoreById(this HashSet<WikipediaPageInfo> values, int id)
+    {
+        return values.FirstOrDefault(element => element.Id == id);
     }
 }

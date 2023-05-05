@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using TypeMaster.Behaviors;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace TypeMaster.ViewModel;
 
@@ -56,7 +57,27 @@ public partial class TypeTestViewModel : BaseViewModel
 
         await Task.Run(async () =>
         {
-            _wikiContent = Regex.Replace((await _wikipediaService.TryGetWikipediaPageAsync(600, "en")).Replace("\n", " "), @" {2,}", " ").Split(" ").Select(word => word + " ").ToArray();
+            
+            var randomWikiPageInfo = await _wikipediaService.TryGetRandomWikipediaPageInfoAsync(600, "en");
+            if(randomWikiPageInfo != null)
+            {
+                var content = await _wikipediaService.GetWikipediaPageContent(randomWikiPageInfo.Id, randomWikiPageInfo.AroundChars);
+                if (content != null)
+                {
+                    _wikiContent = Regex.Replace(content.Replace("\n", " "), @" {2,}", " ").Split(" ").Select(word => word + " ").ToArray();
+                    randomWikiPageInfo.AroundChars = _wikiContent.Length;
+                }
+                else
+                {
+                    Debug.WriteLine($"couldn't get content of page id{randomWikiPageInfo.Id}");
+                }
+            }
+            
+            if (_wikiContent == null)
+            {
+                _wikiContent = new string[0];
+                Debug.WriteLine("couldn't get RandomWikipediaPageInfo");
+            }
         });
 
         SetInlines(this, new SetInlinesEventArgs(_wikiContent.Select(word => new Run(word) { Foreground = Brushes.Black })));
