@@ -19,16 +19,19 @@ public class WikipediaService
             // Add more language codes and regex patterns as needed
         };
 
-    HashSet<WikipediaPageInfo> scores;
+    public HashSet<WikipediaPageInfo> scores { get; private set; }
+    DataSaveLoadService _dataSaveLoadService;
 
     readonly int minChars;
     readonly int maxChars;
 
-    public WikipediaService()
+    public WikipediaService(DataSaveLoadService dataSaveLoadService)
     {
+        _dataSaveLoadService = dataSaveLoadService;
+        scores = _dataSaveLoadService.GetWikipediaPageInfos();
+
         minChars = 10;
         maxChars = 1200;
-        scores = new HashSet<WikipediaPageInfo>();
     }
 
     public async Task<WikipediaPageInfo?> TryGetRandomWikipediaPageInfoAsync(int aroundChars, string language)

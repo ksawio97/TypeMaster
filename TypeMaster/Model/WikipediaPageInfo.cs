@@ -1,5 +1,8 @@
-﻿namespace TypeMaster.Model;
+﻿using System;
 
+namespace TypeMaster.Model;
+
+[Serializable]
 public class WikipediaPageInfo
 {
     public int Id { get; set; }

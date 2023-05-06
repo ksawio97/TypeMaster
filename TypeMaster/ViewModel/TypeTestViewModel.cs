@@ -9,6 +9,7 @@ using System.Windows.Media;
 using TypeMaster.Behaviors;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using TypeMaster.Service;
 
 namespace TypeMaster.ViewModel;
 
@@ -33,6 +34,7 @@ public partial class TypeTestViewModel : BaseViewModel
     public event EventHandler<SetInlinesEventArgs> SetInlines;
 
     WikipediaService _wikipediaService;
+    DataSaveLoadService _dataSaveLoadService;
 
     string[] _wikiContent;
     int wordsCompleted;
@@ -40,11 +42,12 @@ public partial class TypeTestViewModel : BaseViewModel
     int currWord;
     int startIndex;
     int maxErrorCharsCount;
-    public TypeTestViewModel(WikipediaService wikipediaService)
+    public TypeTestViewModel(WikipediaService wikipediaService, DataSaveLoadService dataSaveLoadService)
     {
-        wordsCompleted = 0;
         _wikipediaService = wikipediaService;
+        _dataSaveLoadService = dataSaveLoadService;
 
+        wordsCompleted = 0;
         currWord = 0;
         startIndex = 0;
         maxErrorCharsCount = 12;
