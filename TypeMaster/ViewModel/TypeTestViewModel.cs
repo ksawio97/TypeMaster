@@ -1,15 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using TypeMaster.Behaviors;
-using System.Text.RegularExpressions;
 using System.Diagnostics;
-using TypeMaster.Service;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Timers;
+using System.Windows.Documents;
+using TypeMaster.Behaviors;
 
 namespace TypeMaster.ViewModel;
 
@@ -29,11 +26,15 @@ public partial class TypeTestViewModel : BaseViewModel
     public bool IsNotBusy => !IsBusy;
 
     public Cursor Cursor => IsBusy ? Cursors.Wait : Cursors.Arrow;
+
+    [ObservableProperty]
+    private string _infoForUser;
     #endregion
     public event EventHandler<InlinesElementChangedEventArgs> InlinesElementChanged;
     public event EventHandler<SetInlinesEventArgs> SetInlines;
 
     WikipediaService _wikipediaService;
+    WikipediaPageInfo? currWikiPageInfo;
 
     string[] _wikiContent;
     int wordsCompleted;
@@ -41,6 +42,10 @@ public partial class TypeTestViewModel : BaseViewModel
     int currWord;
     int startIndex;
     int maxErrorCharsCount;
+
+    Timer timer;
+    Stopwatch stopwatch;
+
     public TypeTestViewModel(WikipediaService wikipediaService)
     {
         _wikipediaService = wikipediaService;
@@ -49,6 +54,13 @@ public partial class TypeTestViewModel : BaseViewModel
         currWord = 0;
         startIndex = 0;
         maxErrorCharsCount = 12;
+
+        stopwatch = new Stopwatch();
+        timer = new Timer(100);
+        timer.Enabled = false;
+        timer.Elapsed += Timer_Elapsed;
+
+        _infoForUser = "Loading";
     }
 
     [RelayCommand]
@@ -58,20 +70,24 @@ public partial class TypeTestViewModel : BaseViewModel
 
         await Task.Run(async () =>
         {
-            
-            var randomWikiPageInfo = await _wikipediaService.TryGetRandomWikipediaPageInfoAsync(600, "en");
-            if(randomWikiPageInfo != null)
+
+            currWikiPageInfo = await _wikipediaService.TryGetRandomWikipediaPageInfoAsync(100, "en");
+            if(currWikiPageInfo != null)
             {
-                var content = await _wikipediaService.GetWikipediaPageContent(randomWikiPageInfo.Id, randomWikiPageInfo.AroundChars);
+                var content = await _wikipediaService.GetWikipediaPageContent(currWikiPageInfo.Id, currWikiPageInfo.AroundChars);
                 if (content != null)
                 {
                     _wikiContent = Regex.Replace(content.Replace("\n", " "), @" {2,}", " ").Split(" ").Select(word => word + " ").ToArray();
-                    randomWikiPageInfo.AroundChars = _wikiContent.Length;
+                    currWikiPageInfo.AroundChars = _wikiContent.Length;
                 }
                 else
                 {
-                    Debug.WriteLine($"couldn't get content of page id{randomWikiPageInfo.Id}");
+                    Debug.WriteLine($"couldn't get content of page id{currWikiPageInfo.Id}");
                 }
+
+                await CountDownAsync(3);
+                timer.Enabled = true;
+                stopwatch.Start();
             }
             
             if (_wikiContent == null)
@@ -91,8 +107,13 @@ public partial class TypeTestViewModel : BaseViewModel
     {
         string v = value ?? "";
         if (wordsCompleted == _wikiContent.Length)
-        {
-            //end of text implement later
+        {    
+            if (stopwatch.IsRunning)
+                stopwatch.Stop();
+            if (timer.Enabled)
+                timer.Enabled = false;
+            if (currWikiPageInfo != null && currWikiPageInfo.WPM == 0)
+                currWikiPageInfo.WPM = (int)(_wikiContent.Length / stopwatch.Elapsed.TotalMinutes);
             return;
         }
         else if (value == _wikiContent[wordsCompleted])
@@ -100,7 +121,8 @@ public partial class TypeTestViewModel : BaseViewModel
             ReplaceInlineAt(wordsCompleted, new[] { new CharStylePack(NewText: _wikiContent[wordsCompleted++], NewForeground: Brushes.Green) });
             currWord++;
             UserTypeInput = "";
-            SetCharLimit();
+            if (currWord != _wikiContent.Length)
+                SetCharLimit();
         }
         else
         {
@@ -113,7 +135,7 @@ public partial class TypeTestViewModel : BaseViewModel
         if (currWord + 1 == _wikiContent.Length)
             CharLimit = _wikiContent[currWord].Length;
         else
-            CharLimit = _wikiContent[currWord].Length + maxErrorCharsCount;
+            CharLimit = _wikiContent[currWord].Length + maxErrorCharsCount;  
     }
     private void CheckInput(string input)
     {
@@ -159,6 +181,22 @@ public partial class TypeTestViewModel : BaseViewModel
     {
         var args = new InlinesElementChangedEventArgs(oldInlineIndex, wordStyles);
         InlinesElementChanged(this, args);
+    }
+
+    private async Task CountDownAsync(int seconds)
+    {
+        for (int i = seconds; i > 0; i--)
+        {
+            InfoForUser = i.ToString();
+            await Task.Delay(1000);
+        }
+    }
+
+    private void Timer_Elapsed(object? sender, ElapsedEventArgs e)
+    {
+        int minutes = (int)stopwatch.Elapsed.TotalMinutes;
+        string minutesText = minutes != 0 ? minutes.ToString() + ":" : "";
+        InfoForUser = $"Elapsed time: {minutesText}{stopwatch.Elapsed.Seconds.ToString().PadLeft(2, '0')}";
     }
 }
 

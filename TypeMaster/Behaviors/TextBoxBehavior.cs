@@ -1,15 +1,15 @@
-﻿using Microsoft.Xaml.Behaviors;
-using System.Windows;
-using System.Windows.Input;
+﻿namespace TypeMaster.Behaviors;
 
-namespace TypeMaster.Behaviors;
-
-public class TextBoxBehavior : Behavior<TextBox>
+public class TextBoxBehavior : DynamicFontBehavior<TextBox>
 {
     protected override void OnAttached()
     {
         base.OnAttached();
 
+        grid = GetParentOfType<Grid>(AssociatedObject);
+
+        AssociatedObject.SizeChanged += AssociatedObject_SizeChanged;
+        AssociatedObject.Loaded += AssociatedObject_Loaded;
         AssociatedObject.IsEnabledChanged += AssociatedObject_IsEnabledChanged;
         AssociatedObject.SelectionChanged += AssociatedObject_SelectionChanged;
     }
@@ -17,8 +17,17 @@ public class TextBoxBehavior : Behavior<TextBox>
     protected override void OnDetaching()
     {
         base.OnDetaching();
+
+        AssociatedObject.SizeChanged -= AssociatedObject_SizeChanged;
+        AssociatedObject.Loaded -= AssociatedObject_Loaded;
         AssociatedObject.IsEnabledChanged -= AssociatedObject_IsEnabledChanged;
         AssociatedObject.SelectionChanged -= AssociatedObject_SelectionChanged;
+    }
+
+    private void AssociatedObject_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (grid != null && IsDifferenceBigEnough(e))
+            AssociatedObject.FontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), e.NewSize.Width * e.NewSize.Height, AssociatedObject.Text.Length, e.NewSize);
     }
 
     public void CheckFocus(bool textBoxEnabled)
@@ -43,4 +52,15 @@ public class TextBoxBehavior : Behavior<TextBox>
         if (AssociatedObject.SelectionLength > 0)
             AssociatedObject.SelectionLength = 0;
     }
+
+    private void AssociatedObject_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (grid != null)
+        {
+            Size containerSize = GetGridContainerSize(grid);
+            if (containerSize.Width > 0 && containerSize.Height > 0)
+                AssociatedObject.FontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), containerSize.Width * containerSize.Height, AssociatedObject.Text.Length, containerSize);
+        }
+    }
+
 }

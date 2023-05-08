@@ -24,11 +24,20 @@
         
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="2*"/>
+            <RowDefinition Height="6*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
+
+        <TextBlock 
+            Grid.Row="0"
+            Text="{Binding InfoForUser}"
+            TextAlignment="Center">
+            <behaviors:Interaction.Behaviors>
+                <mybehaviors:InfoForUserBehavior/>
+            </behaviors:Interaction.Behaviors>
+        </TextBlock>
+    
         <TextBlock 
                 Grid.Row="1"
                 Grid.Column="1"
@@ -43,7 +52,6 @@
         <TextBox
             Grid.Row="2"
             Grid.Column="1"
-            MaxHeight="50"
             MaxLines="1"
             SpellCheck.IsEnabled="False"
             MaxLength="{Binding CharLimit}"

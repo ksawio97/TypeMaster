@@ -1,24 +1,16 @@
-﻿using Microsoft.Xaml.Behaviors;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Windows;
 using System.Windows.Documents;
-using System.Windows.Media;
 
 namespace TypeMaster.Behaviors;
 
-public class InlinesBindingBehavior : Behavior<TextBlock>
+public class InlinesBindingBehavior : DynamicFontBehavior<TextBlock>
 {
-    Grid? grid { get; set; }
-
-    Vector2 difference;
     protected override void OnAttached()
     {
         base.OnAttached();
 
-        difference = new Vector2(0, 0);
         grid = GetParentOfType<Grid>(AssociatedObject);
 
         AssociatedObject.DataContextChanged += AssociatedObject_DataContextChanged;
@@ -95,74 +87,26 @@ public class InlinesBindingBehavior : Behavior<TextBlock>
     private void ViewModel_SetInlines(object? sender, SetInlinesEventArgs e)
     {
         AssociatedObject.Inlines.AddRange(e.Inlines);
+
+        //Set font size after inserting Inlines
+        if (grid == null)
+            return;
+        Size containerSize = GetGridContainerSize(grid);
+        AssociatedObject.FontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), containerSize.Width * containerSize.Height, AssociatedObject.Text.Length, containerSize);
     }
 
     //set font to fit nearly perfectly in textblock
     private void AssociatedObject_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        int row;
-        int minDiffrence = 15;
-        difference.X += e.NewSize.Width - e.PreviousSize.Width;
-        difference.Y += e.NewSize.Height - e.PreviousSize.Height;
-
-        if (e.PreviousSize.Height != 0 && grid != null && (Math.Abs(difference.X) > minDiffrence || Math.Abs(difference.Y) > minDiffrence) && (row = Grid.GetRow(AssociatedObject)) != -1)
+        if (grid != null && AssociatedObject.Text != string.Empty && IsDifferenceBigEnough(e))
         {
-            double oldCharSize = CalculateCharSize(AssociatedObject.FontSize);
-            double idealCharSize = (double)(grid.RowDefinitions[row].ActualHeight *
-                grid.ActualWidth /
-                AssociatedObject.Text.Length);
-            double fontSize = oldCharSize <= idealCharSize ? AssociatedObject.FontSize : 1;
-
-            while (CalculateCharSize(fontSize) < idealCharSize)
-                fontSize += 1;
-            if(AssociatedObject.FontSize != fontSize)
-                AssociatedObject.FontSize = fontSize;
-
+            AssociatedObject.FontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), e.NewSize.Width * e.NewSize.Height, AssociatedObject.Text.Length, e.NewSize);
             difference.X = 0;
             difference.Y = 0;
         }
     }
-
-    private double CalculateCharSize(double fontSize)
-    {
-        var dpi = VisualTreeHelper.GetDpi(AssociatedObject);
-        var formattedText = new FormattedText(
-            "A",
-            CultureInfo.CurrentCulture,
-            FlowDirection.LeftToRight,
-            new Typeface(AssociatedObject.FontFamily.Source),
-            fontSize,
-            Brushes.Black,
-            new NumberSubstitution(),
-            TextFormattingMode.Ideal,
-            dpi.PixelsPerDip);
-
-        return formattedText.Width * formattedText.Height;
-    }
-
-    public T? GetParentOfType<T>(DependencyObject child) where T : DependencyObject
-    {
-        DependencyObject parent = VisualTreeHelper.GetParent(child);
-
-        if (parent == null) return null;
-
-        if (parent is T) return parent as T;
-
-        return GetParentOfType<T>(parent);
-    }
 }
 
-public class Vector2
-{
-    public double X { get; set; }
-    public double Y { get; set; }   
-
-    public Vector2(double X = 0, double Y = 0)
-    {
-        this.X = X; 
-        this.Y = Y;
-    }
-}
 public class InlinesElementChangedEventArgs : EventArgs
 {
     public int OldInlineIndex { get; }

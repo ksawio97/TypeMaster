@@ -4,3 +4,6 @@ global using TypeMaster.Model;
 global using TypeMaster.Service;
 global using System.Windows.Controls;
 global using CommunityToolkit.Mvvm.ComponentModel;
+global using System.Windows;
+global using System.Windows.Input;
+global using System.Windows.Media;
