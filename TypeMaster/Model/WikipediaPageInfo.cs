@@ -12,4 +12,6 @@ public class WikipediaPageInfo
     public int Words { get; set; }
 
     public int AroundChars { get; set; }
+
+    public string Language { get; set; }
 }

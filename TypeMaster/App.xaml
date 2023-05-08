@@ -12,5 +12,9 @@
         <DataTemplate DataType="{x:Type TypeName=viewmodel:TypeTestViewModel}">
             <view:TypeTestView/>
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type TypeName=viewmodel:ScoreboardViewModel}">
+            <view:ScoreboardView/>
+        </DataTemplate>
     </Application.Resources>
 </Application>

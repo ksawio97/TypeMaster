@@ -56,7 +56,7 @@ public class WikipediaService
         }
     }
 
-
+    //maybe change it to cut content aroundChars itself not wikipedia
     private async Task<WikipediaPageInfo> GetRandomWikipediaPageInfoAsync(int aroundChars, string language)
     {
         using (HttpClient client = new HttpClient())
@@ -79,9 +79,9 @@ public class WikipediaService
                         Title = page?["title"]?.ToString() ?? throw new NullReferenceException("title not found!"),
                         WPM = 0,
                         Words = 0,
-                        AroundChars = aroundChars
+                        AroundChars = aroundChars,
+                        Language = language
                     };
-                    scores.Add(score);
                     return score;
                 }
             }
@@ -91,6 +91,12 @@ public class WikipediaService
             }
             return await GetRandomWikipediaPageInfoAsync(aroundChars, language);
         }
+    }
+
+    public void AddScore(WikipediaPageInfo wikipediaPageInfo)
+    {
+        if (!scores.Contains(wikipediaPageInfo))
+            scores.Add(wikipediaPageInfo);
     }
 }
 

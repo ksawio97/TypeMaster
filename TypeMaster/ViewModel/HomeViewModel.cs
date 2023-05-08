@@ -4,15 +4,20 @@ namespace TypeMaster.ViewModel;
 
 public partial class HomeViewModel : BaseViewModel
 {
-    [ObservableProperty]
     INavigationService _navigation;
     public HomeViewModel(INavigationService navigation)
     {
-       Navigation = navigation;
+        _navigation = navigation;
     }
     [RelayCommand]
-    public void ChangePage()
+    public void NavigateToTypeTest()
     {
-        Navigation.NavigateTo<TypeTestViewModel>();
+        _navigation.NavigateTo<TypeTestViewModel>();
+    }
+
+    [RelayCommand]
+    public void NavigateToScoreboard()
+    {
+        _navigation.NavigateTo<ScoreboardViewModel>();
     }
 }

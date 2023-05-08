@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Windows;
 
 namespace TypeMaster
 {
@@ -23,6 +22,7 @@ namespace TypeMaster
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<HomeViewModel>();
             services.AddSingleton<TypeTestViewModel>();
+            services.AddSingleton<ScoreboardViewModel>();
 
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<WikipediaService>();

@@ -33,6 +33,7 @@ public partial class TypeTestViewModel : BaseViewModel
     public event EventHandler<InlinesElementChangedEventArgs> InlinesElementChanged;
     public event EventHandler<SetInlinesEventArgs> SetInlines;
 
+    INavigationService _navigationService;
     WikipediaService _wikipediaService;
     WikipediaPageInfo? currWikiPageInfo;
 
@@ -46,8 +47,9 @@ public partial class TypeTestViewModel : BaseViewModel
     Timer timer;
     Stopwatch stopwatch;
 
-    public TypeTestViewModel(WikipediaService wikipediaService)
+    public TypeTestViewModel(WikipediaService wikipediaService, INavigationService navigationService)
     {
+        _navigationService = navigationService;
         _wikipediaService = wikipediaService;
 
         wordsCompleted = 0;
@@ -70,15 +72,16 @@ public partial class TypeTestViewModel : BaseViewModel
 
         await Task.Run(async () =>
         {
-
-            currWikiPageInfo = await _wikipediaService.TryGetRandomWikipediaPageInfoAsync(100, "en");
+            int aroundChars = 100;
+            currWikiPageInfo = await _wikipediaService.TryGetRandomWikipediaPageInfoAsync(aroundChars, "en");
             if(currWikiPageInfo != null)
             {
                 var content = await _wikipediaService.GetWikipediaPageContent(currWikiPageInfo.Id, currWikiPageInfo.AroundChars);
                 if (content != null)
                 {
                     _wikiContent = Regex.Replace(content.Replace("\n", " "), @" {2,}", " ").Split(" ").Select(word => word + " ").ToArray();
-                    currWikiPageInfo.AroundChars = _wikiContent.Length;
+                    currWikiPageInfo.Words = _wikiContent.Length;
+                    currWikiPageInfo.AroundChars = aroundChars;
                 }
                 else
                 {
@@ -108,12 +111,15 @@ public partial class TypeTestViewModel : BaseViewModel
         string v = value ?? "";
         if (wordsCompleted == _wikiContent.Length)
         {    
-            if (stopwatch.IsRunning)
-                stopwatch.Stop();
-            if (timer.Enabled)
-                timer.Enabled = false;
-            if (currWikiPageInfo != null && currWikiPageInfo.WPM == 0)
+            stopwatch.Stop();
+            timer.Enabled = false;
+            if (currWikiPageInfo != null)
+            {
                 currWikiPageInfo.WPM = (int)(_wikiContent.Length / stopwatch.Elapsed.TotalMinutes);
+                _wikipediaService.AddScore(currWikiPageInfo);
+            }
+
+            _navigationService.NavigateTo<HomeViewModel>();
             return;
         }
         else if (value == _wikiContent[wordsCompleted])

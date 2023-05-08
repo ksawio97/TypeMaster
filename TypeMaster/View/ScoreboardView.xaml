@@ -1,0 +1,34 @@
+﻿<Page x:Class="TypeMaster.View.ScoreboardView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:TypeMaster.View"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="ScoreboardView">
+    <Grid>
+        <DataGrid CanUserSortColumns="True"
+                  CanUserAddRows="False" 
+                  CanUserDeleteRows="False"
+                  CanUserResizeColumns="False" 
+                  CanUserResizeRows="False" 
+                  CanUserReorderColumns="False"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True">
+            
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Page ID"  Binding="{Binding Id}" Width="*"/>
+                <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*"/>
+                <DataGridTextColumn Header="Words Per Minute" Binding="{Binding WPM}" Width="*"/>
+                <DataGridTextColumn Header="Words Count" Binding="{Binding Words}" Width="*"/>
+                <DataGridTextColumn Header="Characters Count" Binding="{Binding AroundChars}" Width="*"/>
+                <DataGridTextColumn Header="Text Language" Binding="{Binding Language}" Width="*"/>
+            </DataGrid.Columns>
+
+            <DataGrid.ItemsSource>
+                <Binding Path="Scores"/>
+            </DataGrid.ItemsSource>
+        </DataGrid>
+    </Grid>
+</Page>
