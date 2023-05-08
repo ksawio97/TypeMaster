@@ -10,32 +10,38 @@ namespace TypeMaster.Service
     {
         private readonly string _folderPath;
         private readonly string _filePath;
+        private CryptographyService _cryptographyService;
 
-        public DataSaveLoadService()
+        public DataSaveLoadService(CryptographyService cryptographyService)
         {
-            _folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TypeMaster");
-            _filePath = Path.Combine(_folderPath, "data.json");
+            _cryptographyService = cryptographyService;
 
-            CheckIfPathExists();
+            _folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TypeMaster");
+            _filePath = Path.Combine(_folderPath, "data.json.enc");
         }
 
-        private void CheckIfPathExists()
+        private bool CheckIfPathExisted()
         {
             if (!Directory.Exists(_folderPath))
+            {
                 Directory.CreateDirectory(_folderPath);
-            if (!File.Exists(_filePath))
-                File.Create(_filePath);
+                return false;
+            }
+            return true;
         }
 
         public HashSet<WikipediaPageInfo> GetWikipediaPageInfos()
         {
-            CheckIfPathExists();
+            if(!CheckIfPathExisted() || !File.Exists(_filePath))
+                return new HashSet<WikipediaPageInfo>();
 
             try
             {
                 using (StreamReader sr = new StreamReader(_filePath))
                 {
-                    string json = sr.ReadToEnd();
+                    string encryptedJson = sr.ReadToEnd();
+                    string json = _cryptographyService.Decrypt(encryptedJson);
+
                     return JsonConvert.DeserializeObject<HashSet<WikipediaPageInfo>>(json) ?? new HashSet<WikipediaPageInfo>();
                 }
             }
@@ -48,14 +54,17 @@ namespace TypeMaster.Service
 
         public void SaveWikipediaPageInfos(HashSet<WikipediaPageInfo> wikipediaPageInfos)
         {
-            CheckIfPathExists();
+            CheckIfPathExisted();
 
             try
             {
                 string json = JsonConvert.SerializeObject(wikipediaPageInfos);
+                string encryptedJson = _cryptographyService.Encrypt(json);
+                if(!File.Exists(_filePath))
+                    File.Create(_filePath).Close();
                 using (StreamWriter sw = new StreamWriter(_filePath, false))
                 {
-                    sw.Write(json);
+                    sw.Write(encryptedJson);
                 }
             }
             catch(Exception ex)

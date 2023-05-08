@@ -34,7 +34,6 @@ public partial class TypeTestViewModel : BaseViewModel
     public event EventHandler<SetInlinesEventArgs> SetInlines;
 
     WikipediaService _wikipediaService;
-    DataSaveLoadService _dataSaveLoadService;
 
     string[] _wikiContent;
     int wordsCompleted;
@@ -42,10 +41,9 @@ public partial class TypeTestViewModel : BaseViewModel
     int currWord;
     int startIndex;
     int maxErrorCharsCount;
-    public TypeTestViewModel(WikipediaService wikipediaService, DataSaveLoadService dataSaveLoadService)
+    public TypeTestViewModel(WikipediaService wikipediaService)
     {
         _wikipediaService = wikipediaService;
-        _dataSaveLoadService = dataSaveLoadService;
 
         wordsCompleted = 0;
         currWord = 0;

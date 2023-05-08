@@ -27,6 +27,7 @@ namespace TypeMaster
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<WikipediaService>();
             services.AddSingleton<DataSaveLoadService>();
+            services.AddSingleton<CryptographyService>();
 
             services.AddSingleton<Func<Type, BaseViewModel>>(serviceProvider => viewModelType => (BaseViewModel)serviceProvider.GetRequiredService(viewModelType));
             _serviceProvider = services.BuildServiceProvider();
