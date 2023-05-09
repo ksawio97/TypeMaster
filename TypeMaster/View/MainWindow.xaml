@@ -3,8 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TypeMaster.View"
-        xmlns:vm="clr-namespace:TypeMaster.ViewModel"
         mc:Ignorable="d"
         Title="{Binding Title}" Height="450" Width="800">
     <Grid>
@@ -12,12 +10,35 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="9*"/>
         </Grid.RowDefinitions>
-        <Viewbox Grid.Row="0">
-            <TextBlock
-                Text="TypeMaster"
-                FontSize="100"
-                VerticalAlignment="Center"/>
-        </Viewbox>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="9*"/>
+            </Grid.ColumnDefinitions>
+
+            <Viewbox Grid.Column="0"
+                     Grid.ColumnSpan="2">
+                <TextBlock
+                    Text="TypeMaster"
+                    FontSize="100"
+                    VerticalAlignment="Center"/>
+            </Viewbox>
+            
+            <Button Grid.Column="0"
+                    Background="Transparent" 
+                    BorderThickness="0"
+                    Command="{Binding GoHomeCommand}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="8*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Path Grid.Row="1" Fill="Black" Data="M25 4.81L8.54 19.65V45h10.42V30.77H30V45h10.42V19.65L25 4.81Z" Stretch="Uniform"/>
+                </Grid>
+            </Button>
+        </Grid>
+
         <Frame Grid.Row="1"
                Content="{Binding Path=Navigation.CurrentView}"
                NavigationUIVisibility="Hidden"/>

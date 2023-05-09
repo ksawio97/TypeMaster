@@ -1,4 +1,6 @@
-﻿namespace TypeMaster.ViewModel;
+﻿using CommunityToolkit.Mvvm.Input;
+
+namespace TypeMaster.ViewModel;
 
 public partial class MainViewModel : BaseViewModel
 {
@@ -13,5 +15,12 @@ public partial class MainViewModel : BaseViewModel
         Navigation = navigation;
         Navigation.NavigateTo<HomeViewModel>();
         Title = "TypeMaster";
+    }
+
+    [RelayCommand]
+    private void GoHome()
+    {
+        if (Navigation.CurrentView is not HomeViewModel)
+            Navigation.NavigateTo<HomeViewModel>();
     }
 }

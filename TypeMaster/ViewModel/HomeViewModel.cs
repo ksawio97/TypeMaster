@@ -10,14 +10,20 @@ public partial class HomeViewModel : BaseViewModel
         _navigation = navigation;
     }
     [RelayCommand]
-    public void NavigateToTypeTest()
+    private void NavigateToTypeTest()
     {
         _navigation.NavigateTo<TypeTestViewModel>();
     }
 
     [RelayCommand]
-    public void NavigateToScoreboard()
+    private void NavigateToScoreboard()
     {
         _navigation.NavigateTo<ScoreboardViewModel>();
+    }
+
+    [RelayCommand]
+    private void Quit()
+    {
+        Application.Current.Shutdown();
     }
 }

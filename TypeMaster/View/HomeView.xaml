@@ -29,5 +29,10 @@
                 Grid.Row="1"
                 Content="Scoreboard"
                 Command="{Binding NavigateToScoreboardCommand}"/>
+
+        <Button Grid.Column="1"
+                Grid.Row="1"
+                Content="Quit"
+                Command="{Binding QuitCommand}"/>
     </Grid>
 </Page>
