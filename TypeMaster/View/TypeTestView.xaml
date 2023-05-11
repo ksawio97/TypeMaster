@@ -28,16 +28,14 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
-        <TextBlock 
-            Grid.Row="0"
-            Text="{Binding InfoForUser}"
-            TextAlignment="Center">
-            <behaviors:Interaction.Behaviors>
-                <mybehaviors:InfoForUserBehavior/>
-            </behaviors:Interaction.Behaviors>
-        </TextBlock>
-    
+        
+        <Viewbox Grid.Row="0">
+            <TextBlock 
+                Text="{Binding InfoForUser}"
+                TextAlignment="Center">
+            </TextBlock>
+        </Viewbox>
+        
         <TextBlock 
                 Grid.Row="1"
                 Grid.Column="1"

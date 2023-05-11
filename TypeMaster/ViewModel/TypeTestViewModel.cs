@@ -73,7 +73,7 @@ public partial class TypeTestViewModel : BaseViewModel
         await Task.Run(async () =>
         {
             int aroundChars = 100;
-            currWikiPageInfo = await _wikipediaService.TryGetRandomWikipediaPageInfoAsync(aroundChars, "en");
+            currWikiPageInfo = await _wikipediaService.TryGetWikipediaPageInfoAsync();
             if(currWikiPageInfo != null)
             {
                 var content = await _wikipediaService.GetWikipediaPageContent(currWikiPageInfo.Id, currWikiPageInfo.AroundChars);
@@ -176,7 +176,7 @@ public partial class TypeTestViewModel : BaseViewModel
                     NewText: character.ToString(),
                     NewForeground: index < colors.Length ? colors[index] : null,
                     NewBackground: index == colors.Length ? Brushes.Purple : Brushes.Transparent,
-                    NewTextDecorations: character == ' ' ? null : TextDecorations.Underline
+                    NewTextDecorations: character == ' ' && index >= colors.Length ? null : TextDecorations.Underline
                 )
         ).ToArray();
 
@@ -203,21 +203,5 @@ public partial class TypeTestViewModel : BaseViewModel
         int minutes = (int)stopwatch.Elapsed.TotalMinutes;
         string minutesText = minutes != 0 ? minutes.ToString() + ":" : "";
         InfoForUser = $"Elapsed time: {minutesText}{stopwatch.Elapsed.Seconds.ToString().PadLeft(2, '0')}";
-    }
-}
-
-public struct CharStylePack
-{
-    public readonly string NewText;
-    public readonly Brush NewForeground;
-    public readonly Brush NewBackground;
-    public readonly TextDecorationCollection? NewTextDecorations;
-
-    public CharStylePack(string NewText, Brush? NewForeground = null, Brush? NewBackground = null, TextDecorationCollection? NewTextDecorations = null)
-    {
-        this.NewText = NewText;
-        this.NewForeground = NewForeground == null ? Brushes.Black : NewForeground;
-        this.NewBackground = NewBackground == null ? Brushes.Transparent : NewBackground;
-        this.NewTextDecorations = NewTextDecorations;
     }
 }

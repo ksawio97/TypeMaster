@@ -21,12 +21,14 @@ public class WikipediaService
 
     public HashSet<WikipediaPageInfo> scores { get; private set; }
     DataSaveLoadService _dataSaveLoadService;
+    public PageInfoArgs? getPageInfoArgs { private get; set; }
 
     readonly int minChars;
     readonly int maxChars;
 
     public WikipediaService(DataSaveLoadService dataSaveLoadService)
     {
+        getPageInfoArgs = null;
         _dataSaveLoadService = dataSaveLoadService;
         scores = _dataSaveLoadService.GetWikipediaPageInfos();
 
@@ -34,11 +36,48 @@ public class WikipediaService
         maxChars = 1200;
     }
 
-    public async Task<WikipediaPageInfo?> TryGetRandomWikipediaPageInfoAsync(int aroundChars, string language)
+    public async Task<WikipediaPageInfo?> TryGetWikipediaPageInfoAsync()
     {
-        if (aroundChars < minChars || maxChars < aroundChars || !languageRegex.ContainsKey(language))
+        if (getPageInfoArgs == null || getPageInfoArgs.AroundChars < minChars || maxChars < getPageInfoArgs.AroundChars || !languageRegex.ContainsKey(getPageInfoArgs.Language))
             return null;
-        return await GetRandomWikipediaPageInfoAsync(aroundChars, language);
+
+        return await GetWikipediaPageInfoAsync(getPageInfoArgs.GetUrl(), getPageInfoArgs.AroundChars, getPageInfoArgs.Language);
+    }
+
+    //maybe change it to cut content aroundChars itself not wikipedia
+    private async Task<WikipediaPageInfo> GetWikipediaPageInfoAsync(string url, int aroundChars, string language)
+    {
+        using (HttpClient client = new HttpClient())
+        {
+            string response = await client.GetStringAsync(url);
+
+            try
+            {
+                JObject json = JObject.Parse(response);
+                JToken? pages = json["query"]?["pages"];
+                JToken? page = pages?.First?.First();
+                string? content = page?["extract"]?.ToString();
+
+                if (Int32.TryParse(page?["pageid"]?.ToString(), out int Id) && content?.Length >= aroundChars && Regex.IsMatch(content, languageRegex[language]))
+                {
+                    var pageInfo = new WikipediaPageInfo
+                    {
+                        Id = Id,
+                        Title = page?["title"]?.ToString() ?? throw new NullReferenceException("title not found!"),
+                        WPM = 0,
+                        Words = 0,
+                        AroundChars = aroundChars,
+                        Language = language
+                    };
+                    return pageInfo;
+                }
+            }
+            catch (NullReferenceException ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            return await GetWikipediaPageInfoAsync(url, aroundChars, language);
+        }
     }
 
     public async Task<string?> GetWikipediaPageContent(int id, int aroundChars)
@@ -56,47 +95,15 @@ public class WikipediaService
         }
     }
 
-    //maybe change it to cut content aroundChars itself not wikipedia
-    private async Task<WikipediaPageInfo> GetRandomWikipediaPageInfoAsync(int aroundChars, string language)
-    {
-        using (HttpClient client = new HttpClient())
-        {
-            string url = $"https://{language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&generator=random&grnnamespace=0&grnlimit=1&exchars={aroundChars}";
-            string response = await client.GetStringAsync(url);
-
-            try
-            {
-                JObject json = JObject.Parse(response);
-                JToken? pages = json["query"]?["pages"];
-                JToken? page = pages?.First?.First();
-                string? content = page?["extract"]?.ToString();
-
-                if (Int32.TryParse(page?["pageid"]?.ToString(), out int Id) && content?.Length >= aroundChars && Regex.IsMatch(content, languageRegex[language]))
-                {
-                    var score = new WikipediaPageInfo
-                    {
-                        Id = Id,
-                        Title = page?["title"]?.ToString() ?? throw new NullReferenceException("title not found!"),
-                        WPM = 0,
-                        Words = 0,
-                        AroundChars = aroundChars,
-                        Language = language
-                    };
-                    return score;
-                }
-            }
-            catch(NullReferenceException ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-            return await GetRandomWikipediaPageInfoAsync(aroundChars, language);
-        }
-    }
-
     public void AddScore(WikipediaPageInfo wikipediaPageInfo)
     {
-        if (!scores.Contains(wikipediaPageInfo))
+        WikipediaPageInfo wikipediaPageInfoInScores = scores.FirstOrDefault(element => element.Id == wikipediaPageInfo.Id, wikipediaPageInfo);
+        if (wikipediaPageInfo == wikipediaPageInfoInScores)
             scores.Add(wikipediaPageInfo);
+        else if(wikipediaPageInfoInScores.WPM < wikipediaPageInfo.WPM)
+        {
+            wikipediaPageInfoInScores.WPM = wikipediaPageInfo.WPM;
+        }
     }
 }
 

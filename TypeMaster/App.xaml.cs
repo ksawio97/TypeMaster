@@ -21,8 +21,8 @@ namespace TypeMaster
 
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<HomeViewModel>();
-            services.AddSingleton<TypeTestViewModel>();
-            services.AddSingleton<ScoreboardViewModel>();
+            services.AddTransient<TypeTestViewModel>();
+            services.AddTransient<ScoreboardViewModel>();
 
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<WikipediaService>();

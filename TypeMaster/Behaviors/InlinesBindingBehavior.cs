@@ -1,12 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Windows.Documents;
 
 namespace TypeMaster.Behaviors;
 
 public class InlinesBindingBehavior : DynamicFontBehavior<TextBlock>
 {
+    readonly double maxFontSize;
+
+    double newFontSize
+    {
+        set
+        {
+            if (value <= maxFontSize)
+                AssociatedObject.FontSize = value;
+            else
+                AssociatedObject.FontSize = maxFontSize;
+        }
+    }
+    public InlinesBindingBehavior()
+    {
+        maxFontSize = 60;
+    }
+
     protected override void OnAttached()
     {
         base.OnAttached();
@@ -92,7 +107,7 @@ public class InlinesBindingBehavior : DynamicFontBehavior<TextBlock>
         if (grid == null)
             return;
         Size containerSize = GetGridContainerSize(grid);
-        AssociatedObject.FontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), containerSize.Width * containerSize.Height, AssociatedObject.Text.Length, containerSize);
+        newFontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), containerSize.Width * containerSize.Height, AssociatedObject.Text.Length, containerSize);
     }
 
     //set font to fit nearly perfectly in textblock
@@ -100,31 +115,9 @@ public class InlinesBindingBehavior : DynamicFontBehavior<TextBlock>
     {
         if (grid != null && AssociatedObject.Text != string.Empty && IsDifferenceBigEnough(e))
         {
-            AssociatedObject.FontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), e.NewSize.Width * e.NewSize.Height, AssociatedObject.Text.Length, e.NewSize);
+            newFontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), e.NewSize.Width * e.NewSize.Height, AssociatedObject.Text.Length, e.NewSize);
             difference.X = 0;
             difference.Y = 0;
         }
-    }
-}
-
-public class InlinesElementChangedEventArgs : EventArgs
-{
-    public int OldInlineIndex { get; }
-    public CharStylePack[] NewInlineStyles { get; }
-
-    public InlinesElementChangedEventArgs(int OldInlineIndex, CharStylePack[] NewInlineStyles)
-    {
-        this.OldInlineIndex = OldInlineIndex;
-        this.NewInlineStyles = NewInlineStyles;
-    }
-}
-
-public class SetInlinesEventArgs : EventArgs
-{
-    public IEnumerable<Inline> Inlines { get; }
-
-    public SetInlinesEventArgs(IEnumerable<Inline> Inlines)
-    {
-        this.Inlines = Inlines;
     }
 }

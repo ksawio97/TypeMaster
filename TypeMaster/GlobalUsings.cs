@@ -7,3 +7,4 @@ global using CommunityToolkit.Mvvm.ComponentModel;
 global using System.Windows;
 global using System.Windows.Input;
 global using System.Windows.Media;
+global using TypeMaster.DataModels;
