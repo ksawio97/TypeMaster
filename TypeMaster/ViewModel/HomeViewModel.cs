@@ -4,18 +4,16 @@ namespace TypeMaster.ViewModel;
 
 public partial class HomeViewModel : BaseViewModel
 {
-    INavigationService _navigation;
-    WikipediaService _wikipediaService;
-    public HomeViewModel(INavigationService navigation, WikipediaService wikipediaService)
+    INavigationService _navigation { get; }
+    public HomeViewModel(INavigationService navigation)
     {
         _navigation = navigation;
-        _wikipediaService = wikipediaService;
     }
     [RelayCommand]
     private void NavigateToTypeTest()
     {
-        _wikipediaService.getPageInfoArgs = new RandomPageInfoArgs(200, "en");
-        _navigation.NavigateTo<TypeTestViewModel>();
+        var pageInfoArgs = new RandomPageInfoArgs(200, "en");
+        _navigation.NavigateToTypeTestWithPageInfoArgs(pageInfoArgs);
     }
 
     [RelayCommand]
