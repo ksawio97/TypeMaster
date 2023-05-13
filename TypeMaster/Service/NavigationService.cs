@@ -37,7 +37,7 @@ public class NavigationService : ObservableObject, INavigationService
 
     public void NavigateToTypeTestWithPageInfoArgs(PageInfoArgs pageInfoArgs)
     {
-        _wikipediaService.getPageInfoArgs = pageInfoArgs;
+        _wikipediaService.GetPageInfoArgs = pageInfoArgs;
         NavigateTo<TypeTestViewModel>();
     }
 }

@@ -4,12 +4,12 @@ namespace TypeMaster.DataModels;
 
 public abstract class PageInfoArgs
 {
-    public int AroundChars { get; }
+    public TextLength ProvidedTextLength { get; }
     public string Language { get; }
 
-    protected PageInfoArgs(int aroundChars, string language)
+    protected PageInfoArgs(TextLength providedTextLength, string language)
     {
-        AroundChars = aroundChars;
+        ProvidedTextLength = providedTextLength;
         Language = language;
     }
 
@@ -18,14 +18,14 @@ public abstract class PageInfoArgs
 
 public class RandomPageInfoArgs : PageInfoArgs
 {
-    public RandomPageInfoArgs(int aroundChars, string language)
-        : base(aroundChars, language)
+    public RandomPageInfoArgs(TextLength ProvidedTextLength, string language)
+        : base(ProvidedTextLength, language)
     {
     }
 
     public override string GetUrl()
     {
-        return $"https://{Language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&generator=random&grnnamespace=0&grnlimit=1&exchars={AroundChars}";
+        return $"https://{Language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&generator=random&grnnamespace=0&grnlimit=1&exchars={(int)ProvidedTextLength}";
     }
 }
 
@@ -33,15 +33,15 @@ public class IdPageInfoArgs : PageInfoArgs
 {
     public int Id { get; }
 
-    public IdPageInfoArgs(int id, int aroundChars, string language)
-        : base(aroundChars, language)
+    public IdPageInfoArgs(int id, TextLength ProvidedTextLength, string language)
+        : base(ProvidedTextLength, language)
     {
         Id = id;
     }
 
     public override string GetUrl()
     {
-        return $"https://{Language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&pageids={Id}&exchars={AroundChars}";
+        return $"https://{Language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&pageids={Id}&exchars={(int)ProvidedTextLength}";
     }
 }
 
@@ -49,15 +49,15 @@ public class TitlePageInfoArgs : PageInfoArgs
 {
     public string Title { get; }
 
-    public TitlePageInfoArgs(string title, int aroundChars, string language)
-        : base(aroundChars, language)
+    public TitlePageInfoArgs(string title, TextLength ProvidedTextLength, string language)
+        : base(ProvidedTextLength, language)
     {
         Title = title;
     }
 
     public override string GetUrl()
     {
-        return $"https://{Language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&titles={HttpUtility.UrlEncode(Title)}&exchars={AroundChars}";
+        return $"https://{Language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&titles={HttpUtility.UrlEncode(Title)}&exchars={(int)ProvidedTextLength}";
     }
 }
 

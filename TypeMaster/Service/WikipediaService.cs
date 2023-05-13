@@ -1,51 +1,39 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection.Metadata;
-using System.Security.Policy;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Navigation;
 
 namespace TypeMaster.Service;
 
 public class WikipediaService
 {
-    readonly Dictionary<string, string> languageRegex = new Dictionary<string, string>
-        {
-            { "en", "^[a-zA-Z0-9.,:;!?()\\[\\]{}'\"‘’“”/\\\\\\-\\s]+$" },
-            { "pl", "^[a-zA-Z0-9ĄąĆćĘęŁłŃńÓóŚśŹźŻż.,:;!?()\\[\\]{}'\"‘’“”/\\\\\\-\\s]+$" },
-            { "es", "^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,:;!?()\\[\\]{}'\"‘’“”/\\\\\\-\\s]+$" }
-            // Add more language codes and regex patterns as needed
-        };
+    DataSaveLoadService DataSaveLoadService { get; }
+    LanguagesService LanguagesService { get; }
+    SettingsService SettingsService { get; }
 
-    public HashSet<WikipediaPageInfo> scores { get; private set; }
-    DataSaveLoadService _dataSaveLoadService;
-    public PageInfoArgs? getPageInfoArgs { private get; set; }
 
-    readonly int minChars;
-    readonly int maxChars;
+    public HashSet<WikipediaPageInfo> Scores { get; private set; }
+    public PageInfoArgs? GetPageInfoArgs { get; set; }
 
-    public WikipediaService(DataSaveLoadService dataSaveLoadService)
+    public WikipediaService(DataSaveLoadService dataSaveLoadService, LanguagesService languagesService, SettingsService settingsService)
     {
-        getPageInfoArgs = null;
-        _dataSaveLoadService = dataSaveLoadService;
-        scores = _dataSaveLoadService.GetWikipediaPageInfos();
+        DataSaveLoadService = dataSaveLoadService;
+        LanguagesService = languagesService;
+        SettingsService = settingsService;
 
-        minChars = 10;
-        maxChars = 1200;
+        GetPageInfoArgs = null;
+        Scores = DataSaveLoadService.GetData<HashSet<WikipediaPageInfo>>() ?? new ();
     }
 
     public async Task<WikipediaPageInfo?> TryGetWikipediaPageInfoAsync()
     {
-        if (getPageInfoArgs == null || getPageInfoArgs.AroundChars < minChars || maxChars < getPageInfoArgs.AroundChars || !languageRegex.ContainsKey(getPageInfoArgs.Language))
+        if (GetPageInfoArgs == null)
             return null;
 
-        return await GetWikipediaPageInfoAsync(getPageInfoArgs.GetUrl(), getPageInfoArgs.AroundChars, getPageInfoArgs.Language);
+        return await GetWikipediaPageInfoAsync(GetPageInfoArgs.GetUrl(), GetPageInfoArgs.ProvidedTextLength, GetPageInfoArgs.Language);
     }
 
     public async Task<List<WikipediaPageInfo>> GetWikipediaSearchResultPagesAsync(string url)
@@ -56,23 +44,22 @@ public class WikipediaService
             foreach (JToken page in pages.Children())
             {
                 JToken extractedPage = page.First();
-                int aroundChars = extractedPage?["extract"]?.ToString().Length ?? 0;
-                if (Int32.TryParse(extractedPage?["pageid"]?.ToString(), out int Id) && aroundChars != 0)
+
+                if (Int32.TryParse(extractedPage?["pageid"]?.ToString(), out int Id))
                     result.Add(new WikipediaPageInfo
                     {
                         Id = Id,
                         Title = extractedPage?["title"]?.ToString() ?? "",
                         WPM = 0,
                         Words = 0,
-                        AroundChars = aroundChars,
-                        Language = "en"
+                        ProvidedTextLength = SettingsService.ProvidedTextLength,
+                        Language = SettingsService.CurrentLanguage
                     });
             }
         return result;
     }
 
-    //maybe change it to cut content aroundChars itself not wikipedia
-    private async Task<WikipediaPageInfo> GetWikipediaPageInfoAsync(string url, int aroundChars, string language)
+    private async Task<WikipediaPageInfo?> GetWikipediaPageInfoAsync(string url, TextLength ProvidedTextLength, string language)
     {
         JToken? pages = await GetWikipediaPagesFromUrl(url);
         try
@@ -80,7 +67,7 @@ public class WikipediaService
             JToken? page = pages?.First?.First();
             string? content = page?["extract"]?.ToString();
 
-            if (Int32.TryParse(page?["pageid"]?.ToString(), out int Id) && content?.Length >= aroundChars && Regex.IsMatch(content, languageRegex[language]))
+            if (Int32.TryParse(page?["pageid"]?.ToString(), out int Id) && LanguagesService.CanTypeThisText(content, language))
             {
                 var pageInfo = new WikipediaPageInfo
                 {
@@ -88,7 +75,7 @@ public class WikipediaService
                     Title = page?["title"]?.ToString() ?? throw new NullReferenceException("title not found!"),
                     WPM = 0,
                     Words = 0,
-                    AroundChars = aroundChars,
+                    ProvidedTextLength = ProvidedTextLength,
                     Language = language
                 };
                 return pageInfo;
@@ -98,7 +85,7 @@ public class WikipediaService
         {
             Debug.WriteLine(ex.Message);
         }
-        return await GetWikipediaPageInfoAsync(url, aroundChars, language);
+        return null;
     }
 
     private async Task<JToken?> GetWikipediaPagesFromUrl(string url)
@@ -123,7 +110,7 @@ public class WikipediaService
 
     public async Task<string?> GetWikipediaPageContent()
     {
-        JToken? pages = await GetWikipediaPagesFromUrl(getPageInfoArgs.GetUrl());
+        JToken? pages = await GetWikipediaPagesFromUrl(GetPageInfoArgs!.GetUrl());
         string? content = null;
         try
         {
@@ -139,12 +126,16 @@ public class WikipediaService
 
     public void AddScore(WikipediaPageInfo wikipediaPageInfo)
     {
-        WikipediaPageInfo wikipediaPageInfoInScores = scores.FirstOrDefault(element => element.Id == wikipediaPageInfo.Id, wikipediaPageInfo);
+        WikipediaPageInfo wikipediaPageInfoInScores = Scores.FirstOrDefault(element => element.Id == wikipediaPageInfo.Id, wikipediaPageInfo);
         if (wikipediaPageInfo == wikipediaPageInfoInScores)
-            scores.Add(wikipediaPageInfo);
-        else if(wikipediaPageInfoInScores.WPM < wikipediaPageInfo.WPM)
+        {
+            Scores.Add(wikipediaPageInfo);
+            return;
+        }
+        if(wikipediaPageInfoInScores.SecondsSpent < wikipediaPageInfo.SecondsSpent)
         {
             wikipediaPageInfoInScores.WPM = wikipediaPageInfo.WPM;
+            wikipediaPageInfoInScores.SecondsSpent = wikipediaPageInfo.SecondsSpent;
         }
     }
 }

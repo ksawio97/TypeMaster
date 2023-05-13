@@ -22,8 +22,9 @@
                 <DataGridTextColumn Header="Page ID"  Binding="{Binding Id}" Width="*"/>
                 <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*"/>
                 <DataGridTextColumn Header="Words Per Minute" Binding="{Binding WPM}" Width="*"/>
+                <DataGridTextColumn Header="Seconds Spent" Binding="{Binding SecondsSpent}" Width="*"/>
                 <DataGridTextColumn Header="Words Count" Binding="{Binding Words}" Width="*"/>
-                <DataGridTextColumn Header="Characters Count" Binding="{Binding AroundChars}" Width="*"/>
+                <DataGridTextColumn Header="Text Length" Binding="{Binding ProvidedTextLength, StringFormat={}{0}}" Width="*"/>
                 <DataGridTextColumn Header="Text Language" Binding="{Binding Language}" Width="*"/>
             </DataGrid.Columns>
 

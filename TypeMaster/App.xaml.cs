@@ -16,8 +16,7 @@ namespace TypeMaster
             services.AddSingleton<MainWindow>(provider => new MainWindow
             {
                 DataContext = provider.GetRequiredService<MainViewModel>()
-                
-            }); 
+            });
 
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<HomeViewModel>();
@@ -29,6 +28,8 @@ namespace TypeMaster
             services.AddSingleton<WikipediaService>();
             services.AddSingleton<DataSaveLoadService>();
             services.AddSingleton<CryptographyService>();
+            services.AddSingleton<LanguagesService>();
+            services.AddSingleton<SettingsService>();
 
             services.AddSingleton<Func<Type, BaseViewModel>>(serviceProvider => viewModelType => (BaseViewModel)serviceProvider.GetRequiredService(viewModelType));
             _serviceProvider = services.BuildServiceProvider();
@@ -46,7 +47,10 @@ namespace TypeMaster
         {
             var dataSaveLoadService = _serviceProvider.GetRequiredService<DataSaveLoadService>();
             var wikipediaService = _serviceProvider.GetRequiredService<WikipediaService>();
-            dataSaveLoadService.SaveWikipediaPageInfos(wikipediaService.scores);
+            var settingsService = _serviceProvider.GetRequiredService<SettingsService>();
+
+            dataSaveLoadService.SaveData(wikipediaService.Scores);
+            dataSaveLoadService.SaveData(settingsService.Settings);
 
             base.OnExit(e);
         }

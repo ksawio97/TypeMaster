@@ -4,23 +4,23 @@ namespace TypeMaster.ViewModel;
 
 public partial class HomeViewModel : BaseViewModel
 {
-    INavigationService _navigation { get; }
+    INavigationService Navigation { get; }
     public HomeViewModel(INavigationService navigation)
     {
-        _navigation = navigation;
+        Navigation = navigation;
     }
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private void NavigateToTypeTest()
     {
-        //var pageInfoArgs = new RandomPageInfoArgs(100, "en");
-        //_navigation.NavigateToTypeTestWithPageInfoArgs(pageInfoArgs);
-        _navigation.NavigateTo<PlaymodsViewModel>();
+        Navigation.NavigateTo<PlaymodsViewModel>();
     }
 
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private void NavigateToScoreboard()
     {
-        _navigation.NavigateTo<ScoreboardViewModel>();
+        Navigation.NavigateTo<ScoreboardViewModel>();
     }
 
     [RelayCommand]

@@ -15,38 +15,45 @@ partial class PlaymodsViewModel : BaseViewModel
     [ObservableProperty]
     string _searchBoxText;
 
-    INavigationService _navigation { get; }
+    INavigationService Navigation { get; }
+    WikipediaService WikipediaService { get; }
+    SettingsService SettingsService { get; }
 
-    WikipediaService _wikipediaService { get; }
-    public PlaymodsViewModel(INavigationService navigationService, WikipediaService wikipediaService)
+    public PlaymodsViewModel(INavigationService navigationService, WikipediaService wikipediaService, SettingsService settingsService)
     {
-        _navigation = navigationService;
-        _wikipediaService = wikipediaService;
+        Navigation = navigationService;
+        WikipediaService = wikipediaService;
+        SettingsService = settingsService;
     }
 
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private async Task SearchButtonClicked()
     {
         PageInfoArgs pageInfoArgs;
         if (int.TryParse(SearchBoxText, out int id))
-            pageInfoArgs = new IdPageInfoArgs(id, 400, "en");
+            pageInfoArgs = new IdPageInfoArgs(id, SettingsService.ProvidedTextLength, SettingsService.CurrentLanguage);
         else
-            pageInfoArgs = new TitlePageInfoArgs(SearchBoxText, 400, "en");
+            pageInfoArgs = new TitlePageInfoArgs(SearchBoxText, SettingsService.ProvidedTextLength, SettingsService.CurrentLanguage);
         SearchBoxText = "";
 
-        Results = await _wikipediaService.GetWikipediaSearchResultPagesAsync(pageInfoArgs.GetUrl());
+        Results = await WikipediaService.GetWikipediaSearchResultPagesAsync(pageInfoArgs.GetUrl());
     }
 
     partial void OnSelectedItemChanged(WikipediaPageInfo value)
     {
-        var pageInfoArgs = new IdPageInfoArgs(value.Id, value.AroundChars, value.Language);
-        _navigation.NavigateToTypeTestWithPageInfoArgs(pageInfoArgs);
+        if (value == null)
+            return;
+        var pageInfoArgs = new IdPageInfoArgs(value.Id, value.ProvidedTextLength, value.Language);
+        Navigation.NavigateToTypeTestWithPageInfoArgs(pageInfoArgs);
+        SelectedItem = null;
     }
 
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private void NavigateToRandomTypeTest()
     {
-        var pageInfoArgs = new RandomPageInfoArgs(200, "en");
-        _navigation.NavigateToTypeTestWithPageInfoArgs(pageInfoArgs);
+        var pageInfoArgs = new RandomPageInfoArgs(SettingsService.ProvidedTextLength, SettingsService.CurrentLanguage);
+        Navigation.NavigateToTypeTestWithPageInfoArgs(pageInfoArgs);
     }
 }

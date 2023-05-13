@@ -7,7 +7,7 @@ public class InlinesBindingBehavior : DynamicFontBehavior<TextBlock>
 {
     readonly double maxFontSize;
 
-    double newFontSize
+    double NewFontSize
     {
         set
         {
@@ -34,9 +34,7 @@ public class InlinesBindingBehavior : DynamicFontBehavior<TextBlock>
 
     private void AssociatedObject_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        var viewModel = AssociatedObject.DataContext as TypeTestViewModel;
-
-        if (viewModel != null)
+        if (AssociatedObject.DataContext is TypeTestViewModel viewModel)
         {
             viewModel.InlinesElementChanged += ViewModel_InlinesElementChanged;
             viewModel.SetInlines += ViewModel_SetInlines;
@@ -46,7 +44,7 @@ public class InlinesBindingBehavior : DynamicFontBehavior<TextBlock>
     private void ViewModel_InlinesElementChanged(object? sender, InlinesElementChangedEventArgs e)
     {
         Inline oldInline = AssociatedObject.Inlines.ElementAt(e.OldInlineIndex);
-        Span? word = oldInline is Span ? (Span)oldInline : null;
+        Span? word = oldInline is Span span ? span : null;
 
         if (word != null && word.Inlines.Count == e.NewInlineStyles.Length)
         {
@@ -64,20 +62,8 @@ public class InlinesBindingBehavior : DynamicFontBehavior<TextBlock>
 
             Run currInline = (Run)word.Inlines.FirstInline;
 
-            for (int i = 0; i < e.NewInlineStyles.Length; i++, currInline = (Run)currInline.NextInline)
-            {
-                if (currInline.Text != e.NewInlineStyles[i].NewText)
-                    currInline.Text = e.NewInlineStyles[i].NewText;
-
-                if (currInline.Foreground != e.NewInlineStyles[i].NewForeground)
-                    currInline.Foreground = e.NewInlineStyles[i].NewForeground;
-
-                if (currInline.Background != e.NewInlineStyles[i].NewBackground)
-                    currInline.Background = e.NewInlineStyles[i].NewBackground;
-
-                if (currInline.TextDecorations != e.NewInlineStyles[i].NewTextDecorations)
-                    currInline.TextDecorations = e.NewInlineStyles[i].NewTextDecorations;
-            }
+            for (int i = 0; i < e.NewInlineStyles.Length && currInline.NextInline != null; i++, currInline = (Run)currInline.NextInline)
+                UpdateRunProperties(currInline, e.NewInlineStyles[i]);
             return;
         }
         word = new Span();
@@ -91,6 +77,21 @@ public class InlinesBindingBehavior : DynamicFontBehavior<TextBlock>
             }
         ));
         ReplaceInline(oldInline, word);
+    }
+
+    private static void UpdateRunProperties(Run run, CharStylePack inlineStyle)
+    {
+        if (run.Text != inlineStyle.NewText)
+            run.Text = inlineStyle.NewText;
+
+        if (run.Foreground != inlineStyle.NewForeground)
+            run.Foreground = inlineStyle.NewForeground;
+
+        if (run.Background != inlineStyle.NewBackground)
+            run.Background = inlineStyle.NewBackground;
+
+        if (run.TextDecorations != inlineStyle.NewTextDecorations)
+            run.TextDecorations = inlineStyle.NewTextDecorations;
     }
 
     private void ReplaceInline(Inline toReplace, Inline NewValue)
@@ -107,7 +108,7 @@ public class InlinesBindingBehavior : DynamicFontBehavior<TextBlock>
         if (grid == null)
             return;
         Size containerSize = GetGridContainerSize(grid);
-        newFontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), containerSize.Width * containerSize.Height, AssociatedObject.Text.Length, containerSize);
+        NewFontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), containerSize.Width * containerSize.Height, AssociatedObject.Text.Length, containerSize);
     }
 
     //set font to fit nearly perfectly in textblock
@@ -115,7 +116,7 @@ public class InlinesBindingBehavior : DynamicFontBehavior<TextBlock>
     {
         if (grid != null && AssociatedObject.Text != string.Empty && IsDifferenceBigEnough(e))
         {
-            newFontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), e.NewSize.Width * e.NewSize.Height, AssociatedObject.Text.Length, e.NewSize);
+            NewFontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), e.NewSize.Width * e.NewSize.Height, AssociatedObject.Text.Length, e.NewSize);
             difference.X = 0;
             difference.Y = 0;
         }

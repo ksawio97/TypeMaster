@@ -32,76 +32,91 @@ public partial class TypeTestViewModel : BaseViewModel
     public event EventHandler<InlinesElementChangedEventArgs> InlinesElementChanged;
     public event EventHandler<SetInlinesEventArgs> SetInlines;
 
-    INavigationService _navigationService;
-    WikipediaService _wikipediaService;
-    WikipediaPageInfo? currWikiPageInfo;
+    INavigationService NavigationService { get; }
+    WikipediaService WikipediaService { get; }
+    WikipediaPageInfo? CurrWikiPageInfo;
 
     string[] _wikiContent;
     int wordsCompleted;
 
     int currWord;
     int startIndex;
-    int maxErrorCharsCount;
+    int MaxErrorCharsCount { get; }
 
-    Timer timer;
-    Stopwatch stopwatch;
+    Timer Timer { get; }
+    Stopwatch Stopwatch { get; }
 
     public TypeTestViewModel(WikipediaService wikipediaService, INavigationService navigationService)
     {
-        _navigationService = navigationService;
-        _wikipediaService = wikipediaService;
+        NavigationService = navigationService;
+        WikipediaService = wikipediaService;
 
         wordsCompleted = 0;
         currWord = 0;
         startIndex = 0;
-        maxErrorCharsCount = 12;
+        MaxErrorCharsCount = 12;
 
-        stopwatch = new Stopwatch();
-        timer = new Timer(100);
-        timer.Enabled = false;
-        timer.Elapsed += Timer_Elapsed;
+        Stopwatch = new Stopwatch();
+        Timer = new Timer(100)
+        {
+            Enabled = false
+        };
+        Timer.Elapsed += Timer_Elapsed;
 
         _infoForUser = "Loading";
     }
 
     [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private async Task LoadDataAsync()
     {
         IsBusy = true;
 
         await Task.Run(async () =>
         {
-            int aroundChars = 100;
-            currWikiPageInfo = await _wikipediaService.TryGetWikipediaPageInfoAsync();
-            if(currWikiPageInfo != null)
+            CurrWikiPageInfo = await WikipediaService.TryGetWikipediaPageInfoAsync();
+            if(CurrWikiPageInfo != null)
             {
-                var content = await _wikipediaService.GetWikipediaPageContent();
+                var content = await WikipediaService.GetWikipediaPageContent();
                 if (content != null)
                 {
-                    _wikiContent = Regex.Replace(content.Replace("\n", " "), @" {2,}", " ").Split(" ").Select(word => word + " ").ToArray();
-                    currWikiPageInfo.Words = _wikiContent.Length;
-                    currWikiPageInfo.AroundChars = aroundChars;
+                    _wikiContent = TwoOrMoreSpaces().Replace(content.Replace("\n", " "), " ").Split(" ").Select(word => word + " ").SkipLast(1).ToArray();
+                    CurrWikiPageInfo.Words = _wikiContent.Length;
+                    CurrWikiPageInfo.ProvidedTextLength = WikipediaService.GetPageInfoArgs!.ProvidedTextLength;
+                    await CountDownAsync(3);
+                    Timer.Enabled = true;
+                    Stopwatch.Start();
                 }
                 else
                 {
-                    Debug.WriteLine($"couldn't get content of page id{currWikiPageInfo.Id}");
+                    Debug.WriteLine($"couldn't get content of page id{CurrWikiPageInfo.Id}");
                 }
-
-                await CountDownAsync(3);
-                timer.Enabled = true;
-                stopwatch.Start();
             }
             
             if (_wikiContent == null)
             {
-                _wikiContent = new string[0];
-                Debug.WriteLine("couldn't get RandomWikipediaPageInfo");
+                _wikiContent = Array.Empty<string>();
+                Debug.WriteLine("couldn't get WikipediaPageInfo");
+                //bad luck try again
+                if (WikipediaService.GetPageInfoArgs! is RandomPageInfoArgs)
+                {
+                    var args = new RandomPageInfoArgs(WikipediaService.GetPageInfoArgs!.ProvidedTextLength, WikipediaService.GetPageInfoArgs!.Language);
+                    NavigationService.NavigateTo<TypeTestViewModel>();
+                }
             }
         });
+        if(_wikiContent.Length != 0)
+        {
+            SetInlines(this, new SetInlinesEventArgs(_wikiContent.Select(word => new Run(word) { Foreground = Brushes.Black })));
+            SetCharLimit();
+            CheckCurrentWord("", wordsCompleted, (c1, c2) => Brushes.Black);
+        }
+        else
+        {
+            Debug.WriteLine("couldn't get WikipediaPageContent");
+            NavigationService.NavigateTo<HomeViewModel>();
+        }
 
-        SetInlines(this, new SetInlinesEventArgs(_wikiContent.Select(word => new Run(word) { Foreground = Brushes.Black })));
-        SetCharLimit();
-        CheckCurrentWord("", wordsCompleted, (c1, c2) => Brushes.Black);
         IsBusy = false;
     }
 
@@ -110,15 +125,16 @@ public partial class TypeTestViewModel : BaseViewModel
         string v = value ?? "";
         if (wordsCompleted == _wikiContent.Length)
         {    
-            stopwatch.Stop();
-            timer.Enabled = false;
-            if (currWikiPageInfo != null)
+            Stopwatch.Stop();
+            Timer.Enabled = false;
+            if (CurrWikiPageInfo != null)
             {
-                currWikiPageInfo.WPM = (int)(_wikiContent.Length / stopwatch.Elapsed.TotalMinutes);
-                _wikipediaService.AddScore(currWikiPageInfo);
+                CurrWikiPageInfo.WPM = (int)(_wikiContent.Length / (Stopwatch.Elapsed.TotalMinutes % 0.01));
+                CurrWikiPageInfo.SecondsSpent = (int)Stopwatch.Elapsed.TotalSeconds;
+                WikipediaService.AddScore(CurrWikiPageInfo);
             }
 
-            _navigationService.NavigateTo<HomeViewModel>();
+            NavigationService.NavigateTo<HomeViewModel>();
             return;
         }
         else if (value == _wikiContent[wordsCompleted])
@@ -140,7 +156,7 @@ public partial class TypeTestViewModel : BaseViewModel
         if (currWord + 1 == _wikiContent.Length)
             CharLimit = _wikiContent[currWord].Length;
         else
-            CharLimit = _wikiContent[currWord].Length + maxErrorCharsCount;  
+            CharLimit = _wikiContent[currWord].Length + MaxErrorCharsCount;  
     }
     private void CheckInput(string input)
     {
@@ -162,12 +178,12 @@ public partial class TypeTestViewModel : BaseViewModel
         }
         //if types word he isnt supposed to type color is yellow
         Func<char, char, SolidColorBrush> colorPick = currWord == wordsCompleted ? (c1, c2) => c1 == c2 ? Brushes.Green : Brushes.Red : (c1, c2) => Brushes.Yellow;
-        CheckCurrentWord(input.Substring(startIndex, input.Length - startIndex), currWord, colorPick);
+        CheckCurrentWord(input[startIndex..], currWord, colorPick);
     }
 
     private void CheckCurrentWord(string input, int wordIndex, Func<char, char, SolidColorBrush> colorPick)
     {
-        var colors = input.Substring(0, (_wikiContent[wordIndex].Length < input.Length ? _wikiContent[wordIndex].Length : input.Length)).Select((c, i) => colorPick(c, _wikiContent[wordIndex][i])).ToArray();
+        var colors = input[..(_wikiContent[wordIndex].Length < input.Length ? _wikiContent[wordIndex].Length : input.Length)].Select((c, i) => colorPick(c, _wikiContent[wordIndex][i])).ToArray();
 
         var wordStyles = _wikiContent[wordIndex].Select(
             (character, index) =>
@@ -199,8 +215,11 @@ public partial class TypeTestViewModel : BaseViewModel
 
     private void Timer_Elapsed(object? sender, ElapsedEventArgs e)
     {
-        int minutes = (int)stopwatch.Elapsed.TotalMinutes;
+        int minutes = (int)Stopwatch.Elapsed.TotalMinutes;
         string minutesText = minutes != 0 ? minutes.ToString() + ":" : "";
-        InfoForUser = $"Elapsed time: {minutesText}{stopwatch.Elapsed.Seconds.ToString().PadLeft(2, '0')}";
+        InfoForUser = $"Elapsed time: {minutesText}{Stopwatch.Elapsed.Seconds.ToString().PadLeft(2, '0')}";
     }
+
+    [GeneratedRegex(" {2,}")]
+    private partial Regex TwoOrMoreSpaces();
 }
