@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Documents;
-using TypeMaster.Behaviors;
 
 namespace TypeMaster.ViewModel;
 
@@ -76,7 +75,7 @@ public partial class TypeTestViewModel : BaseViewModel
             currWikiPageInfo = await _wikipediaService.TryGetWikipediaPageInfoAsync();
             if(currWikiPageInfo != null)
             {
-                var content = await _wikipediaService.GetWikipediaPageContent(currWikiPageInfo.Id, currWikiPageInfo.AroundChars);
+                var content = await _wikipediaService.GetWikipediaPageContent();
                 if (content != null)
                 {
                     _wikiContent = Regex.Replace(content.Replace("\n", " "), @" {2,}", " ").Split(" ").Select(word => word + " ").ToArray();

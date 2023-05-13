@@ -23,6 +23,7 @@ namespace TypeMaster
             services.AddSingleton<HomeViewModel>();
             services.AddTransient<TypeTestViewModel>();
             services.AddTransient<ScoreboardViewModel>();
+            services.AddSingleton<PlaymodsViewModel>();
 
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<WikipediaService>();

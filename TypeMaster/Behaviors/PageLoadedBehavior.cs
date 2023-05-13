@@ -1,6 +1,4 @@
 ﻿using Microsoft.Xaml.Behaviors;
-using System.Windows;
-using System.Windows.Input;
 
 namespace TypeMaster.Behaviors;
 

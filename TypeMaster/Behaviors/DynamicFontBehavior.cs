@@ -59,12 +59,12 @@ public class DynamicFontBehavior<T> : Behavior<T> where T : FrameworkElement
         int col = Grid.GetColumn(AssociatedObject);
         double width, height;
 
-        if (grid.ColumnDefinitions.Count != 1 && col != -1)
+        if (grid.ColumnDefinitions.Count > 1 && col != -1)
             width = grid.ColumnDefinitions[col].ActualWidth;
         else
             width = grid.ActualWidth;
 
-        if (grid.RowDefinitions.Count != 1 && row != -1)
+        if (grid.RowDefinitions.Count > 1 && row != -1)
             height = grid.RowDefinitions[row].ActualHeight;
         else
             height = grid.ActualHeight;

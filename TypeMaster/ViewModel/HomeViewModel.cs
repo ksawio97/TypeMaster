@@ -12,8 +12,9 @@ public partial class HomeViewModel : BaseViewModel
     [RelayCommand]
     private void NavigateToTypeTest()
     {
-        var pageInfoArgs = new RandomPageInfoArgs(200, "en");
-        _navigation.NavigateToTypeTestWithPageInfoArgs(pageInfoArgs);
+        //var pageInfoArgs = new RandomPageInfoArgs(100, "en");
+        //_navigation.NavigateToTypeTestWithPageInfoArgs(pageInfoArgs);
+        _navigation.NavigateTo<PlaymodsViewModel>();
     }
 
     [RelayCommand]

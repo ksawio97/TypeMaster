@@ -2,6 +2,16 @@
 
 public class TextBoxBehavior : DynamicFontBehavior<TextBox>
 {
+    public static readonly DependencyProperty WithSelectionProperty =
+        DependencyProperty.Register(nameof(WithSelection), typeof(bool), typeof(TextBoxBehavior), new PropertyMetadata());
+
+
+    public bool WithSelection
+    {
+        get { return (bool)GetValue(WithSelectionProperty); }
+        set { SetValue(WithSelectionProperty, value); }
+    }
+
     protected override void OnAttached()
     {
         base.OnAttached();
@@ -10,8 +20,11 @@ public class TextBoxBehavior : DynamicFontBehavior<TextBox>
 
         AssociatedObject.SizeChanged += AssociatedObject_SizeChanged;
         AssociatedObject.Loaded += AssociatedObject_Loaded;
-        AssociatedObject.IsEnabledChanged += AssociatedObject_IsEnabledChanged;
-        AssociatedObject.SelectionChanged += AssociatedObject_SelectionChanged;
+        if (!WithSelection)
+        {
+            AssociatedObject.IsEnabledChanged += AssociatedObject_IsEnabledChanged;
+            AssociatedObject.SelectionChanged += AssociatedObject_SelectionChanged;
+        }
     }
 
     protected override void OnDetaching()
@@ -20,8 +33,11 @@ public class TextBoxBehavior : DynamicFontBehavior<TextBox>
 
         AssociatedObject.SizeChanged -= AssociatedObject_SizeChanged;
         AssociatedObject.Loaded -= AssociatedObject_Loaded;
-        AssociatedObject.IsEnabledChanged -= AssociatedObject_IsEnabledChanged;
-        AssociatedObject.SelectionChanged -= AssociatedObject_SelectionChanged;
+        if (!WithSelection)
+        {
+            AssociatedObject.IsEnabledChanged -= AssociatedObject_IsEnabledChanged;
+            AssociatedObject.SelectionChanged -= AssociatedObject_SelectionChanged;
+        }
     }
 
     private void AssociatedObject_SizeChanged(object sender, SizeChangedEventArgs e)

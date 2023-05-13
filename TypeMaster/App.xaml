@@ -16,5 +16,9 @@
         <DataTemplate DataType="{x:Type TypeName=viewmodel:ScoreboardViewModel}">
             <view:ScoreboardView/>
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type TypeName=viewmodel:PlaymodsViewModel}">
+            <view:PlaymodsView/>
+        </DataTemplate>
     </Application.Resources>
 </Application>
