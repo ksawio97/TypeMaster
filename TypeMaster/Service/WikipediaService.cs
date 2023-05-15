@@ -28,10 +28,10 @@ public class WikipediaService
         Scores = DataSaveLoadService.GetData<HashSet<WikipediaPageInfo>>() ?? new ();
     }
 
-    public async Task<WikipediaPageInfo?> TryGetWikipediaPageInfoAsync()
+    public async Task<(WikipediaPageInfo?, string?)> TryGetWikipediaPageInfoAsync()
     {
         if (GetPageInfoArgs == null)
-            return null;
+            return (null, null);
 
         return await GetWikipediaPageInfoAsync(GetPageInfoArgs.GetUrl(), GetPageInfoArgs.ProvidedTextLength, GetPageInfoArgs.Language);
     }
@@ -59,7 +59,7 @@ public class WikipediaService
         return result;
     }
 
-    private async Task<WikipediaPageInfo?> GetWikipediaPageInfoAsync(string url, TextLength ProvidedTextLength, string language)
+    private async Task<(WikipediaPageInfo?, string?)> GetWikipediaPageInfoAsync(string url, TextLength ProvidedTextLength, string language)
     {
         JToken? pages = await GetWikipediaPagesFromUrl(url);
         try
@@ -78,14 +78,14 @@ public class WikipediaService
                     ProvidedTextLength = ProvidedTextLength,
                     Language = language
                 };
-                return pageInfo;
+                return (pageInfo, content);
             }
         }
         catch (NullReferenceException ex)
         {
             Debug.WriteLine(ex.Message);
         }
-        return null;
+        return (null, null);
     }
 
     private async Task<JToken?> GetWikipediaPagesFromUrl(string url)
@@ -110,10 +110,12 @@ public class WikipediaService
 
     public async Task<string?> GetWikipediaPageContent()
     {
-        JToken? pages = await GetWikipediaPagesFromUrl(GetPageInfoArgs!.GetUrl());
         string? content = null;
+        if (GetPageInfoArgs == null)
+            return null;
         try
         {
+            JToken? pages = await GetWikipediaPagesFromUrl(GetPageInfoArgs.GetUrl());
             JToken? page = pages?.First?.First();
             content = page?["extract"]?.ToString();
         }

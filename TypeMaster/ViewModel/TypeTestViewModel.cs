@@ -74,47 +74,37 @@ public partial class TypeTestViewModel : BaseViewModel
 
         await Task.Run(async () =>
         {
-            CurrWikiPageInfo = await WikipediaService.TryGetWikipediaPageInfoAsync();
-            if(CurrWikiPageInfo != null)
+            (CurrWikiPageInfo, string? content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
+            if(CurrWikiPageInfo != null && content != null)
             {
-                var content = await WikipediaService.GetWikipediaPageContent();
-                if (content != null)
-                {
-                    _wikiContent = TwoOrMoreSpaces().Replace(content.Replace("\n", " "), " ").Split(" ").Select(word => word + " ").SkipLast(1).ToArray();
-                    CurrWikiPageInfo.Words = _wikiContent.Length;
-                    CurrWikiPageInfo.ProvidedTextLength = WikipediaService.GetPageInfoArgs!.ProvidedTextLength;
-                    await CountDownAsync(3);
-                    Timer.Enabled = true;
-                    Stopwatch.Start();
-                }
-                else
-                {
-                    Debug.WriteLine($"couldn't get content of page id{CurrWikiPageInfo.Id}");
-                }
+
+                _wikiContent = TwoOrMoreSpaces().Replace(content.Replace("\n", " "), " ").Split(" ").Select(word => word + " ").SkipLast(1).ToArray();
+                CurrWikiPageInfo.Words = _wikiContent.Length;
+                CurrWikiPageInfo.ProvidedTextLength = WikipediaService.GetPageInfoArgs!.ProvidedTextLength;
+                await CountDownAsync(3);
+                Timer.Enabled = true;
+                Stopwatch.Start();
             }
-            
-            if (_wikiContent == null)
+
+            else
             {
+                Debug.WriteLine("couldn't get WikipediaPageInfo and content");
                 _wikiContent = Array.Empty<string>();
-                Debug.WriteLine("couldn't get WikipediaPageInfo");
-                //bad luck try again
+
+                //TO DO Replace it with better solution
                 if (WikipediaService.GetPageInfoArgs! is RandomPageInfoArgs)
-                {
-                    var args = new RandomPageInfoArgs(WikipediaService.GetPageInfoArgs!.ProvidedTextLength, WikipediaService.GetPageInfoArgs!.Language);
-                    NavigationService.NavigateTo<TypeTestViewModel>();
-                }
+                    await LoadDataAsync();    
+                else
+                    NavigationService.NavigateTo<ScoreboardViewModel>();
+                return;
             }
+
         });
         if(_wikiContent.Length != 0)
         {
             SetInlines(this, new SetInlinesEventArgs(_wikiContent.Select(word => new Run(word) { Foreground = Brushes.Black })));
             SetCharLimit();
             CheckCurrentWord("", wordsCompleted, (c1, c2) => Brushes.Black);
-        }
-        else
-        {
-            Debug.WriteLine("couldn't get WikipediaPageContent");
-            NavigationService.NavigateTo<HomeViewModel>();
         }
 
         IsBusy = false;
