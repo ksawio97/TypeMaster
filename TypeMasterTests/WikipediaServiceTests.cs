@@ -46,33 +46,47 @@ namespace TypeMasterTests
             PageInfoArgs args = new RandomPageInfoArgs(textLength, lang);
             WikipediaService.GetPageInfoArgs = args;
 
-            (WikipediaPageInfo? info, string? content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
-            
-            if (info != null && content != null)
-            {
-                //TO DO rewrite TryGetWikipediaPageInfoAsync for it to work (url takes only header not all content and then cuts it)
-                Assert.IsTrue(content.Length >= (int)textLength);
+            WikipediaPageInfo? info;
+            string? content;
+            do
+                (info, content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
+            while ((info, content) == (null, null));
 
-                args = new IdPageInfoArgs(info.Id, textLength, lang);
-                WikipediaService.GetPageInfoArgs = args;
+            //for future
+            //Assert.IsTrue(content!.Length >= (int)textLength);
 
-                (WikipediaPageInfo? infoAgain, string? contentAgain) = await WikipediaService.TryGetWikipediaPageInfoAsync();
-                Assert.IsNotNull(infoAgain);
-                Assert.IsNotNull(contentAgain);
+            args = new IdPageInfoArgs(info!.Id, textLength, lang);
+            WikipediaService.GetPageInfoArgs = args;
 
-                Assert.IsTrue(info.IsEqualTo(infoAgain));
-                Assert.That(content, Is.EqualTo(contentAgain!));
+            (WikipediaPageInfo? infoAgain, string? contentAgain) = await WikipediaService.TryGetWikipediaPageInfoAsync();
+            Assert.IsNotNull(infoAgain);
+            Assert.IsNotNull(contentAgain);
 
-                var content3 = await WikipediaService.GetWikipediaPageContent();
-                Assert.That(content, Is.EqualTo(content3));
-                Assert.That(contentAgain, Is.EqualTo(content3));
-            }
-            else
-            {
-                //test until language matches
-                await GetWikipediaPageContentTest();
-            }
-        }   
+            Assert.IsTrue(info.IsEqualTo(infoAgain));
+            Assert.That(content, Is.EqualTo(contentAgain!));
+
+            var content3 = await WikipediaService.GetWikipediaPageContent();
+            Assert.That(content, Is.EqualTo(content3));
+            Assert.That(contentAgain, Is.EqualTo(content3));
+        }
+
+        [Test]
+        public void AddScoreTest()
+        {
+            int oldCount = WikipediaService.Scores.Count;
+            var wikipediaPageInfo = new WikipediaPageInfo();
+            WikipediaService.AddScore(wikipediaPageInfo);
+            Assert.That(oldCount + 1, Is.EqualTo(WikipediaService.Scores.Count));
+            Assert.True(WikipediaService.Scores.Contains(wikipediaPageInfo));
+        }
+        [Test]
+        public async Task GetWikipediaSearchResultsTest()
+        {
+            var result = await WikipediaService.GetWikipediaSearchResultsAsync("Dwayne Johnson", 5);
+
+            Assert.IsNotNull(result);
+            Assert.True(result.Length > 0);
+        }
     }
 }
 

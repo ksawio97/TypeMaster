@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -7,10 +8,10 @@ namespace TypeMaster.ViewModel;
 partial class PlaymodsViewModel : BaseViewModel
 {
     [ObservableProperty]
-    List<WikipediaPageInfo> _results;
+    IEnumerable<SearchResult> _results;
 
     [ObservableProperty]
-    WikipediaPageInfo _selectedItem;
+    SearchResult _selectedItem;
 
     [ObservableProperty]
     string _searchBoxText;
@@ -30,21 +31,14 @@ partial class PlaymodsViewModel : BaseViewModel
     [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private async Task SearchButtonClicked()
     {
-        PageInfoArgs pageInfoArgs;
-        if (int.TryParse(SearchBoxText, out int id))
-            pageInfoArgs = new IdPageInfoArgs(id, SettingsService.ProvidedTextLength, SettingsService.CurrentLanguage);
-        else
-            pageInfoArgs = new TitlePageInfoArgs(SearchBoxText, SettingsService.ProvidedTextLength, SettingsService.CurrentLanguage);
-        SearchBoxText = "";
-
-        Results = await WikipediaService.GetWikipediaSearchResultPagesAsync(pageInfoArgs.GetUrl());
+        Results = await WikipediaService.GetWikipediaSearchResultsAsync(SearchBoxText) ?? Array.Empty<SearchResult>();
     }
 
-    partial void OnSelectedItemChanged(WikipediaPageInfo value)
+    partial void OnSelectedItemChanged(SearchResult value)
     {
         if (value == null)
             return;
-        var pageInfoArgs = new IdPageInfoArgs(value.Id, value.ProvidedTextLength, value.Language);
+        var pageInfoArgs = new IdPageInfoArgs(value.Id, SettingsService.ProvidedTextLength, SettingsService.CurrentLanguage);
         Navigation.NavigateToTypeTestWithPageInfoArgs(pageInfoArgs);
         SelectedItem = null;
     }

@@ -55,7 +55,6 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Id"  Binding="{Binding Id}" Width="*"/>
                     <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*"/>
-                    <DataGridTextColumn Header="Text Length" Binding="{Binding ProvidedTextLength, StringFormat={}{0}}" Width="*"/>
                 </DataGrid.Columns>
 
                 <DataGrid.ItemsSource>

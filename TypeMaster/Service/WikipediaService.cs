@@ -12,17 +12,14 @@ public class WikipediaService
 {
     DataSaveLoadService DataSaveLoadService { get; }
     LanguagesService LanguagesService { get; }
-    SettingsService SettingsService { get; }
-
 
     public HashSet<WikipediaPageInfo> Scores { get; private set; }
     public PageInfoArgs? GetPageInfoArgs { get; set; }
 
-    public WikipediaService(DataSaveLoadService dataSaveLoadService, LanguagesService languagesService, SettingsService settingsService)
+    public WikipediaService(DataSaveLoadService dataSaveLoadService, LanguagesService languagesService)
     {
         DataSaveLoadService = dataSaveLoadService;
         LanguagesService = languagesService;
-        SettingsService = settingsService;
 
         GetPageInfoArgs = null;
         Scores = DataSaveLoadService.GetData<HashSet<WikipediaPageInfo>>() ?? new ();
@@ -36,27 +33,44 @@ public class WikipediaService
         return await GetWikipediaPageInfoAsync(GetPageInfoArgs.GetUrl(), GetPageInfoArgs.ProvidedTextLength, GetPageInfoArgs.Language);
     }
 
-    public async Task<List<WikipediaPageInfo>> GetWikipediaSearchResultPagesAsync(string url)
+    public async Task<SearchResult[]?> GetWikipediaSearchResultsAsync(string searchTitle, int resultLimit = 10)
     {
-        var result = new List<WikipediaPageInfo>();
-        JToken? pages = await GetWikipediaPagesFromUrl(url);
-        if (pages is not null)
-            foreach (JToken page in pages.Children())
+        var url = $"https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&sroffset=0&srsearch={searchTitle}&srprop=&srinfo=&srlimit={resultLimit}";
+        
+        JToken? searchResults = null;
+        using (HttpClient client = new HttpClient())
+        {
+            try
             {
-                JToken extractedPage = page.First();
-
-                if (Int32.TryParse(extractedPage?["pageid"]?.ToString(), out int Id))
-                    result.Add(new WikipediaPageInfo
-                    {
-                        Id = Id,
-                        Title = extractedPage?["title"]?.ToString() ?? "",
-                        WPM = 0,
-                        Words = 0,
-                        ProvidedTextLength = SettingsService.ProvidedTextLength,
-                        Language = SettingsService.CurrentLanguage
-                    });
+                string? response = await client.GetStringAsync(url);
+                JObject json = JObject.Parse(response);
+                searchResults = json?["query"]?["search"];
             }
-        return result;
+            catch (NullReferenceException ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+        }
+        if (searchResults == null)
+            return null;
+
+        return GetSearchResults(searchResults).ToArray();
+
+        IEnumerable<SearchResult> GetSearchResults(JToken searchResults)
+        {
+            foreach (var jToken in searchResults)
+            {
+                string title;
+                if (int.TryParse(jToken?["pageid"]?.ToString(), out int id) && (title = jToken?["title"]!.ToString() ?? string.Empty) != string.Empty)
+                {
+                    yield return new SearchResult
+                    {
+                        Id = id,
+                        Title = title
+                    };
+                }
+            }
+        }
     }
 
     private async Task<(WikipediaPageInfo?, string?)> GetWikipediaPageInfoAsync(string url, TextLength ProvidedTextLength, string language)
@@ -139,13 +153,5 @@ public class WikipediaService
             wikipediaPageInfoInScores.WPM = wikipediaPageInfo.WPM;
             wikipediaPageInfoInScores.SecondsSpent = wikipediaPageInfo.SecondsSpent;
         }
-    }
-}
-
-public static class HashSetExtensions 
-{ 
-    public static WikipediaPageInfo? GetWikipediaPageScoreById(this HashSet<WikipediaPageInfo> values, int id)
-    {
-        return values.FirstOrDefault(element => element.Id == id);
     }
 }
