@@ -6,21 +6,31 @@ namespace TypeMaster.Service;
 
 public partial class LanguagesService : ObservableObject
 {
-    Dictionary<string, string> LanguagesRegex { get; }
+    Dictionary<string, string> RegexMatchWordsInDiffrentLanguages { get; }
 
-    public string[] AvailableLanguages => LanguagesRegex.Keys.ToArray();
+    public string[] AvailableLanguages => RegexMatchWordsInDiffrentLanguages.Keys.ToArray();
 
-    public bool CanTypeThisText(string text, string language) => Regex.IsMatch(text, LanguagesRegex[language]);
-
-    public bool IsInAvailableLanguages(string language) => LanguagesRegex.ContainsKey(language);
+    public bool IsInAvailableLanguages(string language) => RegexMatchWordsInDiffrentLanguages.ContainsKey(language);
 
     public LanguagesService()
     {
-        LanguagesRegex = new Dictionary<string, string>
+        RegexMatchWordsInDiffrentLanguages = new Dictionary<string, string>
         {
-            { "en", "^[a-zA-Z0-9.,:;!?()\\[\\]{}'\"‘’“”/\\\\\\-\\s]+$" },
-            { "pl", "^[a-zA-Z0-9ĄąĆćĘęŁłŃńÓóŚśŹźŻż.,:;!?()\\[\\]{}'\"‘’“”/\\\\\\-\\s]+$" },
-            { "es", "^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,:;!?()\\[\\]{}'\"‘’“”/\\\\\\-\\s]+$" }
+            { "en", "(?:\\w*[^\\x00-\\x7F]+\\w*)" },
+            { "pl", "(?:\\w*[^\\x00-\\x7FĄąĆćĘęŁłŃńÓóŚśŹźŻż]+\\w*)" },
+            { "es", "(?:\\w*[^\\x00-\\x7FáéíóúÁÉÍÓÚñÑ-]+\\w*)" }
         };
+    }
+
+    public string FilterTextByLanguage(string inputText, string language)
+    {
+        if (RegexMatchWordsInDiffrentLanguages.TryGetValue(language, out string regexPattern))
+        {
+            string filteredText = Regex.Replace(inputText, regexPattern, "");
+
+            return filteredText;
+        }
+
+        return inputText;
     }
 }

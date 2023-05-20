@@ -20,6 +20,6 @@ partial class ScoreboardViewModel : BaseViewModel
     partial void OnSelectedItemChanged(WikipediaPageInfo value)
     {
         var pageInfoArgs = new IdPageInfoArgs(value.Id, value.ProvidedTextLength, value.Language);
-        Navigation.NavigateToTypeTestWithPageInfoArgs(pageInfoArgs);
+        Navigation.TryNavigateWithPageInfoArgs<TypeTestViewModel>(pageInfoArgs);
     }
 }

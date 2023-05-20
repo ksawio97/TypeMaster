@@ -11,7 +11,7 @@
       Cursor="{Binding Cursor}">
     
     <Page.Resources>
-        <mybehaviors:PageLoadedBehavior x:Key="PageLoadedBehavior" OnLoadAsyncCommand="{Binding LoadDataCommand}" />
+        <mybehaviors:PageLoadedBehavior x:Key="PageLoadedBehavior" OnPageLoadAsyncCommand="{Binding LoadDataCommand}" />
     </Page.Resources>
     <behaviors:Interaction.Behaviors>
         <StaticResourceExtension ResourceKey="PageLoadedBehavior" />

@@ -27,7 +27,8 @@ public partial class MainViewModel : BaseViewModel
         SettingsService = settingsService;
 
         Navigation = navigation;
-        Navigation.NavigateTo<HomeViewModel>();
+        Navigation.TryNavigateTo<HomeViewModel>();
+
         Title = "TypeMaster";
         AddItemsToContextMenu();
     }
@@ -50,25 +51,9 @@ public partial class MainViewModel : BaseViewModel
         foreach (string option in LanguagesService.AvailableLanguages)
             languageMenu.Items.Add(CreateOption(languageMenu, option, SettingsService.CurrentLanguage, SettingsService.TryChangeCurrentLanguage));
         
-        //adds list of Length Options
-        var lengthMenu = new MenuItem
-        {
-            Header = "Length",
-            HorizontalContentAlignment = HorizontalAlignment.Center,
-            VerticalContentAlignment = VerticalAlignment.Center,
-            Icon = new Path
-            {
-                Data = Geometry.Parse("M0,0 L100,0 L100,50 L0,50 Z"),
-                Fill = Brushes.Black
-            }
-        };
-        foreach (string option in Enum.GetNames(typeof(TextLength)))
-            lengthMenu.Items.Add(CreateOption(lengthMenu, option, SettingsService.ProvidedTextLength.ToString(), SettingsService.TryChangeProvidedTextLength));
-
         SettingsContextMenuItems = new List<MenuItem>
         {
-            languageMenu,
-            lengthMenu
+            languageMenu
         };
     }
 
@@ -109,7 +94,6 @@ public partial class MainViewModel : BaseViewModel
     [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private void GoHome()
     {
-        if (Navigation.CurrentView is not HomeViewModel)
-            Navigation.NavigateTo<HomeViewModel>();
+        Navigation.TryNavigateTo<HomeViewModel>();
     }
 }

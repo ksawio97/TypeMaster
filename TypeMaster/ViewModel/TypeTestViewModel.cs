@@ -74,31 +74,35 @@ public partial class TypeTestViewModel : BaseViewModel
 
         await Task.Run(async () =>
         {
-            (CurrWikiPageInfo, string? content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
-            if(CurrWikiPageInfo != null && content != null)
-            {
+            SearchResult? CurrWikiPageResult;
+            (CurrWikiPageResult, string? content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
 
-                _wikiContent = TwoOrMoreSpaces().Replace(content.Replace("\n", " "), " ").Split(" ").Select(word => word + " ").SkipLast(1).ToArray();
-                CurrWikiPageInfo.Words = _wikiContent.Length;
-                CurrWikiPageInfo.ProvidedTextLength = WikipediaService.GetPageInfoArgs!.ProvidedTextLength;
+            if (CurrWikiPageResult != null && content != null && WikipediaService.GetPageInfoArgs!.ProvidedTextLength != null)
+            {
+                content = WikipediaService.FormatPageContent(content, WikipediaService.GetPageInfoArgs.Language);
+                content = WikipediaService.CutPageContent(content, (TextLength)WikipediaService.GetPageInfoArgs!.ProvidedTextLength);
+                _wikiContent = content.Split(" ").Select(element => element + " ").ToArray();
+
+                CurrWikiPageInfo = new WikipediaPageInfo
+                {
+                    Id = CurrWikiPageResult.Id,
+                    Title = CurrWikiPageResult.Title,
+                    WPM = 0,
+                    SecondsSpent = 0,
+                    Words = _wikiContent.Length,
+                    ProvidedTextLength = (TextLength)WikipediaService.GetPageInfoArgs!.ProvidedTextLength,
+                    Language = WikipediaService.GetPageInfoArgs!.Language
+                };
+
                 await CountDownAsync(3);
                 Timer.Enabled = true;
                 Stopwatch.Start();
             }
-
             else
             {
                 Debug.WriteLine("couldn't get WikipediaPageInfo and content");
                 _wikiContent = Array.Empty<string>();
-
-                //TO DO Replace it with better solution
-                if (WikipediaService.GetPageInfoArgs! is RandomPageInfoArgs)
-                    await LoadDataAsync();    
-                else
-                    NavigationService.NavigateTo<ScoreboardViewModel>();
-                return;
             }
-
         });
         if(_wikiContent.Length != 0)
         {
@@ -119,12 +123,12 @@ public partial class TypeTestViewModel : BaseViewModel
             Timer.Enabled = false;
             if (CurrWikiPageInfo != null)
             {
-                CurrWikiPageInfo.WPM = (int)(_wikiContent.Length / (Stopwatch.Elapsed.TotalMinutes % 0.01));
                 CurrWikiPageInfo.SecondsSpent = (int)Stopwatch.Elapsed.TotalSeconds;
-                WikipediaService.AddScore(CurrWikiPageInfo);
+                CurrWikiPageInfo.WPM = (int)((_wikiContent.Length / (double)CurrWikiPageInfo.SecondsSpent) * 60);
+                WikipediaService.AddScore(CurrWikiPageInfo);         
             }
 
-            NavigationService.NavigateTo<HomeViewModel>();
+            NavigationService.TryNavigateTo<HomeViewModel>();
             return;
         }
         else if (value == _wikiContent[wordsCompleted])

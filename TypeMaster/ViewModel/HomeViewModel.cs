@@ -13,14 +13,14 @@ public partial class HomeViewModel : BaseViewModel
     [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private void NavigateToTypeTest()
     {
-        Navigation.NavigateTo<PlaymodsViewModel>();
+        Navigation.TryNavigateTo<SearchArticlesViewModel>();
     }
 
     [RelayCommand]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private void NavigateToScoreboard()
     {
-        Navigation.NavigateTo<ScoreboardViewModel>();
+        Navigation.TryNavigateTo<ScoreboardViewModel>();
     }
 
     [RelayCommand]

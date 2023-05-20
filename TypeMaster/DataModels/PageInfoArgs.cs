@@ -4,10 +4,10 @@ namespace TypeMaster.DataModels;
 
 public abstract class PageInfoArgs
 {
-    public TextLength ProvidedTextLength { get; }
+    public TextLength? ProvidedTextLength { get; set; }
     public string Language { get; }
 
-    protected PageInfoArgs(TextLength providedTextLength, string language)
+    protected PageInfoArgs(TextLength? providedTextLength, string language)
     {
         ProvidedTextLength = providedTextLength;
         Language = language;
@@ -18,14 +18,14 @@ public abstract class PageInfoArgs
 
 public class RandomPageInfoArgs : PageInfoArgs
 {
-    public RandomPageInfoArgs(TextLength ProvidedTextLength, string language)
+    public RandomPageInfoArgs(TextLength? ProvidedTextLength, string language)
         : base(ProvidedTextLength, language)
     {
     }
 
     public override string GetUrl()
     {
-        return $"https://{Language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&generator=random&grnnamespace=0&grnlimit=1&exchars={(int)ProvidedTextLength}";
+        return $"https://{Language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro&explaintext&generator=random&grnnamespace=0&grnlimit=1";
     }
 }
 
@@ -33,7 +33,7 @@ public class IdPageInfoArgs : PageInfoArgs
 {
     public int Id { get; }
 
-    public IdPageInfoArgs(int id, TextLength ProvidedTextLength, string language)
+    public IdPageInfoArgs(int id, TextLength? ProvidedTextLength, string language)
         : base(ProvidedTextLength, language)
     {
         Id = id;
@@ -41,7 +41,7 @@ public class IdPageInfoArgs : PageInfoArgs
 
     public override string GetUrl()
     {
-        return $"https://{Language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&pageids={Id}&exchars={(int)ProvidedTextLength}";
+        return $"https://{Language}.wikipedia.org/w/api.php?action=query&format=json&pageids={Id}&prop=extracts&exintro&explaintext";
     }
 }
 
@@ -57,7 +57,7 @@ public class TitlePageInfoArgs : PageInfoArgs
 
     public override string GetUrl()
     {
-        return $"https://{Language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&titles={HttpUtility.UrlEncode(Title)}&exchars={(int)ProvidedTextLength}";
+        return $"https://en.wikipedia.org/w/api.php?action=query&format=json&titles={HttpUtility.UrlEncode(Title)}&prop=extracts&exintro&explaintext";
     }
 }
 

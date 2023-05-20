@@ -20,9 +20,12 @@ namespace TypeMaster
 
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<HomeViewModel>();
+
+            services.AddTransient<SearchArticlesViewModel>();
             services.AddTransient<TypeTestViewModel>();
             services.AddTransient<ScoreboardViewModel>();
-            services.AddSingleton<PlaymodsViewModel>();
+            services.AddTransient<ChooseTextLengthViewModel>();
+
 
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<WikipediaService>();

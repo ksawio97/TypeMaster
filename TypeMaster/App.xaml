@@ -17,8 +17,12 @@
             <view:ScoreboardView/>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type TypeName=viewmodel:PlaymodsViewModel}">
-            <view:PlaymodsView/>
+        <DataTemplate DataType="{x:Type TypeName=viewmodel:SearchArticlesViewModel}">
+            <view:SearchArticlesView/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type TypeName=viewmodel:ChooseTextLengthViewModel}">
+            <view:ChooseTextLengthView/>
         </DataTemplate>
     </Application.Resources>
 </Application>

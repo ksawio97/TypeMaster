@@ -4,13 +4,13 @@ namespace TypeMaster.Behaviors;
 
 public class PageLoadedBehavior : Behavior<Page>
 {
-    public static readonly DependencyProperty OnLoadAsyncCommandProperty =
-        DependencyProperty.Register(nameof(OnLoadAsyncCommand), typeof(ICommand), typeof(PageLoadedBehavior), new PropertyMetadata(null, OnLoadAsyncCommandPropertyChanged));
+    public static readonly DependencyProperty OnPageLoadCommandProperty =
+        DependencyProperty.Register(nameof(OnPageLoadAsyncCommand), typeof(ICommand), typeof(PageLoadedBehavior), new PropertyMetadata(null, OnLoadAsyncCommandPropertyChanged));
 
-    public ICommand OnLoadAsyncCommand
+    public ICommand OnPageLoadAsyncCommand
     {
-        get { return (ICommand)GetValue(OnLoadAsyncCommandProperty); }
-        set { SetValue(OnLoadAsyncCommandProperty, value); }
+        get { return (ICommand)GetValue(OnPageLoadCommandProperty); }
+        set { SetValue(OnPageLoadCommandProperty, value); }
     }
 
     private static void OnLoadAsyncCommandPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -26,7 +26,7 @@ public class PageLoadedBehavior : Behavior<Page>
     {
         AssociatedObject.Loaded += (s, e) =>
         {
-            OnLoadAsyncCommand.Execute(null);
+            OnPageLoadAsyncCommand.Execute(null);
         };
     }
 }

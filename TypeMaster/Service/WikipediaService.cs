@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection.Metadata;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace TypeMaster.Service;
 
-public class WikipediaService
+public partial class WikipediaService
 {
     DataSaveLoadService DataSaveLoadService { get; }
     LanguagesService LanguagesService { get; }
@@ -25,12 +27,12 @@ public class WikipediaService
         Scores = DataSaveLoadService.GetData<HashSet<WikipediaPageInfo>>() ?? new ();
     }
 
-    public async Task<(WikipediaPageInfo?, string?)> TryGetWikipediaPageInfoAsync()
+    public async Task<(SearchResult?, string?)> TryGetWikipediaPageInfoAsync()
     {
         if (GetPageInfoArgs == null)
             return (null, null);
 
-        return await GetWikipediaPageInfoAsync(GetPageInfoArgs.GetUrl(), GetPageInfoArgs.ProvidedTextLength, GetPageInfoArgs.Language);
+        return await GetWikipediaPageInfoAsync(GetPageInfoArgs.GetUrl(), GetPageInfoArgs.Language);
     }
 
     public async Task<SearchResult[]?> GetWikipediaSearchResultsAsync(string searchTitle, int resultLimit = 10)
@@ -73,7 +75,7 @@ public class WikipediaService
         }
     }
 
-    private async Task<(WikipediaPageInfo?, string?)> GetWikipediaPageInfoAsync(string url, TextLength ProvidedTextLength, string language)
+    private async Task<(SearchResult?, string?)> GetWikipediaPageInfoAsync(string url, string language)
     {
         JToken? pages = await GetWikipediaPagesFromUrl(url);
         try
@@ -81,17 +83,15 @@ public class WikipediaService
             JToken? page = pages?.First?.First();
             string? content = page?["extract"]?.ToString();
 
-            if (Int32.TryParse(page?["pageid"]?.ToString(), out int Id) && LanguagesService.CanTypeThisText(content, language))
+            string? title = null;
+            if (Int32.TryParse(page?["pageid"]?.ToString(), out int id) && (title = page?["title"]?.ToString()) != null && content != null)
             {
-                var pageInfo = new WikipediaPageInfo
+                var pageInfo = new SearchResult
                 {
-                    Id = Id,
-                    Title = page?["title"]?.ToString() ?? throw new NullReferenceException("title not found!"),
-                    WPM = 0,
-                    Words = 0,
-                    ProvidedTextLength = ProvidedTextLength,
-                    Language = language
+                    Id = id,
+                    Title = title
                 };
+
                 return (pageInfo, content);
             }
         }
@@ -140,6 +140,20 @@ public class WikipediaService
         return content;
     }
 
+    public string FormatPageContent(string content, string language)
+    {
+        content = LanguagesService.FilterTextByLanguage(content, language);
+        content = content.Replace("\n", " ");
+        content = TwoOrMoreSpaces().Replace(content, " ").ToString();
+
+        return content;
+    }
+
+    public string CutPageContent(string content, TextLength textLength)
+    {
+        return content[..((int)textLength - 3)] + "...";
+    }
+
     public void AddScore(WikipediaPageInfo wikipediaPageInfo)
     {
         WikipediaPageInfo wikipediaPageInfoInScores = Scores.FirstOrDefault(element => element.Id == wikipediaPageInfo.Id, wikipediaPageInfo);
@@ -154,4 +168,7 @@ public class WikipediaService
             wikipediaPageInfoInScores.SecondsSpent = wikipediaPageInfo.SecondsSpent;
         }
     }
+
+    [GeneratedRegex(" {2,}")]
+    private partial Regex TwoOrMoreSpaces();
 }

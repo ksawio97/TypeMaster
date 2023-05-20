@@ -5,9 +5,9 @@ namespace TypeMaster.Service;
 public interface INavigationService
 {
     BaseViewModel CurrentView { get; }
-    void NavigateTo<TViewModel>() where TViewModel : BaseViewModel;
+    bool TryNavigateTo<TViewModel>() where TViewModel : BaseViewModel;
 
-    void NavigateToTypeTestWithPageInfoArgs(PageInfoArgs pageInfoArgs);
+    bool TryNavigateWithPageInfoArgs<TViewModel>(PageInfoArgs pageInfoArgs) where TViewModel : BaseViewModel;
 }
 
 public class NavigationService : ObservableObject, INavigationService
@@ -29,15 +29,18 @@ public class NavigationService : ObservableObject, INavigationService
         _wikipediaService = wikipediaService;
     }
 
-    public void NavigateTo<TViewModel>() where TViewModel : BaseViewModel
+    public bool TryNavigateTo<TViewModel>() where TViewModel : BaseViewModel
     {
+        if (_currentView is TViewModel || (typeof(TViewModel) == typeof(TypeTestViewModel) && _wikipediaService.GetPageInfoArgs == null))
+            return false;
         var viewmodel = _viewModelFactory.Invoke(typeof(TViewModel));
         CurrentView = viewmodel;
+        return true;
     }
 
-    public void NavigateToTypeTestWithPageInfoArgs(PageInfoArgs pageInfoArgs)
+    public bool TryNavigateWithPageInfoArgs<TViewModel>(PageInfoArgs pageInfoArgs) where TViewModel : BaseViewModel
     {
         _wikipediaService.GetPageInfoArgs = pageInfoArgs;
-        NavigateTo<TypeTestViewModel>();
+        return TryNavigateTo<TViewModel>();
     }
 }

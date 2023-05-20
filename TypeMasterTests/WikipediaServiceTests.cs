@@ -1,5 +1,3 @@
-using NUnit.Framework;
-
 namespace TypeMasterTests
 {
     public class WikipediaServiceTests
@@ -11,7 +9,7 @@ namespace TypeMasterTests
         {
             LanguagesService = new LanguagesService();
             var saveLoadService = new DataSaveLoadService(new CryptographyService());
-            WikipediaService = new WikipediaService(saveLoadService, LanguagesService, new SettingsService(saveLoadService, LanguagesService));
+            WikipediaService = new WikipediaService(saveLoadService, LanguagesService);
         }
 
         [Test]
@@ -21,44 +19,40 @@ namespace TypeMasterTests
             TextLength textLength = TextLength.Medium;
 
             var args = new RandomPageInfoArgs(textLength, lang);
-            (WikipediaPageInfo? info, string? content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
+            (SearchResult? info, string? content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
             Assert.IsNull(info);
             Assert.IsNull(content);
 
             WikipediaService.GetPageInfoArgs = args;
             
             (info, content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
-
-            if (content != null && LanguagesService.CanTypeThisText(content, "en"))
-                Assert.IsFalse(info == null || content == null);
-            else
-            {
-                Assert.IsNull(info);
-                Assert.IsNull(content);
-            }
+            Assert.IsNotNull(info);
+            Assert.IsNotNull(content);
         }
 
         [Test]
         public async Task GetWikipediaPageContentTest()
         {
             string lang = "en";
-            TextLength textLength = TextLength.Medium;
+            TextLength textLength = TextLength.Short;
             PageInfoArgs args = new RandomPageInfoArgs(textLength, lang);
             WikipediaService.GetPageInfoArgs = args;
 
-            WikipediaPageInfo? info;
+            SearchResult? info;
             string? content;
             do
                 (info, content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
             while ((info, content) == (null, null));
 
             //for future
-            //Assert.IsTrue(content!.Length >= (int)textLength);
+            content = WikipediaService.FormatPageContent(content, lang);
+            if (content.Length >= (int)textLength)
+                Assert.IsTrue(WikipediaService.CutPageContent(content, textLength).Length == (int)textLength);
 
             args = new IdPageInfoArgs(info!.Id, textLength, lang);
             WikipediaService.GetPageInfoArgs = args;
 
-            (WikipediaPageInfo? infoAgain, string? contentAgain) = await WikipediaService.TryGetWikipediaPageInfoAsync();
+            (SearchResult? infoAgain, string? contentAgain) = await WikipediaService.TryGetWikipediaPageInfoAsync();
             Assert.IsNotNull(infoAgain);
             Assert.IsNotNull(contentAgain);
 
@@ -90,16 +84,12 @@ namespace TypeMasterTests
     }
 }
 
-public static class WikipediaPageInfoExtensions
+public static class SearchResultExtensions
 {
-    public static bool IsEqualTo(this WikipediaPageInfo thisInfo, WikipediaPageInfo otherInfo)
+    public static bool IsEqualTo(this SearchResult thisInfo, SearchResult otherInfo)
     {
         return
             thisInfo.Id == otherInfo.Id &&
-            thisInfo.Title == otherInfo.Title &&
-            thisInfo.WPM == otherInfo.SecondsSpent &&
-            thisInfo.Words == otherInfo.Words &&
-            thisInfo.ProvidedTextLength == otherInfo.ProvidedTextLength &&
-            thisInfo.Language == otherInfo.Language;
+            thisInfo.Title == otherInfo.Title;
     }
 }
