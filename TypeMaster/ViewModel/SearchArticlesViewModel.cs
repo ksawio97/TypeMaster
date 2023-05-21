@@ -1,12 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace TypeMaster.ViewModel;
 
-partial class SearchArticlesViewModel : BaseViewModel
+partial class SearchArticlesViewModel : AsyncViewModel
 {
     [ObservableProperty]
     IEnumerable<SearchResult> _results;
@@ -35,6 +34,9 @@ partial class SearchArticlesViewModel : BaseViewModel
     [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private async Task SearchButtonClicked()
     {
+        if (IsBusy) return;
+        IsBusy = true;
+
         var rawResults = await WikipediaService.GetWikipediaSearchResultsAsync(SearchBoxText) ?? Array.Empty<SearchResult>();
 
         //filter results for only valid ones
@@ -42,10 +44,10 @@ partial class SearchArticlesViewModel : BaseViewModel
         foreach (var element in rawResults)
         {
             CurrentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(element.Id, null, SettingsService.CurrentLanguage);
-            
+
+            string formatedContent = await CurrentPageService.TryGetPageContent(formatted: true) ?? "";
             if (CurrentPageService.Content == null)
                 continue;
-            string formatedContent = await CurrentPageService.TryGetPageContent(formatted: true) ?? "";
 
             if (formatedContent.Length >= (int)TextLength.Short)
                 filteredResults.Add(element);
@@ -53,6 +55,8 @@ partial class SearchArticlesViewModel : BaseViewModel
 
         Results = filteredResults;
         CurrentPageService.CurrentPageInfoArgs = null;
+
+        IsBusy = false;
     }
 
     partial void OnSelectedItemChanged(SearchResult value)
@@ -65,8 +69,13 @@ partial class SearchArticlesViewModel : BaseViewModel
     [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private async Task NavigateToRandomTypeTest()
     {
+        if (IsBusy) return;
+        IsBusy = true;
+
         var pageInfoArgs = await DraftRandomPage();
         Navigation.TryNavigateWithPageInfoArgs<ChooseTextLengthViewModel>(pageInfoArgs);
+
+        IsBusy = false;
     }
 
     async Task<PageInfoArgs> DraftRandomPage()

@@ -7,6 +7,7 @@
       xmlns:mybehaviors="clr-namespace:TypeMaster.Behaviors"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
+      Cursor="{Binding Cursor}"
       Title="SearchArticlesView">
 
     <Grid>
@@ -29,14 +30,16 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBox Grid.Column="0"
-                         Text="{Binding SearchBoxText}">
+                         Text="{Binding SearchBoxText}"
+                         IsEnabled="{Binding IsNotBusy}">
                     <behaviors:Interaction.Behaviors>
                         <mybehaviors:TextBoxBehavior WithSelection="True"/>
                     </behaviors:Interaction.Behaviors>
                 </TextBox>
                 <Button Grid.Column="1"
                         Content="Search"
-                        Command="{Binding SearchButtonClickedCommand}"/>
+                        Command="{Binding SearchButtonClickedCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
             </Grid>
 
             <DataGrid 

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace TypeMaster.ViewModel;
 
-partial class ChooseTextLengthViewModel : BaseViewModel
+partial class ChooseTextLengthViewModel : AsyncViewModel
 {
     [ObservableProperty]
     ButtonBindableArgs shortButtonBindableArgs;
@@ -33,6 +33,9 @@ partial class ChooseTextLengthViewModel : BaseViewModel
     [RelayCommand]
     async Task LoadDataAsync()
     {
+        if (IsBusy) return;
+        IsBusy = true;
+
         string? content = await CurrentPageService.TryGetPageContent(formatted: true);
         if (content != null)
             CheckIfCanBeEnabled(content.Length);
@@ -40,6 +43,8 @@ partial class ChooseTextLengthViewModel : BaseViewModel
         {
             Debug.WriteLine("Couldn't get page content!");
         }
+
+        IsBusy = false;
     }
 
     [RelayCommand]

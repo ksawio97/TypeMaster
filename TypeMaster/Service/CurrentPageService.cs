@@ -5,7 +5,23 @@ namespace TypeMaster.Service;
 
 public partial class CurrentPageService
 {
-    public PageInfoArgs? CurrentPageInfoArgs { get; set; }
+    private PageInfoArgs? _currentPageInfoArgs;
+
+    public PageInfoArgs? CurrentPageInfoArgs
+    {
+        get
+        {
+            return _currentPageInfoArgs;
+        }
+
+        set
+        {
+            WikipediaPageResult = null;
+            Content = null;
+
+            _currentPageInfoArgs = value;
+        }
+    }
 
     public bool IsCurrentPageInfoArgsNull => CurrentPageInfoArgs == null;
 

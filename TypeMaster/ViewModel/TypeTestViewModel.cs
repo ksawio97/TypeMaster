@@ -9,7 +9,7 @@ using System.Windows.Documents;
 
 namespace TypeMaster.ViewModel;
 
-public partial class TypeTestViewModel : BaseViewModel
+public partial class TypeTestViewModel : AsyncViewModel
 {
     #region observable properties
     [ObservableProperty]
@@ -17,14 +17,6 @@ public partial class TypeTestViewModel : BaseViewModel
 
     [ObservableProperty]
     private int _charLimit;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsNotBusy))]
-    [NotifyPropertyChangedFor(nameof(Cursor))]
-    private bool _isBusy;
-    public bool IsNotBusy => !IsBusy;
-
-    public Cursor Cursor => IsBusy ? Cursors.Wait : Cursors.Arrow;
 
     [ObservableProperty]
     private string _infoForUser;
@@ -73,6 +65,7 @@ public partial class TypeTestViewModel : BaseViewModel
     [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private async Task LoadDataAsync()
     {
+        if (IsBusy) return;
         IsBusy = true;
 
         await Task.Run(async () =>

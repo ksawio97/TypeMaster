@@ -1,9 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
-using System.Reflection.Emit;
-using System.Windows.Data;
 using System.Windows.Shapes;
 
 namespace TypeMaster.ViewModel;
