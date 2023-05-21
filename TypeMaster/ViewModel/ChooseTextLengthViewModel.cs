@@ -33,7 +33,7 @@ partial class ChooseTextLengthViewModel : BaseViewModel
     [RelayCommand]
     async Task LoadDataAsync()
     {
-        string? content = await CurrentPageService.TryGetPageContent(formated: true);
+        string? content = await CurrentPageService.TryGetPageContent(formatted: true);
         if (content != null)
             CheckIfCanBeEnabled(content.Length);
         else

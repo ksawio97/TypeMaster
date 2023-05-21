@@ -45,8 +45,8 @@ partial class SearchArticlesViewModel : BaseViewModel
             
             if (CurrentPageService.Content == null)
                 continue;
+            string formatedContent = await CurrentPageService.TryGetPageContent(formatted: true) ?? "";
 
-            var formatedContent = WikipediaService.FormatPageContent(CurrentPageService.Content, SettingsService.CurrentLanguage);
             if (formatedContent.Length >= (int)TextLength.Short)
                 filteredResults.Add(element);
         }

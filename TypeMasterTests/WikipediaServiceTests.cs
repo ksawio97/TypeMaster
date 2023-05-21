@@ -10,8 +10,8 @@ namespace TypeMasterTests
         {
             LanguagesService = new LanguagesService();
             var saveLoadService = new DataSaveLoadService(new CryptographyService());
-            WikipediaService = new WikipediaService(saveLoadService, LanguagesService);
-            CurrentPageService = new CurrentPageService(WikipediaService);
+            WikipediaService = new WikipediaService(saveLoadService);
+            CurrentPageService = new CurrentPageService(WikipediaService, LanguagesService);
         }
 
         [Test]

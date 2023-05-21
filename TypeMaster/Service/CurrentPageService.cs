@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace TypeMaster.Service;
 
-public class CurrentPageService
+public partial class CurrentPageService
 {
     public PageInfoArgs? CurrentPageInfoArgs { get; set; }
 
@@ -34,9 +34,9 @@ public class CurrentPageService
         return null;
     }
 
-    public async Task<string?> TryGetPageContent(bool formated = false, bool cutted = false)
+    public async Task<string?> TryGetPageContent(bool formatted = false, bool cutted = false)
     {
-        if (formated || cutted)
+        if (formatted || cutted)
             if (CurrentPageInfoArgs == null)
                 return null;
 
@@ -44,18 +44,18 @@ public class CurrentPageService
             return null;
 
         if (Content != null)
-            return GetPageContent(formated, cutted);
+            return GetPageContent(formatted, cutted);
 
         if (await TrySetPageInfoAndContent())
-            return GetPageContent(formated, cutted);
+            return GetPageContent(formatted, cutted);
 
         return null;
     }
 
-    private string GetPageContent(bool formated, bool cutted)
+    private string GetPageContent(bool formatted, bool cutted)
     {
         string content = Content!;
-        if(formated)
+        if(formatted)
             content = FormatPageContent(content, CurrentPageInfoArgs!.Language);
         if(cutted)
             content = CutPageContent(content, (TextLength)CurrentPageInfoArgs!.ProvidedTextLength!);

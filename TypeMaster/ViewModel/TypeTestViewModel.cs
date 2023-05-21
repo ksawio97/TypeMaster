@@ -78,7 +78,7 @@ public partial class TypeTestViewModel : BaseViewModel
         await Task.Run(async () =>
         {
             SearchResult? CurrWikiPageResult;
-            (CurrWikiPageResult, string? content) = (await CurrentPageService.GetPageResult(), await CurrentPageService.TryGetPageContent(formated: true, cutted: true));
+            (CurrWikiPageResult, string? content) = (await CurrentPageService.GetPageResult(), await CurrentPageService.TryGetPageContent(formatted: true, cutted: true));
 
             if (CurrWikiPageResult != null && content != null)
             {
