@@ -12,10 +12,11 @@ public interface INavigationService
 
 public class NavigationService : ObservableObject, INavigationService
 {
-    private readonly Func<Type, BaseViewModel> _viewModelFactory;
+    private readonly Func<Type, BaseViewModel> ViewModelFactory;
 
     private BaseViewModel _currentView;
-    private WikipediaService _wikipediaService { get; }
+
+    private CurrentPageService CurrentPageService { get; }
 
     public BaseViewModel CurrentView
     {
@@ -23,24 +24,25 @@ public class NavigationService : ObservableObject, INavigationService
         private set => SetProperty(ref _currentView, value);
     }
 
-    public NavigationService(Func<Type, BaseViewModel> viewModelFactory, WikipediaService wikipediaService)
+    public NavigationService(Func<Type, BaseViewModel> viewModelFactory, CurrentPageService currentPageService)
     {
-        _viewModelFactory = viewModelFactory;
-        _wikipediaService = wikipediaService;
+        ViewModelFactory = viewModelFactory;
+
+        CurrentPageService = currentPageService;
     }
 
     public bool TryNavigateTo<TViewModel>() where TViewModel : BaseViewModel
     {
-        if (_currentView is TViewModel || (typeof(TViewModel) == typeof(TypeTestViewModel) && _wikipediaService.GetPageInfoArgs == null))
+        if (_currentView is TViewModel || (typeof(TViewModel) == typeof(TypeTestViewModel) && CurrentPageService.IsCurrentPageInfoArgsNull))
             return false;
-        var viewmodel = _viewModelFactory.Invoke(typeof(TViewModel));
+        var viewmodel = ViewModelFactory.Invoke(typeof(TViewModel));
         CurrentView = viewmodel;
         return true;
     }
 
     public bool TryNavigateWithPageInfoArgs<TViewModel>(PageInfoArgs pageInfoArgs) where TViewModel : BaseViewModel
     {
-        _wikipediaService.GetPageInfoArgs = pageInfoArgs;
+        CurrentPageService.CurrentPageInfoArgs = pageInfoArgs;
         return TryNavigateTo<TViewModel>();
     }
 }

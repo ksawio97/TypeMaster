@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection.Metadata;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace TypeMaster.Service;
@@ -13,26 +11,22 @@ namespace TypeMaster.Service;
 public partial class WikipediaService
 {
     DataSaveLoadService DataSaveLoadService { get; }
-    LanguagesService LanguagesService { get; }
 
     public HashSet<WikipediaPageInfo> Scores { get; private set; }
-    public PageInfoArgs? GetPageInfoArgs { get; set; }
 
-    public WikipediaService(DataSaveLoadService dataSaveLoadService, LanguagesService languagesService)
+    public WikipediaService(DataSaveLoadService dataSaveLoadService)
     {
         DataSaveLoadService = dataSaveLoadService;
-        LanguagesService = languagesService;
 
-        GetPageInfoArgs = null;
         Scores = DataSaveLoadService.GetData<HashSet<WikipediaPageInfo>>() ?? new ();
     }
 
-    public async Task<(SearchResult?, string?)> TryGetWikipediaPageInfoAsync()
+    public async Task<(SearchResult?, string?)> TryGetWikipediaPageInfoAsync(PageInfoArgs CurrentPageInfoArgs)
     {
-        if (GetPageInfoArgs == null)
+        if (CurrentPageInfoArgs == null)
             return (null, null);
 
-        return await GetWikipediaPageInfoAsync(GetPageInfoArgs.GetUrl(), GetPageInfoArgs.Language);
+        return await GetWikipediaPageInfoAsync(CurrentPageInfoArgs.GetUrl(), CurrentPageInfoArgs.Language);
     }
 
     public async Task<SearchResult[]?> GetWikipediaSearchResultsAsync(string searchTitle, int resultLimit = 10)
@@ -121,39 +115,6 @@ public partial class WikipediaService
         return pages;
     }
 
-
-    public async Task<string?> GetWikipediaPageContent()
-    {
-        string? content = null;
-        if (GetPageInfoArgs == null)
-            return null;
-        try
-        {
-            JToken? pages = await GetWikipediaPagesFromUrl(GetPageInfoArgs.GetUrl());
-            JToken? page = pages?.First?.First();
-            content = page?["extract"]?.ToString();
-        }
-        catch (NullReferenceException ex)
-        {
-            Debug.WriteLine(ex.Message);
-        }
-        return content;
-    }
-
-    public string FormatPageContent(string content, string language)
-    {
-        content = LanguagesService.FilterTextByLanguage(content, language);
-        content = content.Replace("\n", " ");
-        content = TwoOrMoreSpaces().Replace(content, " ").ToString();
-
-        return content;
-    }
-
-    public string CutPageContent(string content, TextLength textLength)
-    {
-        return content[..((int)textLength - 3)] + "...";
-    }
-
     public void AddScore(WikipediaPageInfo wikipediaPageInfo)
     {
         WikipediaPageInfo wikipediaPageInfoInScores = Scores.FirstOrDefault(element => element.Id == wikipediaPageInfo.Id, wikipediaPageInfo);
@@ -168,7 +129,4 @@ public partial class WikipediaService
             wikipediaPageInfoInScores.SecondsSpent = wikipediaPageInfo.SecondsSpent;
         }
     }
-
-    [GeneratedRegex(" {2,}")]
-    private partial Regex TwoOrMoreSpaces();
 }

@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace TypeMaster.ViewModel;
@@ -14,14 +15,13 @@ partial class ChooseTextLengthViewModel : BaseViewModel
     [ObservableProperty]
     ButtonBindableArgs longButtonBindableArgs;
 
-    WikipediaService WikipediaService { get; }
-
     INavigationService NavigationService { get; }
+    CurrentPageService CurrentPageService { get; }
 
-    public ChooseTextLengthViewModel(WikipediaService wikipediaService, INavigationService navigationService)
+    public ChooseTextLengthViewModel(INavigationService navigationService, CurrentPageService currentPageService)
     {
-        WikipediaService = wikipediaService;
         NavigationService = navigationService;
+        CurrentPageService = currentPageService;
 
         ShortButtonBindableArgs = new ButtonBindableArgs { IsEnabled = false, RepresentedLength = TextLength.Short };
         MediumButtonBindableArgs = new ButtonBindableArgs { IsEnabled = false, RepresentedLength = TextLength.Medium };
@@ -33,18 +33,19 @@ partial class ChooseTextLengthViewModel : BaseViewModel
     [RelayCommand]
     async Task LoadDataAsync()
     {
-        string? content = await WikipediaService.GetWikipediaPageContent();
+        string? content = await CurrentPageService.TryGetPageContent(formated: true);
         if (content != null)
-        {
-            content = WikipediaService.FormatPageContent(content, WikipediaService.GetPageInfoArgs!.Language);
             CheckIfCanBeEnabled(content.Length);
+        else
+        {
+            Debug.WriteLine("Couldn't get page content!");
         }
     }
 
     [RelayCommand]
     void NavigateToTypeTest(TextLength textLength)
     {
-        WikipediaService.GetPageInfoArgs!.ProvidedTextLength = textLength;
+        CurrentPageService.CurrentPageInfoArgs!.ProvidedTextLength = textLength;
         NavigationService.TryNavigateTo<TypeTestViewModel>();
     }
 

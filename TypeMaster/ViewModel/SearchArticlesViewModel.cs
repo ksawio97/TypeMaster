@@ -21,11 +21,14 @@ partial class SearchArticlesViewModel : BaseViewModel
     WikipediaService WikipediaService { get; }
     SettingsService SettingsService { get; }
 
-    public SearchArticlesViewModel(INavigationService navigationService, WikipediaService wikipediaService, SettingsService settingsService)
+    CurrentPageService CurrentPageService { get; }
+
+    public SearchArticlesViewModel(INavigationService navigationService, WikipediaService wikipediaService, SettingsService settingsService, CurrentPageService currentPageService)
     {
         Navigation = navigationService;
         WikipediaService = wikipediaService;
         SettingsService = settingsService;
+        CurrentPageService = currentPageService;
     }
 
     [RelayCommand]
@@ -38,19 +41,18 @@ partial class SearchArticlesViewModel : BaseViewModel
         List<SearchResult> filteredResults = new();
         foreach (var element in rawResults)
         {
-            WikipediaService.GetPageInfoArgs = new IdPageInfoArgs(element.Id, null, SettingsService.CurrentLanguage);
+            CurrentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(element.Id, null, SettingsService.CurrentLanguage);
             
-            var content = await WikipediaService.GetWikipediaPageContent();
-            if (content == null)
+            if (CurrentPageService.Content == null)
                 continue;
 
-            content = WikipediaService.FormatPageContent(content, SettingsService.CurrentLanguage);
-            if (content.Length >= (int)TextLength.Short)
+            var formatedContent = WikipediaService.FormatPageContent(CurrentPageService.Content, SettingsService.CurrentLanguage);
+            if (formatedContent.Length >= (int)TextLength.Short)
                 filteredResults.Add(element);
         }
 
         Results = filteredResults;
-        WikipediaService.GetPageInfoArgs = null;
+        CurrentPageService.CurrentPageInfoArgs = null;
     }
 
     partial void OnSelectedItemChanged(SearchResult value)
@@ -75,11 +77,13 @@ partial class SearchArticlesViewModel : BaseViewModel
         do
         {
             pageInfoArgs = new RandomPageInfoArgs(null, SettingsService.CurrentLanguage);
-            WikipediaService.GetPageInfoArgs = pageInfoArgs;
-            (wikipediaPageInfo, content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
+            CurrentPageService.CurrentPageInfoArgs = pageInfoArgs;
+
+            (wikipediaPageInfo, content) = (await CurrentPageService.GetPageResult(), await CurrentPageService.TryGetPageContent());
+
             if (wikipediaPageInfo == null || content == null)
                 continue;
-            content = WikipediaService.FormatPageContent(content, WikipediaService.GetPageInfoArgs!.Language);  
+
         } while (content!.Length < (int)TextLength.Short);
 
         return new IdPageInfoArgs(wikipediaPageInfo!.Id, null, SettingsService.CurrentLanguage);

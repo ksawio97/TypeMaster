@@ -33,6 +33,7 @@ namespace TypeMaster
             services.AddSingleton<CryptographyService>();
             services.AddSingleton<LanguagesService>();
             services.AddSingleton<SettingsService>();
+            services.AddSingleton<CurrentPageService>();
 
             services.AddSingleton<Func<Type, BaseViewModel>>(serviceProvider => viewModelType => (BaseViewModel)serviceProvider.GetRequiredService(viewModelType));
             _serviceProvider = services.BuildServiceProvider();

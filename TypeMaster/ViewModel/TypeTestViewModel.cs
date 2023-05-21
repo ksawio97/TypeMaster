@@ -33,7 +33,9 @@ public partial class TypeTestViewModel : BaseViewModel
     public event EventHandler<SetInlinesEventArgs> SetInlines;
 
     INavigationService NavigationService { get; }
+    CurrentPageService CurrentPageService { get; }
     WikipediaService WikipediaService { get; }
+
     WikipediaPageInfo? CurrWikiPageInfo;
 
     string[] _wikiContent;
@@ -46,10 +48,11 @@ public partial class TypeTestViewModel : BaseViewModel
     Timer Timer { get; }
     Stopwatch Stopwatch { get; }
 
-    public TypeTestViewModel(WikipediaService wikipediaService, INavigationService navigationService)
+    public TypeTestViewModel(WikipediaService wikipediaService, INavigationService navigationService, CurrentPageService currentPageService)
     {
         NavigationService = navigationService;
         WikipediaService = wikipediaService;
+        CurrentPageService = currentPageService;
 
         wordsCompleted = 0;
         currWord = 0;
@@ -75,24 +78,13 @@ public partial class TypeTestViewModel : BaseViewModel
         await Task.Run(async () =>
         {
             SearchResult? CurrWikiPageResult;
-            (CurrWikiPageResult, string? content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
+            (CurrWikiPageResult, string? content) = (await CurrentPageService.GetPageResult(), await CurrentPageService.TryGetPageContent(formated: true, cutted: true));
 
-            if (CurrWikiPageResult != null && content != null && WikipediaService.GetPageInfoArgs!.ProvidedTextLength != null)
+            if (CurrWikiPageResult != null && content != null)
             {
-                content = WikipediaService.FormatPageContent(content, WikipediaService.GetPageInfoArgs.Language);
-                content = WikipediaService.CutPageContent(content, (TextLength)WikipediaService.GetPageInfoArgs!.ProvidedTextLength);
                 _wikiContent = content.Split(" ").Select(element => element + " ").ToArray();
 
-                CurrWikiPageInfo = new WikipediaPageInfo
-                {
-                    Id = CurrWikiPageResult.Id,
-                    Title = CurrWikiPageResult.Title,
-                    WPM = 0,
-                    SecondsSpent = 0,
-                    Words = _wikiContent.Length,
-                    ProvidedTextLength = (TextLength)WikipediaService.GetPageInfoArgs!.ProvidedTextLength,
-                    Language = WikipediaService.GetPageInfoArgs!.Language
-                };
+                CurrWikiPageInfo = CurrentPageService.GetWikipediaPageInfo(_wikiContent.Length);
 
                 await CountDownAsync(3);
                 Timer.Enabled = true;

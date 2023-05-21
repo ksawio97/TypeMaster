@@ -4,12 +4,14 @@ namespace TypeMasterTests
     {
         WikipediaService WikipediaService;
         LanguagesService LanguagesService;
+        CurrentPageService CurrentPageService;
         [SetUp]
         public void Setup()
         {
             LanguagesService = new LanguagesService();
             var saveLoadService = new DataSaveLoadService(new CryptographyService());
             WikipediaService = new WikipediaService(saveLoadService, LanguagesService);
+            CurrentPageService = new CurrentPageService(WikipediaService);
         }
 
         [Test]
@@ -19,15 +21,8 @@ namespace TypeMasterTests
             TextLength textLength = TextLength.Medium;
 
             var args = new RandomPageInfoArgs(textLength, lang);
-            (SearchResult? info, string? content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
-            Assert.IsNull(info);
-            Assert.IsNull(content);
-
-            WikipediaService.GetPageInfoArgs = args;
-            
-            (info, content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
-            Assert.IsNotNull(info);
-            Assert.IsNotNull(content);
+            (SearchResult? info, string? content) = await WikipediaService.TryGetWikipediaPageInfoAsync(args);
+            Assert.IsTrue(info != null && content != null);
         }
 
         [Test]
@@ -36,32 +31,15 @@ namespace TypeMasterTests
             string lang = "en";
             TextLength textLength = TextLength.Short;
             PageInfoArgs args = new RandomPageInfoArgs(textLength, lang);
-            WikipediaService.GetPageInfoArgs = args;
+            CurrentPageService.CurrentPageInfoArgs = args;
 
-            SearchResult? info;
-            string? content;
-            do
-                (info, content) = await WikipediaService.TryGetWikipediaPageInfoAsync();
-            while ((info, content) == (null, null));
+            (SearchResult? info, string? content) = await WikipediaService.TryGetWikipediaPageInfoAsync(args);
+            Assert.IsTrue(info != null && content != null);
 
-            //for future
-            content = WikipediaService.FormatPageContent(content, lang);
-            if (content.Length >= (int)textLength)
-                Assert.IsTrue(WikipediaService.CutPageContent(content, textLength).Length == (int)textLength);
-
-            args = new IdPageInfoArgs(info!.Id, textLength, lang);
-            WikipediaService.GetPageInfoArgs = args;
-
-            (SearchResult? infoAgain, string? contentAgain) = await WikipediaService.TryGetWikipediaPageInfoAsync();
-            Assert.IsNotNull(infoAgain);
-            Assert.IsNotNull(contentAgain);
-
-            Assert.IsTrue(info.IsEqualTo(infoAgain));
-            Assert.That(content, Is.EqualTo(contentAgain!));
-
-            var content3 = await WikipediaService.GetWikipediaPageContent();
-            Assert.That(content, Is.EqualTo(content3));
-            Assert.That(contentAgain, Is.EqualTo(content3));
+            args = new IdPageInfoArgs(info.Id, null, lang);
+            (SearchResult? info2, string? content2) = await WikipediaService.TryGetWikipediaPageInfoAsync(args);
+            Assert.True(info.IsEqualTo(info2));
+            Assert.That(content, Is.EqualTo(content2));
         }
 
         [Test]
