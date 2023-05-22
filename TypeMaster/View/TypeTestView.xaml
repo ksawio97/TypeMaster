@@ -7,8 +7,9 @@
       xmlns:mybehaviors="clr-namespace:TypeMaster.Behaviors"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="TypeTestView"
-      Cursor="{Binding Cursor}">
+      Style="{StaticResource PageStyle}"
+      Cursor="{Binding Cursor}"
+      Title="TypeTestView">
     
     <Page.Resources>
         <mybehaviors:PageLoadedBehavior x:Key="PageLoadedBehavior" OnPageLoadAsyncCommand="{Binding LoadDataCommand}" />
@@ -52,6 +53,7 @@
             Grid.Column="1"
             MaxLines="1"
             SpellCheck.IsEnabled="False"
+            Foreground="{StaticResource ForegroundColor}"
             MaxLength="{Binding CharLimit}"
             IsEnabled="{Binding IsNotBusy}"
             Text="{Binding UserTypeInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

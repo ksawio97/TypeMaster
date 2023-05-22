@@ -1,0 +1,16 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="ErrorColor" Color="#EA4C4C"/>
+    <SolidColorBrush x:Key="TypoColor" Color="#F1C550"/>
+    <SolidColorBrush x:Key="CorrectColor" Color="#A1C45A"/>
+
+    <SolidColorBrush x:Key="DarkErrorColor" Color="#FF1700"/>
+    <SolidColorBrush x:Key="DarkTypoColor" Color="#FF8E00"/>
+    <SolidColorBrush x:Key="DarkCorrectColor" Color="#379237"/>
+
+    <SolidColorBrush x:Key="BackgroundColor" Color="#272537"/>
+    <SolidColorBrush x:Key="DarkBackgroundColor" Color="#22202f"/>
+    
+    <SolidColorBrush x:Key="ForegroundColor" Color="White"/>
+    
+</ResourceDictionary>

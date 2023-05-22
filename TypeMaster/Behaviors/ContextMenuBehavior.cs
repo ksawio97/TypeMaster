@@ -2,13 +2,13 @@
 
 namespace TypeMaster.Behaviors;
 
-public class ContextMenuBehavior : Behavior<Button>
+public class ContextMenuBehavior : Behavior<RadioButton>
 {
     protected override void OnAttached()
     {
         base.OnAttached();
 
-        AssociatedObject.Click += AssociatedObject_Click;
+        AssociatedObject.Click += AssociatedObject_Click; 
     }
 
     private void AssociatedObject_Click(object sender, RoutedEventArgs e)
@@ -21,6 +21,6 @@ public class ContextMenuBehavior : Behavior<Button>
     {
         base.OnDetaching();
 
-        AssociatedObject.MouseLeftButtonDown -= AssociatedObject_Click;
+        AssociatedObject.Click -= AssociatedObject_Click;
     }
 }

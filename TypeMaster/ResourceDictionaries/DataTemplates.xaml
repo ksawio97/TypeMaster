@@ -1,0 +1,21 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:viewmodel="clr-namespace:TypeMaster.ViewModel"
+                    xmlns:view="clr-namespace:TypeMaster.View">
+
+    <DataTemplate DataType="{x:Type TypeName=viewmodel:TypeTestViewModel}">
+        <view:TypeTestView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type TypeName=viewmodel:ScoreboardViewModel}">
+        <view:ScoreboardView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type TypeName=viewmodel:SearchArticlesViewModel}">
+        <view:SearchArticlesView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type TypeName=viewmodel:ChooseTextLengthViewModel}">
+        <view:ChooseTextLengthView/>
+    </DataTemplate>
+</ResourceDictionary>

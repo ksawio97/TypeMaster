@@ -39,7 +39,7 @@ public partial class CurrentPageService
         LanguagesService = languagesService;
     }
 
-    public async Task<SearchResult?> GetPageResult()
+    public async Task<SearchResult?> TryGetPageResult()
     {
         if (!WikipediaPageResult.IsNullOrEmpty())
             return WikipediaPageResult;

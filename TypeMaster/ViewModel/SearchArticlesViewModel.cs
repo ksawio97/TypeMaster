@@ -37,64 +37,48 @@ partial class SearchArticlesViewModel : AsyncViewModel
         if (IsBusy) return;
         IsBusy = true;
 
-        var rawResults = await WikipediaService.GetWikipediaSearchResultsAsync(SearchBoxText) ?? Array.Empty<SearchResult>();
-
         //filter results for only valid ones
         List<SearchResult> filteredResults = new();
-        foreach (var element in rawResults)
+
+        //if it is id try show it
+        if (int.TryParse(SearchBoxText, out int id))
         {
-            CurrentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(element.Id, null, SettingsService.CurrentLanguage);
+            CurrentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(id, null, SettingsService.CurrentLanguage);
 
-            string formatedContent = await CurrentPageService.TryGetPageContent(formatted: true) ?? "";
-            if (CurrentPageService.Content == null)
-                continue;
+            (SearchResult? result, string? formatedContent) = (await CurrentPageService.TryGetPageResult(), await CurrentPageService.TryGetPageContent(formatted: true));
+            if (result != null && IsPageValid(formatedContent))
+                filteredResults.Add(result);
+        }
+        else
+        {
+            SearchResult[] rawResults = await WikipediaService.GetWikipediaSearchResultsAsync(SearchBoxText) ?? Array.Empty<SearchResult>();
 
-            if (formatedContent.Length >= (int)TextLength.Short)
-                filteredResults.Add(element);
+            foreach (var element in rawResults)
+            {
+                CurrentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(element.Id, null, SettingsService.CurrentLanguage);
+
+                string? formatedContent = await CurrentPageService.TryGetPageContent(formatted: true);
+
+                if (IsPageValid(formatedContent))
+                    filteredResults.Add(element);
+            }
         }
 
         Results = filteredResults;
         CurrentPageService.CurrentPageInfoArgs = null;
-
         IsBusy = false;
     }
+
+    bool IsPageValid(string? content) => content != null && content.Length >= (int)TextLength.Short;
 
     partial void OnSelectedItemChanged(SearchResult value)
     {
-        var pageInfoArgs = new IdPageInfoArgs(value.Id, null, SettingsService.CurrentLanguage);
-        Navigation.TryNavigateWithPageInfoArgs<ChooseTextLengthViewModel>(pageInfoArgs);
+        NavigateToChooseTextLengthViewModel(value.Id);
     }
 
-    [RelayCommand]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
-    private async Task NavigateToRandomTypeTest()
+    void NavigateToChooseTextLengthViewModel(int id)
     {
-        if (IsBusy) return;
-        IsBusy = true;
-
-        var pageInfoArgs = await DraftRandomPage();
+        var pageInfoArgs = new IdPageInfoArgs(id, null, SettingsService.CurrentLanguage);
         Navigation.TryNavigateWithPageInfoArgs<ChooseTextLengthViewModel>(pageInfoArgs);
-
-        IsBusy = false;
-    }
-
-    async Task<PageInfoArgs> DraftRandomPage()
-    {
-        PageInfoArgs pageInfoArgs;
-        SearchResult? wikipediaPageInfo;
-        string? content;
-        do
-        {
-            pageInfoArgs = new RandomPageInfoArgs(null, SettingsService.CurrentLanguage);
-            CurrentPageService.CurrentPageInfoArgs = pageInfoArgs;
-
-            (wikipediaPageInfo, content) = (await CurrentPageService.GetPageResult(), await CurrentPageService.TryGetPageContent());
-
-            if (wikipediaPageInfo == null || content == null)
-                continue;
-
-        } while (content!.Length < (int)TextLength.Short);
-
-        return new IdPageInfoArgs(wikipediaPageInfo!.Id, null, SettingsService.CurrentLanguage);
     }
 }

@@ -19,7 +19,6 @@ namespace TypeMaster
             });
 
             services.AddSingleton<MainViewModel>();
-            services.AddSingleton<HomeViewModel>();
 
             services.AddTransient<SearchArticlesViewModel>();
             services.AddTransient<TypeTestViewModel>();
@@ -34,6 +33,7 @@ namespace TypeMaster
             services.AddSingleton<LanguagesService>();
             services.AddSingleton<SettingsService>();
             services.AddSingleton<CurrentPageService>();
+            services.AddSingleton<ColorsService>();
 
             services.AddSingleton<Func<Type, BaseViewModel>>(serviceProvider => viewModelType => (BaseViewModel)serviceProvider.GetRequiredService(viewModelType));
             _serviceProvider = services.BuildServiceProvider();

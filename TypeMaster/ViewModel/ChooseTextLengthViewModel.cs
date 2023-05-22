@@ -15,6 +15,8 @@ partial class ChooseTextLengthViewModel : AsyncViewModel
     [ObservableProperty]
     ButtonBindableArgs longButtonBindableArgs;
 
+    [ObservableProperty]
+    string? wikiTitle;
     INavigationService NavigationService { get; }
     CurrentPageService CurrentPageService { get; }
 
@@ -27,18 +29,21 @@ partial class ChooseTextLengthViewModel : AsyncViewModel
         MediumButtonBindableArgs = new ButtonBindableArgs { IsEnabled = false, RepresentedLength = TextLength.Medium };
         LongButtonBindableArgs = new ButtonBindableArgs { IsEnabled = false, RepresentedLength = TextLength.Long };
 
-        CheckIfCanBeEnabled(0);
+        //CheckIfCanBeEnabled(0);
     }
 
     [RelayCommand]
-    async Task LoadDataAsync()
+    public async Task LoadDataAsync()
     {
         if (IsBusy) return;
         IsBusy = true;
 
         string? content = await CurrentPageService.TryGetPageContent(formatted: true);
         if (content != null)
+        {
+            WikiTitle = (await CurrentPageService.TryGetPageResult())?.Title;
             CheckIfCanBeEnabled(content.Length);
+        }
         else
         {
             Debug.WriteLine("Couldn't get page content!");
@@ -65,8 +70,10 @@ partial class ChooseTextLengthViewModel : AsyncViewModel
 public partial class ButtonBindableArgs : ObservableObject
 {
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Visibility))]
     bool isEnabled;
 
     [ObservableProperty]
     TextLength representedLength;
+    public Visibility Visibility => IsEnabled ? Visibility.Visible : Visibility.Hidden;
 }

@@ -1,10 +1,11 @@
 ﻿using System;
+using System.CodeDom;
 
 namespace TypeMaster.Service;
 
 public interface INavigationService
 {
-    BaseViewModel CurrentView { get; }
+    public BaseViewModel CurrentView { get; }
     bool TryNavigateTo<TViewModel>() where TViewModel : BaseViewModel;
 
     bool TryNavigateWithPageInfoArgs<TViewModel>(PageInfoArgs pageInfoArgs) where TViewModel : BaseViewModel;
@@ -32,8 +33,8 @@ public class NavigationService : ObservableObject, INavigationService
     }
 
     public bool TryNavigateTo<TViewModel>() where TViewModel : BaseViewModel
-    {
-        if (_currentView is TViewModel || (typeof(TViewModel) == typeof(TypeTestViewModel) && CurrentPageService.IsCurrentPageInfoArgsNull))
+    {            
+        if (CurrentView is TViewModel || (typeof(TViewModel) == typeof(TypeTestViewModel) && CurrentPageService.IsCurrentPageInfoArgsNull))
             return false;
         var viewmodel = ViewModelFactory.Invoke(typeof(TViewModel));
         CurrentView = viewmodel;

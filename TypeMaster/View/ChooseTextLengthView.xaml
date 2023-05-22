@@ -3,11 +3,11 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:datamodels="clr-namespace:TypeMaster.DataModels"
       xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:mybehaviors="clr-namespace:TypeMaster.Behaviors"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
+      Style="{StaticResource PageStyle}"
       Cursor="{Binding Cursor}"
       Title="ChooseTextLengthView">
     
@@ -21,11 +21,14 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="3*"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
 
@@ -33,25 +36,41 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
         </Grid.RowDefinitions>
-
+        <Viewbox Grid.Row="1"
+                 Grid.Column="2"
+                 Grid.ColumnSpan="5">
+            <TextBlock Text="{Binding WikiTitle}"/>
+        </Viewbox>
+        
         <Button Grid.Column="1"
-                Grid.Row="1"
+                Grid.ColumnSpan="2"
+                Grid.Row="3"
                 Content="Short"
+                Style="{StaticResource GreenStyle}"
+                Visibility="{Binding ShortButtonBindableArgs.Visibility}"
                 IsEnabled="{Binding ShortButtonBindableArgs.IsEnabled}"
                 Command="{Binding NavigateToTypeTestCommand}"
                 CommandParameter="{Binding ShortButtonBindableArgs.RepresentedLength}"/>
 
-        <Button Grid.Column="3"
-                Grid.Row="1"
+        <Button Grid.Column="4"
+                Grid.ColumnSpan="2"  
+                Grid.Row="3"
                 Content="Medium"
+                Style="{StaticResource YellowStyle}"
+                Visibility="{Binding MediumButtonBindableArgs.Visibility}"
                 IsEnabled="{Binding MediumButtonBindableArgs.IsEnabled}"
                 Command="{Binding NavigateToTypeTestCommand}"
                 CommandParameter="{Binding MediumButtonBindableArgs.RepresentedLength}"/>
 
-        <Button Grid.Column="5"
-                Grid.Row="1"
+        <Button Grid.Column="7"
+                Grid.ColumnSpan="2"
+                Grid.Row="3"
                 Content="Long"
+                Style="{StaticResource RedStyle}"
+                Visibility="{Binding MediumButtonBindableArgs.Visibility}"
                 IsEnabled="{Binding MediumButtonBindableArgs.IsEnabled}"
                 Command="{Binding NavigateToTypeTestCommand}"
                 CommandParameter="{Binding MediumButtonBindableArgs.RepresentedLength}"/>

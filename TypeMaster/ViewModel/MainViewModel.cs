@@ -1,11 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows.Shapes;
 
 namespace TypeMaster.ViewModel;
 
-public partial class MainViewModel : BaseViewModel
+public partial class MainViewModel : AsyncViewModel
 {
     [ObservableProperty]
     string? _title;
@@ -14,83 +17,128 @@ public partial class MainViewModel : BaseViewModel
     INavigationService _navigation;
 
     [ObservableProperty]
-    List<MenuItem> _settingsContextMenuItems;
+    List<MenuItem> _languageOptions;
 
     LanguagesService LanguagesService { get; }
     SettingsService SettingsService { get; }
-    public MainViewModel(INavigationService navigation, LanguagesService languagesService, SettingsService settingsService)
+
+    CurrentPageService CurrentPageService { get; }
+
+    ColorsService ColorsService { get; }
+
+    public MainViewModel(INavigationService navigation, LanguagesService languagesService, SettingsService settingsService, CurrentPageService currentPageService, ColorsService colorsService)
     {
         LanguagesService = languagesService;
         SettingsService = settingsService;
-
+        CurrentPageService = currentPageService;
         Navigation = navigation;
-        Navigation.TryNavigateTo<HomeViewModel>();
+        ColorsService = colorsService;
 
         Title = "TypeMaster";
-        AddItemsToContextMenu();
+        LanguageOptions = new ();
+        SetContextMenuItems();
     }
 
-    private void AddItemsToContextMenu()
+    private void SetContextMenuItems()
     {
-        //adds list of languages
-        var languageMenu = new MenuItem
-        {
-            Header = "Language",
-            HorizontalContentAlignment = HorizontalAlignment.Center,
-            VerticalContentAlignment = VerticalAlignment.Center,
-            Icon = new Path
-            {
-                Data = Geometry.Parse("M9 7h6v14h3V7h6V4H9v3z"),
-                Fill = Brushes.Black
-            }
-        };
-        //adds options to choose
         foreach (string option in LanguagesService.AvailableLanguages)
-            languageMenu.Items.Add(CreateOption(languageMenu, option, SettingsService.CurrentLanguage, SettingsService.TryChangeCurrentLanguage));
-        
-        SettingsContextMenuItems = new List<MenuItem>
-        {
-            languageMenu
-        };
+            LanguageOptions.Add(CreateOption(option, SettingsService.CurrentLanguage == option));
     }
 
-    private MenuItem CreateOption(MenuItem languageMenu, string option, string selectedHeader, Action<string> setAction)
+    private MenuItem CreateOption(string option, bool isSelected)
     {
+        SolidColorBrush ColorsOptions(bool selected) => selected ? ColorsService.TryGetColor("DarkBackgroundColor") ?? Brushes.MediumPurple : ColorsService.TryGetColor("BackgroundColor") ?? Brushes.Purple;
         return new MenuItem
         {
             Header = option,
+            Command = new RelayCommand(() => OptionChoosed(option, ColorsOptions)),
             HorizontalContentAlignment = HorizontalAlignment.Center,
             VerticalContentAlignment = VerticalAlignment.Center,
-            Command = new RelayCommand(() => OptionChoosed(option, languageMenu.Items, setAction)),
-            Background = option == selectedHeader ? Brushes.MediumPurple : Brushes.White,
+            IsEnabled = !isSelected,
+            Background = ColorsOptions(isSelected),
+            Foreground = ColorsService.TryGetColor("ForegroundColor") ?? Brushes.White,
             Icon = new Path
             {
                 Data = Geometry.Parse("M -2,-2 L 2,-2 L 2,2 L -2,2 Z"),
-                Fill = Brushes.Black,
+                Fill = ColorsService.TryGetColor("ForegroundColor") ?? Brushes.White,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             }
         };
     }
 
-    private void OptionChoosed(string selectedOption, ItemCollection options, Action<string> setAction)
+    private void OptionChoosed(string selectedOption, Func<bool, SolidColorBrush> ColorsOptions)
     {
-        foreach (MenuItem option in options)
+        foreach (MenuItem option in LanguageOptions)
         {
-            if (!option.Header.Equals(selectedOption))
-            {
-                if (option.Background != Brushes.White)
-                    option.Background = Brushes.White;
-            }
-            else option.Background = Brushes.MediumPurple;     
+            bool isSelected = option.Header.Equals(selectedOption);
+            option.Background = ColorsOptions(isSelected);
+            option.IsEnabled = !isSelected;
         }
-        setAction(selectedOption);
+
+        SettingsService.TryChangeCurrentLanguage(selectedOption);
+        OnPropertyChanged(nameof(LanguageOptions));
+    }
+
+    
+    [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
+    private void NavigateToTypeTest()
+    {
+        Navigation.TryNavigateTo<SearchArticlesViewModel>();
     }
 
     [RelayCommand]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
-    private void GoHome()
+    private async Task NavigateToRandomTypeTest()
     {
-        Navigation.TryNavigateTo<HomeViewModel>();
+        if (IsBusy) return;
+        IsBusy = true;
+
+        var pageInfoArgs = await DraftRandomPage();
+        
+        if (Navigation.CurrentView is not ChooseTextLengthViewModel)
+            Navigation.TryNavigateWithPageInfoArgs<ChooseTextLengthViewModel>(pageInfoArgs);
+        else
+        {
+            //if it's ChooseTextLengthViewModel just draft new random page
+            var chooseTextLengthViewModel = (ChooseTextLengthViewModel)Navigation.CurrentView;
+            await chooseTextLengthViewModel.LoadDataAsync();
+        }
+        IsBusy = false;
+    }
+
+    async Task<PageInfoArgs> DraftRandomPage()
+    {
+        PageInfoArgs pageInfoArgs;
+        SearchResult? wikipediaPageInfo;
+        string? content;
+        do
+        {
+            pageInfoArgs = new RandomPageInfoArgs(null, SettingsService.CurrentLanguage);
+            CurrentPageService.CurrentPageInfoArgs = pageInfoArgs;
+
+            (wikipediaPageInfo, content) = (await CurrentPageService.TryGetPageResult(), await CurrentPageService.TryGetPageContent());
+
+            if (wikipediaPageInfo == null || content == null)
+                continue;
+
+        } while (content!.Length < (int)TextLength.Short);
+
+        return new IdPageInfoArgs(wikipediaPageInfo!.Id, null, SettingsService.CurrentLanguage);
+    }
+
+    [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
+    private void NavigateToScoreboard()
+    {
+        Navigation.TryNavigateTo<ScoreboardViewModel>();
+    }
+
+    [RelayCommand]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
+    private void Quit()
+    {
+        Application.Current.Shutdown();
     }
 }

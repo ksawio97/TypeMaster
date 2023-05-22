@@ -27,6 +27,7 @@ public partial class TypeTestViewModel : AsyncViewModel
     INavigationService NavigationService { get; }
     CurrentPageService CurrentPageService { get; }
     WikipediaService WikipediaService { get; }
+    ColorsService ColorsService { get; }
 
     WikipediaPageInfo? CurrWikiPageInfo;
 
@@ -40,11 +41,12 @@ public partial class TypeTestViewModel : AsyncViewModel
     Timer Timer { get; }
     Stopwatch Stopwatch { get; }
 
-    public TypeTestViewModel(WikipediaService wikipediaService, INavigationService navigationService, CurrentPageService currentPageService)
+    public TypeTestViewModel(WikipediaService wikipediaService, INavigationService navigationService, CurrentPageService currentPageService, ColorsService colorsService)
     {
         NavigationService = navigationService;
         WikipediaService = wikipediaService;
         CurrentPageService = currentPageService;
+        ColorsService = colorsService;
 
         wordsCompleted = 0;
         currWord = 0;
@@ -71,7 +73,7 @@ public partial class TypeTestViewModel : AsyncViewModel
         await Task.Run(async () =>
         {
             SearchResult? CurrWikiPageResult;
-            (CurrWikiPageResult, string? content) = (await CurrentPageService.GetPageResult(), await CurrentPageService.TryGetPageContent(formatted: true, cutted: true));
+            (CurrWikiPageResult, string? content) = (await CurrentPageService.TryGetPageResult(), await CurrentPageService.TryGetPageContent(formatted: true, cutted: true));
 
             if (CurrWikiPageResult != null && content != null)
             {
@@ -91,9 +93,9 @@ public partial class TypeTestViewModel : AsyncViewModel
         });
         if(_wikiContent.Length != 0)
         {
-            SetInlines(this, new SetInlinesEventArgs(_wikiContent.Select(word => new Run(word) { Foreground = Brushes.Black })));
+            SetInlines(this, new SetInlinesEventArgs(_wikiContent.Select(word => new Run(word) { Foreground = ColorsService.TryGetColor("ForegroundColor") ?? Brushes.White })));
             SetCharLimit();
-            CheckCurrentWord("", wordsCompleted, (c1, c2) => Brushes.Black);
+            CheckCurrentWord("", wordsCompleted, (c1, c2) => ColorsService.TryGetColor("ForegroundColor") ?? Brushes.White);
         }
 
         IsBusy = false;
@@ -113,12 +115,12 @@ public partial class TypeTestViewModel : AsyncViewModel
                 WikipediaService.AddScore(CurrWikiPageInfo);         
             }
 
-            NavigationService.TryNavigateTo<HomeViewModel>();
+            NavigationService.TryNavigateTo<ScoreboardViewModel>();
             return;
         }
         else if (value == _wikiContent[wordsCompleted])
         {
-            ReplaceInlineAt(wordsCompleted, new[] { new CharStylePack(NewText: _wikiContent[wordsCompleted++], NewForeground: Brushes.Green) });
+            ReplaceInlineAt(wordsCompleted, new[] { new CharStylePack(NewText: _wikiContent[wordsCompleted++], NewForeground: ColorsService.TryGetColor("DarkCorrectColor") ?? Brushes.Green ) });
             currWord++;
             UserTypeInput = "";
             if (currWord != _wikiContent.Length)
@@ -145,7 +147,7 @@ public partial class TypeTestViewModel : AsyncViewModel
             startIndex += _wikiContent[currWord].Length;
             currWord++;
 
-            CheckCurrentWord("", currWord, (c1, c2) => Brushes.Black);
+            CheckCurrentWord("", currWord, (c1, c2) => ColorsService.TryGetColor("ForegroundColor") ?? Brushes.White);
         }
         //go one word back
         else if (startIndex > input.Length)
@@ -153,10 +155,10 @@ public partial class TypeTestViewModel : AsyncViewModel
             currWord--;
             startIndex -= _wikiContent[currWord].Length;
 
-            ReplaceInlineAt(currWord + 1, new[] { new CharStylePack(NewText: _wikiContent[currWord + 1], NewForeground: Brushes.Black) });
+            ReplaceInlineAt(currWord + 1, new[] { new CharStylePack(NewText: _wikiContent[currWord + 1], NewForeground: ColorsService.TryGetColor("ForegroundColor") ?? Brushes.White) });
         }
         //if types word he isnt supposed to type color is yellow
-        Func<char, char, SolidColorBrush> colorPick = currWord == wordsCompleted ? (c1, c2) => c1 == c2 ? Brushes.Green : Brushes.Red : (c1, c2) => Brushes.Yellow;
+        Func<char, char, SolidColorBrush> colorPick = currWord == wordsCompleted ? (c1, c2) => c1 == c2 ? ColorsService.TryGetColor("DarkCorrectColor") ?? Brushes.Green  : ColorsService.TryGetColor("DarkErrorColor") ?? Brushes.Yellow  : (c1, c2) => ColorsService.TryGetColor("DarkTypoColor") ?? Brushes.Yellow ;
         CheckCurrentWord(input[startIndex..], currWord, colorPick);
     }
 
@@ -169,7 +171,7 @@ public partial class TypeTestViewModel : AsyncViewModel
                 new CharStylePack(
                     NewText: character.ToString(),
                     NewForeground: index < colors.Length ? colors[index] : null,
-                    NewBackground: index == colors.Length ? Brushes.Purple : Brushes.Transparent,
+                    NewBackground: index == colors.Length ? ColorsService.TryGetColor("DarkBackgroundColor") ?? Brushes.Purple : Brushes.Transparent,
                     NewTextDecorations: character == ' ' && index >= colors.Length ? null : TextDecorations.Underline
                 )
         ).ToArray();
