@@ -8,10 +8,10 @@
                 <ResourceDictionary Source="ResourceDictionaries/Colors.xaml"/>
                 <ResourceDictionary Source="ResourceDictionaries/MenuButtonTheme.xaml"/>
                 <ResourceDictionary Source="ResourceDictionaries/DataTemplates.xaml"/>
-                <ResourceDictionary Source="ResourceDictionaries/WindowStyle.xaml"/>
                 <ResourceDictionary Source="ResourceDictionaries/PageStyle.xaml"/>
                 <ResourceDictionary Source="ResourceDictionaries/ButtonStyles.xaml"/>
                 <ResourceDictionary Source="ResourceDictionaries/TextBoxStyle.xaml"/>
+                <ResourceDictionary Source="ResourceDictionaries/DataGridStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

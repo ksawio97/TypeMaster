@@ -22,44 +22,46 @@
 
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
+                <RowDefinition Height="4*"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="8*"/>
+                <RowDefinition Height="32*"/>
             </Grid.RowDefinitions>
 
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="8*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="32*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="4*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
                 
-                <TextBox Grid.Column="0"
+                <TextBox Grid.Column="1"
                          Style="{StaticResource TextBoxStyle}"
-                         Text="{Binding SearchBoxText}"
-                         IsEnabled="{Binding IsNotBusy}">
+                         IsEnabled="{Binding IsNotBusy}"
+                         x:Name="SearchTextBox">
                     <behaviors:Interaction.Behaviors>
                         <mybehaviors:TextBoxBehavior WithSelection="True"/>
                     </behaviors:Interaction.Behaviors>
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Return" 
+                                    Command="{Binding SearchButtonClickedCommand}" 
+                                    CommandParameter="{Binding Text, ElementName=SearchTextBox}"/>
+                    </TextBox.InputBindings>
                 </TextBox>
-                
-                <Button Grid.Column="1"
-                        Content="Search"
+
+                <Button Grid.Column="3"
+                        Content=""   
+                        FontFamily="Segoe MDL2 Assets"
+                        Style="{StaticResource PurpleStyle}"
                         Command="{Binding SearchButtonClickedCommand}"
+                        CommandParameter="{Binding Text, ElementName=SearchTextBox}"
                         IsEnabled="{Binding IsNotBusy}"/>
             </Grid>
 
             <DataGrid 
-                Grid.Row="1"
-                CanUserSortColumns="True"
-                CanUserAddRows="False" 
-                CanUserDeleteRows="False"
-                CanUserResizeColumns="False" 
-                CanUserResizeRows="False" 
-                CanUserReorderColumns="False"
-                AutoGenerateColumns="False"
-                SelectionMode="Single"
-                SelectedItem="{Binding SelectedItem}"
-                IsReadOnly="True">
-
+                Grid.Row="2"
+                SelectedItem="{Binding SelectedItem}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Id"  Binding="{Binding Id}" Width="*"/>
                     <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*"/>

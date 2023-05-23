@@ -8,16 +8,7 @@
       Style="{StaticResource PageStyle}"
       Title="ScoreboardView">
     <Grid>
-        <DataGrid CanUserSortColumns="True"
-                  CanUserAddRows="False" 
-                  CanUserDeleteRows="False"
-                  CanUserResizeColumns="False" 
-                  CanUserResizeRows="False" 
-                  CanUserReorderColumns="False"
-                  AutoGenerateColumns="False"
-                  SelectionMode="Single"
-                  SelectedItem="{Binding SelectedItem}"
-                  IsReadOnly="True">
+        <DataGrid SelectedItem="{Binding SelectedItem}">
             
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Page ID"  Binding="{Binding Id}" Width="*"/>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.CodeDom;
 
 namespace TypeMaster.Service;
 
@@ -28,7 +27,6 @@ public class NavigationService : ObservableObject, INavigationService
     public NavigationService(Func<Type, BaseViewModel> viewModelFactory, CurrentPageService currentPageService)
     {
         ViewModelFactory = viewModelFactory;
-
         CurrentPageService = currentPageService;
     }
 

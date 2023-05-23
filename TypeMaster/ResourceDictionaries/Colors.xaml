@@ -24,4 +24,7 @@
 
     <SolidColorBrush x:Key="RedColor2" Color="#DF2E2E"/>
     <SolidColorBrush x:Key="RedColor3" Color="#FF8080"/>
+
+    <SolidColorBrush x:Key="PurpleColor2" Color="#643843"/>
+    <SolidColorBrush x:Key="PurpleColor3" Color="#99627A"/>
 </ResourceDictionary>

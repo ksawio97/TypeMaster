@@ -37,6 +37,7 @@ public partial class MainViewModel : AsyncViewModel
         Title = "TypeMaster";
         LanguageOptions = new ();
         SetContextMenuItems();
+        navigation.TryNavigateTo<SearchArticlesViewModel>();
     }
 
     private void SetContextMenuItems()

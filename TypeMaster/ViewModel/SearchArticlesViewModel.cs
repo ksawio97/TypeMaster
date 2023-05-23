@@ -8,13 +8,10 @@ namespace TypeMaster.ViewModel;
 partial class SearchArticlesViewModel : AsyncViewModel
 {
     [ObservableProperty]
-    IEnumerable<SearchResult> _results;
+    List<SearchResult> _results;
 
     [ObservableProperty]
     SearchResult _selectedItem;
-
-    [ObservableProperty]
-    string _searchBoxText;
 
     INavigationService Navigation { get; }
     WikipediaService WikipediaService { get; }
@@ -28,11 +25,12 @@ partial class SearchArticlesViewModel : AsyncViewModel
         WikipediaService = wikipediaService;
         SettingsService = settingsService;
         CurrentPageService = currentPageService;
+        Results = new();
     }
 
     [RelayCommand]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
-    private async Task SearchButtonClicked()
+    private async Task SearchButtonClicked(string searchBoxText)
     {
         if (IsBusy) return;
         IsBusy = true;
@@ -41,7 +39,7 @@ partial class SearchArticlesViewModel : AsyncViewModel
         List<SearchResult> filteredResults = new();
 
         //if it is id try show it
-        if (int.TryParse(SearchBoxText, out int id))
+        if (int.TryParse(searchBoxText, out int id))
         {
             CurrentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(id, null, SettingsService.CurrentLanguage);
 
@@ -51,7 +49,7 @@ partial class SearchArticlesViewModel : AsyncViewModel
         }
         else
         {
-            SearchResult[] rawResults = await WikipediaService.GetWikipediaSearchResultsAsync(SearchBoxText) ?? Array.Empty<SearchResult>();
+            SearchResult[] rawResults = await WikipediaService.GetWikipediaSearchResultsAsync(searchBoxText) ?? Array.Empty<SearchResult>();
 
             foreach (var element in rawResults)
             {
