@@ -54,7 +54,7 @@ namespace TypeMasterTests
         [Test]
         public async Task GetWikipediaSearchResultsTest()
         {
-            var result = await WikipediaService.GetWikipediaSearchResultsAsync("Dwayne Johnson", 5);
+            var result = await WikipediaService.GetWikipediaSearchResultsAsync("Dwayne Johnson", "en", 5);
 
             Assert.IsNotNull(result);
             Assert.True(result.Length > 0);

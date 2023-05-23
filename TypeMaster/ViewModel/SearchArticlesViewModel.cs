@@ -19,6 +19,8 @@ partial class SearchArticlesViewModel : AsyncViewModel
 
     CurrentPageService CurrentPageService { get; }
 
+    string? LastSearchLanguage;
+
     public SearchArticlesViewModel(INavigationService navigationService, WikipediaService wikipediaService, SettingsService settingsService, CurrentPageService currentPageService)
     {
         Navigation = navigationService;
@@ -37,11 +39,12 @@ partial class SearchArticlesViewModel : AsyncViewModel
 
         //filter results for only valid ones
         List<SearchResult> filteredResults = new();
+        LastSearchLanguage = SettingsService.CurrentLanguage;
 
         //if it is id try show it
         if (int.TryParse(searchBoxText, out int id))
         {
-            CurrentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(id, null, SettingsService.CurrentLanguage);
+            CurrentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(id, null, LastSearchLanguage);
 
             (SearchResult? result, string? formatedContent) = (await CurrentPageService.TryGetPageResult(), await CurrentPageService.TryGetPageContent(formatted: true));
             if (result != null && IsPageValid(formatedContent))
@@ -49,11 +52,11 @@ partial class SearchArticlesViewModel : AsyncViewModel
         }
         else
         {
-            SearchResult[] rawResults = await WikipediaService.GetWikipediaSearchResultsAsync(searchBoxText) ?? Array.Empty<SearchResult>();
+            SearchResult[] rawResults = await WikipediaService.GetWikipediaSearchResultsAsync(searchBoxText, LastSearchLanguage) ?? Array.Empty<SearchResult>();
 
             foreach (var element in rawResults)
             {
-                CurrentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(element.Id, null, SettingsService.CurrentLanguage);
+                CurrentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(element.Id, null, LastSearchLanguage);
 
                 string? formatedContent = await CurrentPageService.TryGetPageContent(formatted: true);
 
@@ -76,7 +79,7 @@ partial class SearchArticlesViewModel : AsyncViewModel
 
     void NavigateToChooseTextLengthViewModel(int id)
     {
-        var pageInfoArgs = new IdPageInfoArgs(id, null, SettingsService.CurrentLanguage);
+        var pageInfoArgs = new IdPageInfoArgs(id, null, LastSearchLanguage);
         Navigation.TryNavigateWithPageInfoArgs<ChooseTextLengthViewModel>(pageInfoArgs);
     }
 }

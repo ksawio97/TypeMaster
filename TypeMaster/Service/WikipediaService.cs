@@ -29,9 +29,9 @@ public partial class WikipediaService
         return await GetWikipediaPageInfoAsync(CurrentPageInfoArgs.GetUrl(), CurrentPageInfoArgs.Language);
     }
 
-    public async Task<SearchResult[]?> GetWikipediaSearchResultsAsync(string searchTitle, int resultLimit = 10)
+    public async Task<SearchResult[]?> GetWikipediaSearchResultsAsync(string searchTitle, string language, int resultLimit = 10)
     {
-        var url = $"https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&sroffset=0&srsearch={searchTitle}&srprop=&srinfo=&srlimit={resultLimit}";
+        var url = $"https://{language}.wikipedia.org/w/api.php?action=query&format=json&list=search&sroffset=0&srsearch={searchTitle}&srprop=&srinfo=&srlimit={resultLimit}";
         
         JToken? searchResults = null;
         using (HttpClient client = new HttpClient())
