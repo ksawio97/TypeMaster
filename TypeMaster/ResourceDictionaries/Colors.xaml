@@ -4,7 +4,7 @@
     <SolidColorBrush x:Key="TypoColor" Color="#F1C550"/>
     <SolidColorBrush x:Key="CorrectColor" Color="#A1C45A"/>
 
-    <SolidColorBrush x:Key="DarkErrorColor" Color="#FF1700"/>
+    <SolidColorBrush x:Key="DarkErrorColor" Color="#B70404"/>
     <SolidColorBrush x:Key="DarkTypoColor" Color="#FF8E00"/>
     <SolidColorBrush x:Key="DarkCorrectColor" Color="#379237"/>
 
@@ -12,5 +12,16 @@
     <SolidColorBrush x:Key="DarkBackgroundColor" Color="#22202f"/>
     
     <SolidColorBrush x:Key="ForegroundColor" Color="White"/>
-    
+
+    <SolidColorBrush x:Key="DarkBorderColor" Color="Black"/>
+    <SolidColorBrush x:Key="BorderColor" Color="White"/>
+
+    <SolidColorBrush x:Key="GreenColor2" Color="#82CD47"/>
+    <SolidColorBrush x:Key="GreenColor3" Color="#A6BB8D"/>
+
+    <SolidColorBrush x:Key="YellowColor2" Color="#F0FF42"/>
+    <SolidColorBrush x:Key="YellowColor3" Color="#FFE569"/>
+
+    <SolidColorBrush x:Key="RedColor2" Color="#DF2E2E"/>
+    <SolidColorBrush x:Key="RedColor3" Color="#FF8080"/>
 </ResourceDictionary>

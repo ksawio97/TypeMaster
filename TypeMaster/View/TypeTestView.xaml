@@ -53,11 +53,10 @@
             Grid.Column="1"
             MaxLines="1"
             SpellCheck.IsEnabled="False"
-            Foreground="{StaticResource ForegroundColor}"
+            Style="{StaticResource TextBoxStyle}"
             MaxLength="{Binding CharLimit}"
             IsEnabled="{Binding IsNotBusy}"
-            Text="{Binding UserTypeInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-            Background="Transparent">
+            Text="{Binding UserTypeInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
             <behaviors:Interaction.Behaviors>
                 <mybehaviors:TextBoxBehavior WithSelection="False"/>
             </behaviors:Interaction.Behaviors>
