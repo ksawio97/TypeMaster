@@ -24,10 +24,10 @@ public partial class TypeTestViewModel : AsyncViewModel
     public event EventHandler<InlinesElementChangedEventArgs> InlinesElementChanged;
     public event EventHandler<SetInlinesEventArgs> SetInlines;
 
-    INavigationService NavigationService { get; }
-    CurrentPageService CurrentPageService { get; }
-    WikipediaService WikipediaService { get; }
-    ColorsService ColorsService { get; }
+    readonly INavigationService NavigationService;
+    readonly CurrentPageService CurrentPageService;
+    readonly WikipediaService WikipediaService;
+    readonly ColorsService ColorsService;
 
     WikipediaPageInfo? CurrWikiPageInfo;
 
@@ -36,10 +36,10 @@ public partial class TypeTestViewModel : AsyncViewModel
 
     int currWord;
     int startIndex;
-    int MaxErrorCharsCount { get; }
+    readonly int MaxErrorCharsCount;
 
-    Timer Timer { get; }
-    Stopwatch Stopwatch { get; }
+    readonly Timer TimeToStart;
+    readonly Stopwatch ElapsedTypeTime;
 
     public TypeTestViewModel(WikipediaService wikipediaService, INavigationService navigationService, CurrentPageService currentPageService, ColorsService colorsService)
     {
@@ -53,12 +53,12 @@ public partial class TypeTestViewModel : AsyncViewModel
         startIndex = 0;
         MaxErrorCharsCount = 12;
 
-        Stopwatch = new Stopwatch();
-        Timer = new Timer(100)
+        ElapsedTypeTime = new Stopwatch();
+        TimeToStart = new Timer(100)
         {
             Enabled = false
         };
-        Timer.Elapsed += Timer_Elapsed;
+        TimeToStart.Elapsed += TimeToStart_Elapsed;
 
         _infoForUser = "Loading";
     }
@@ -82,8 +82,8 @@ public partial class TypeTestViewModel : AsyncViewModel
                 CurrWikiPageInfo = CurrentPageService.GetWikipediaPageInfo(_wikiContent.Length);
 
                 await CountDownAsync(3);
-                Timer.Enabled = true;
-                Stopwatch.Start();
+                TimeToStart.Enabled = true;
+                ElapsedTypeTime.Start();
             }
             else
             {
@@ -106,11 +106,11 @@ public partial class TypeTestViewModel : AsyncViewModel
         string v = value ?? "";
         if (wordsCompleted == _wikiContent.Length)
         {    
-            Stopwatch.Stop();
-            Timer.Enabled = false;
+            ElapsedTypeTime.Stop();
+            TimeToStart.Enabled = false;
             if (CurrWikiPageInfo != null)
             {
-                CurrWikiPageInfo.SecondsSpent = (int)Stopwatch.Elapsed.TotalSeconds;
+                CurrWikiPageInfo.SecondsSpent = (int)ElapsedTypeTime.Elapsed.TotalSeconds;
                 CurrWikiPageInfo.WPM = (int)((_wikiContent.Length / (double)CurrWikiPageInfo.SecondsSpent) * 60);
                 WikipediaService.AddScore(CurrWikiPageInfo);         
             }
@@ -194,11 +194,11 @@ public partial class TypeTestViewModel : AsyncViewModel
         }
     }
 
-    private void Timer_Elapsed(object? sender, ElapsedEventArgs e)
+    private void TimeToStart_Elapsed(object? sender, ElapsedEventArgs e)
     {
-        int minutes = (int)Stopwatch.Elapsed.TotalMinutes;
+        int minutes = (int)ElapsedTypeTime.Elapsed.TotalMinutes;
         string minutesText = minutes != 0 ? minutes.ToString() + ":" : "";
-        InfoForUser = $"Elapsed time: {minutesText}{Stopwatch.Elapsed.Seconds.ToString().PadLeft(2, '0')}";
+        InfoForUser = $"Elapsed time: {minutesText}{ElapsedTypeTime.Elapsed.Seconds.ToString().PadLeft(2, '0')}";
     }
 
     [GeneratedRegex(" {2,}")]

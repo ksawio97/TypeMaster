@@ -9,7 +9,7 @@ public class ColorsService
 
     public bool ContainsColor(string color) => ColorResourceDictionary.Contains(color);
 
-    ResourceDictionary ColorResourceDictionary { get; }
+    readonly ResourceDictionary ColorResourceDictionary;
 
     public ColorsService()
     {

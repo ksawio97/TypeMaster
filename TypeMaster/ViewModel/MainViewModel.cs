@@ -1,8 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Shapes;
 
@@ -19,12 +17,10 @@ public partial class MainViewModel : AsyncViewModel
     [ObservableProperty]
     List<MenuItem> _languageOptions;
 
-    LanguagesService LanguagesService { get; }
-    SettingsService SettingsService { get; }
-
-    CurrentPageService CurrentPageService { get; }
-
-    ColorsService ColorsService { get; }
+    readonly LanguagesService LanguagesService;
+    readonly SettingsService SettingsService;
+    readonly CurrentPageService CurrentPageService;
+    readonly ColorsService ColorsService;
 
     public MainViewModel(INavigationService navigation, LanguagesService languagesService, SettingsService settingsService, CurrentPageService currentPageService, ColorsService colorsService)
     {

@@ -29,9 +29,9 @@ public partial class CurrentPageService
 
     public string? Content { get; private set; }
 
-    WikipediaService WikipediaService { get; }
+    readonly WikipediaService WikipediaService;
 
-    LanguagesService LanguagesService { get; }
+    readonly LanguagesService LanguagesService;
 
     public CurrentPageService(WikipediaService wikipediaService, LanguagesService languagesService)
     {
@@ -117,7 +117,10 @@ public partial class CurrentPageService
 
     string CutPageContent(string content, TextLength textLength)
     {
-        return content[..((int)textLength - 3)] + "...";
+        content = content.TrimStart();
+        if (content.Length >= (int)textLength)
+            return (content[..((int)textLength - 3)] + "...");
+        return content.PadRight((int)textLength - content.Length, '.');
     }
 
 

@@ -10,9 +10,9 @@ namespace TypeMaster.Service;
 
 public partial class WikipediaService
 {
-    DataSaveLoadService DataSaveLoadService { get; }
+    readonly DataSaveLoadService DataSaveLoadService;
 
-    public HashSet<WikipediaPageInfo> Scores { get; private set; }
+    public readonly HashSet<WikipediaPageInfo> Scores;
 
     public WikipediaService(DataSaveLoadService dataSaveLoadService)
     {

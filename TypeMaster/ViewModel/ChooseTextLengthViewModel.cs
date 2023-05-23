@@ -17,8 +17,9 @@ partial class ChooseTextLengthViewModel : AsyncViewModel
 
     [ObservableProperty]
     string? wikiTitle;
-    INavigationService NavigationService { get; }
-    CurrentPageService CurrentPageService { get; }
+
+    readonly INavigationService NavigationService;
+    readonly CurrentPageService CurrentPageService;
 
     public ChooseTextLengthViewModel(INavigationService navigationService, CurrentPageService currentPageService)
     {

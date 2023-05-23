@@ -6,7 +6,7 @@ namespace TypeMaster.Service;
 
 public partial class LanguagesService : ObservableObject
 {
-    Dictionary<string, string> RegexMatchWordsInDiffrentLanguages { get; }
+    readonly Dictionary<string, string> RegexMatchWordsInDiffrentLanguages;
 
     public string[] AvailableLanguages => RegexMatchWordsInDiffrentLanguages.Keys.ToArray();
 

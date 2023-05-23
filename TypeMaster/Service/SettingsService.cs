@@ -4,9 +4,9 @@ namespace TypeMaster.Service;
 
 public class SettingsService
 {
-    LanguagesService LanguagesService { get; }
+    readonly LanguagesService LanguagesService;
 
-    public Settings Settings { get; private set; }
+    readonly public Settings Settings;
 
     public string CurrentLanguage => Settings.CurrentLanguage;
 

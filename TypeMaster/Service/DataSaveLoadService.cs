@@ -12,8 +12,9 @@ namespace TypeMaster.Service
         private readonly string WikipediaPageInfosFilePath;
         private readonly string SettingsFilePath;
 
-        CryptographyService CryptographyService { get; }
-        public Dictionary<Type, string> SavableData { get; }
+        readonly CryptographyService CryptographyService;
+
+        public readonly Dictionary<Type, string> SavableData;
 
         public DataSaveLoadService(CryptographyService cryptographyService)
         {
@@ -42,12 +43,12 @@ namespace TypeMaster.Service
 
         public T? GetData<T>()
         {
-            if (!CheckIfPathExisted() || !File.Exists(WikipediaPageInfosFilePath) || !SavableData.TryGetValue(typeof(T), out string path))
+            if (!CheckIfPathExisted() || !File.Exists(WikipediaPageInfosFilePath) || !SavableData.TryGetValue(typeof(T), out string? path))
                 return default;
             
             try
             {
-                using (StreamReader sr = new StreamReader(path))
+                using (StreamReader sr = new StreamReader(path!))
                 {
                     string encryptedJson = sr.ReadToEnd();
                     string json = CryptographyService.Decrypt(encryptedJson);

@@ -13,11 +13,12 @@ partial class SearchArticlesViewModel : AsyncViewModel
     [ObservableProperty]
     SearchResult _selectedItem;
 
-    INavigationService Navigation { get; }
-    WikipediaService WikipediaService { get; }
-    SettingsService SettingsService { get; }
+    readonly INavigationService Navigation;
 
-    CurrentPageService CurrentPageService { get; }
+    readonly WikipediaService WikipediaService;
+    readonly SettingsService SettingsService;
+
+    readonly CurrentPageService CurrentPageService;
 
     string? LastSearchLanguage;
 

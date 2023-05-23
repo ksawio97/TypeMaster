@@ -16,7 +16,7 @@ public class NavigationService : ObservableObject, INavigationService
 
     private BaseViewModel _currentView;
 
-    private CurrentPageService CurrentPageService { get; }
+    readonly CurrentPageService CurrentPageService;
 
     public BaseViewModel CurrentView
     {
