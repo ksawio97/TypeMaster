@@ -43,7 +43,11 @@ public class TextBoxBehavior : DynamicFontBehavior<TextBox>
     private void AssociatedObject_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         if (grid != null && IsDifferenceBigEnough(e))
-            AssociatedObject.FontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), e.NewSize.Width * e.NewSize.Height, AssociatedObject.Text.Length, e.NewSize);
+        {
+            var newFont = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), e.NewSize.Width * e.NewSize.Height, AssociatedObject.Text.Length, e.NewSize);
+            AssociatedObject.FontSize = newFont <= 0 ? 1 : newFont;
+
+        }
     }
 
     public void CheckFocus(bool textBoxEnabled)

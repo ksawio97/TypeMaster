@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-namespace TypeMaster.View
+﻿namespace TypeMaster.View
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
