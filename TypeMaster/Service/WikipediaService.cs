@@ -10,15 +10,15 @@ namespace TypeMaster.Service;
 
 public partial class WikipediaService
 {
-    readonly DataSaveLoadService DataSaveLoadService;
+    readonly DataSaveLoadService _dataSaveLoadService;
 
     public readonly HashSet<WikipediaPageInfo> Scores;
 
     public WikipediaService(DataSaveLoadService dataSaveLoadService)
     {
-        DataSaveLoadService = dataSaveLoadService;
+        _dataSaveLoadService = dataSaveLoadService;
 
-        Scores = DataSaveLoadService.GetData<HashSet<WikipediaPageInfo>>() ?? new ();
+        Scores = _dataSaveLoadService.GetData<HashSet<WikipediaPageInfo>>() ?? new ();
     }
 
     public async Task<(SearchResult?, string?)> TryGetWikipediaPageInfoAsync(PageInfoArgs CurrentPageInfoArgs)

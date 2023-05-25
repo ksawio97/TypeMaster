@@ -5,7 +5,7 @@ namespace TypeMaster.DataModels;
 public abstract class PageInfoArgs
 {
     public TextLength? ProvidedTextLength { get; set; }
-    public string Language { get; }
+    public readonly string Language;
 
     protected PageInfoArgs(TextLength? providedTextLength, string language)
     {

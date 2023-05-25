@@ -2,16 +2,16 @@ namespace TypeMasterTests
 {
     public class WikipediaServiceTests
     {
-        WikipediaService WikipediaService;
-        LanguagesService LanguagesService;
-        CurrentPageService CurrentPageService;
+        WikipediaService _wikipediaService;
+        LanguagesService _languagesService;
+        CurrentPageService _currentPageService;
         [SetUp]
         public void Setup()
         {
-            LanguagesService = new LanguagesService();
+            _languagesService = new LanguagesService();
             var saveLoadService = new DataSaveLoadService(new CryptographyService());
-            WikipediaService = new WikipediaService(saveLoadService);
-            CurrentPageService = new CurrentPageService(WikipediaService, LanguagesService);
+            _wikipediaService = new WikipediaService(saveLoadService);
+            _currentPageService = new CurrentPageService(_wikipediaService, _languagesService);
         }
 
         [Test]
@@ -21,7 +21,7 @@ namespace TypeMasterTests
             TextLength textLength = TextLength.Medium;
 
             var args = new RandomPageInfoArgs(textLength, lang);
-            (SearchResult? info, string? content) = await WikipediaService.TryGetWikipediaPageInfoAsync(args);
+            (SearchResult? info, string? content) = await _wikipediaService.TryGetWikipediaPageInfoAsync(args);
             Assert.IsTrue(info != null && content != null);
         }
 
@@ -31,13 +31,13 @@ namespace TypeMasterTests
             string lang = "en";
             TextLength textLength = TextLength.Short;
             PageInfoArgs args = new RandomPageInfoArgs(textLength, lang);
-            CurrentPageService.CurrentPageInfoArgs = args;
+            _currentPageService.CurrentPageInfoArgs = args;
 
-            (SearchResult? info, string? content) = await WikipediaService.TryGetWikipediaPageInfoAsync(args);
+            (SearchResult? info, string? content) = await _wikipediaService.TryGetWikipediaPageInfoAsync(args);
             Assert.IsTrue(info != null && content != null);
 
             args = new IdPageInfoArgs(info.Id, null, lang);
-            (SearchResult? info2, string? content2) = await WikipediaService.TryGetWikipediaPageInfoAsync(args);
+            (SearchResult? info2, string? content2) = await _wikipediaService.TryGetWikipediaPageInfoAsync(args);
             Assert.True(info.IsEqualTo(info2));
             Assert.That(content, Is.EqualTo(content2));
         }
@@ -45,16 +45,16 @@ namespace TypeMasterTests
         [Test]
         public void AddScoreTest()
         {
-            int oldCount = WikipediaService.Scores.Count;
+            int oldCount = _wikipediaService.Scores.Count;
             var wikipediaPageInfo = new WikipediaPageInfo();
-            WikipediaService.AddScore(wikipediaPageInfo);
-            Assert.That(oldCount + 1, Is.EqualTo(WikipediaService.Scores.Count));
-            Assert.True(WikipediaService.Scores.Contains(wikipediaPageInfo));
+            _wikipediaService.AddScore(wikipediaPageInfo);
+            Assert.That(oldCount + 1, Is.EqualTo(_wikipediaService.Scores.Count));
+            Assert.True(_wikipediaService.Scores.Contains(wikipediaPageInfo));
         }
         [Test]
         public async Task GetWikipediaSearchResultsTest()
         {
-            var result = await WikipediaService.GetWikipediaSearchResultsAsync("Dwayne Johnson", "en", 5);
+            var result = await _wikipediaService.GetWikipediaSearchResultsAsync("Dwayne Johnson", "en", 5);
 
             Assert.IsNotNull(result);
             Assert.True(result.Length > 0);

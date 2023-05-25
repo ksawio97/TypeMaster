@@ -12,23 +12,23 @@ public partial class MainViewModel : AsyncViewModel
     string? _title;
 
     [ObservableProperty]
-    INavigationService _navigation;
+    INavigationService _navigationService;
 
     [ObservableProperty]
     List<MenuItem> _languageOptions;
 
-    readonly LanguagesService LanguagesService;
-    readonly SettingsService SettingsService;
-    readonly CurrentPageService CurrentPageService;
-    readonly ColorsService ColorsService;
+    readonly LanguagesService _languagesService;
+    readonly SettingsService _settingsService;
+    readonly CurrentPageService _currentPageService;
+    readonly ColorsService _colorsService;
 
     public MainViewModel(INavigationService navigation, LanguagesService languagesService, SettingsService settingsService, CurrentPageService currentPageService, ColorsService colorsService)
     {
-        LanguagesService = languagesService;
-        SettingsService = settingsService;
-        CurrentPageService = currentPageService;
-        Navigation = navigation;
-        ColorsService = colorsService;
+        _languagesService = languagesService;
+        _settingsService = settingsService;
+        _currentPageService = currentPageService;
+        _navigationService = navigation;
+        _colorsService = colorsService;
 
         Title = "TypeMaster";
         LanguageOptions = new ();
@@ -38,13 +38,13 @@ public partial class MainViewModel : AsyncViewModel
 
     private void SetContextMenuItems()
     {
-        foreach (string option in LanguagesService.AvailableLanguages)
-            LanguageOptions.Add(CreateOption(option, SettingsService.CurrentLanguage == option));
+        foreach (string option in _languagesService.AvailableLanguages)
+            LanguageOptions.Add(CreateOption(option, _settingsService.CurrentLanguage == option));
     }
 
     private MenuItem CreateOption(string option, bool isSelected)
     {
-        SolidColorBrush ColorsOptions(bool selected) => selected ? ColorsService.TryGetColor("DarkBackgroundColor") ?? Brushes.MediumPurple : ColorsService.TryGetColor("BackgroundColor") ?? Brushes.Purple;
+        SolidColorBrush ColorsOptions(bool selected) => selected ? _colorsService.TryGetColor("DarkBackgroundColor") ?? Brushes.MediumPurple : _colorsService.TryGetColor("BackgroundColor") ?? Brushes.Purple;
         return new MenuItem
         {
             Header = option,
@@ -53,11 +53,11 @@ public partial class MainViewModel : AsyncViewModel
             VerticalContentAlignment = VerticalAlignment.Center,
             IsEnabled = !isSelected,
             Background = ColorsOptions(isSelected),
-            Foreground = ColorsService.TryGetColor("ForegroundColor") ?? Brushes.White,
+            Foreground = _colorsService.TryGetColor("ForegroundColor") ?? Brushes.White,
             Icon = new Path
             {
                 Data = Geometry.Parse("M -2,-2 L 2,-2 L 2,2 L -2,2 Z"),
-                Fill = ColorsService.TryGetColor("ForegroundColor") ?? Brushes.White,
+                Fill = _colorsService.TryGetColor("ForegroundColor") ?? Brushes.White,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             }
@@ -73,7 +73,7 @@ public partial class MainViewModel : AsyncViewModel
             option.IsEnabled = !isSelected;
         }
 
-        SettingsService.TryChangeCurrentLanguage(selectedOption);
+        _settingsService.TryChangeCurrentLanguage(selectedOption);
         OnPropertyChanged(nameof(LanguageOptions));
     }
 
@@ -82,7 +82,7 @@ public partial class MainViewModel : AsyncViewModel
     [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private void NavigateToTypeTest()
     {
-        Navigation.TryNavigateTo<SearchArticlesViewModel>();
+        _navigationService.TryNavigateTo<SearchArticlesViewModel>();
     }
 
     [RelayCommand]
@@ -94,12 +94,12 @@ public partial class MainViewModel : AsyncViewModel
 
         var pageInfoArgs = await DraftRandomPage();
         
-        if (Navigation.CurrentView is not ChooseTextLengthViewModel)
-            Navigation.TryNavigateWithPageInfoArgs<ChooseTextLengthViewModel>(pageInfoArgs);
+        if (_navigationService.CurrentView is not ChooseTextLengthViewModel)
+            _navigationService.TryNavigateWithPageInfoArgs<ChooseTextLengthViewModel>(pageInfoArgs);
         else
         {
             //if it's ChooseTextLengthViewModel just draft new random page
-            var chooseTextLengthViewModel = (ChooseTextLengthViewModel)Navigation.CurrentView;
+            var chooseTextLengthViewModel = (ChooseTextLengthViewModel)_navigationService.CurrentView;
             await chooseTextLengthViewModel.LoadDataAsync();
         }
         IsBusy = false;
@@ -112,24 +112,24 @@ public partial class MainViewModel : AsyncViewModel
         string? content;
         do
         {
-            pageInfoArgs = new RandomPageInfoArgs(null, SettingsService.CurrentLanguage);
-            CurrentPageService.CurrentPageInfoArgs = pageInfoArgs;
+            pageInfoArgs = new RandomPageInfoArgs(null, _settingsService.CurrentLanguage);
+            _currentPageService.CurrentPageInfoArgs = pageInfoArgs;
 
-            (wikipediaPageInfo, content) = (await CurrentPageService.TryGetPageResult(), await CurrentPageService.TryGetPageContent());
+            (wikipediaPageInfo, content) = (await _currentPageService.TryGetPageResult(), await _currentPageService.TryGetPageContent());
 
             if (wikipediaPageInfo == null || content == null)
                 continue;
 
         } while (content!.Length < (int)TextLength.Short);
 
-        return new IdPageInfoArgs(wikipediaPageInfo!.Id, null, SettingsService.CurrentLanguage);
+        return new IdPageInfoArgs(wikipediaPageInfo!.Id, null, _settingsService.CurrentLanguage);
     }
 
     [RelayCommand]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private void NavigateToScoreboard()
     {
-        Navigation.TryNavigateTo<ScoreboardViewModel>();
+        _navigationService.TryNavigateTo<ScoreboardViewModel>();
     }
 
     [RelayCommand]

@@ -13,21 +13,21 @@ partial class SearchArticlesViewModel : AsyncViewModel
     [ObservableProperty]
     SearchResult _selectedItem;
 
-    readonly INavigationService Navigation;
+    readonly INavigationService _navigationService;
 
-    readonly WikipediaService WikipediaService;
-    readonly SettingsService SettingsService;
+    readonly WikipediaService _wikipediaService;
+    readonly SettingsService _settingsService;
 
-    readonly CurrentPageService CurrentPageService;
+    readonly CurrentPageService _currentPageService;
 
-    string? LastSearchLanguage;
+    string? _lastSearchLanguage;
 
     public SearchArticlesViewModel(INavigationService navigationService, WikipediaService wikipediaService, SettingsService settingsService, CurrentPageService currentPageService)
     {
-        Navigation = navigationService;
-        WikipediaService = wikipediaService;
-        SettingsService = settingsService;
-        CurrentPageService = currentPageService;
+        _navigationService = navigationService;
+        _wikipediaService = wikipediaService;
+        _settingsService = settingsService;
+        _currentPageService = currentPageService;
         Results = new();
     }
 
@@ -40,26 +40,26 @@ partial class SearchArticlesViewModel : AsyncViewModel
 
         //filter results for only valid ones
         List<SearchResult> filteredResults = new();
-        LastSearchLanguage = SettingsService.CurrentLanguage;
+        _lastSearchLanguage = _settingsService.CurrentLanguage;
 
         //if it is id try show it
         if (int.TryParse(searchBoxText, out int id))
         {
-            CurrentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(id, null, LastSearchLanguage);
+            _currentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(id, null, _lastSearchLanguage);
 
-            (SearchResult? result, string? formatedContent) = (await CurrentPageService.TryGetPageResult(), await CurrentPageService.TryGetPageContent(formatted: true));
+            (SearchResult? result, string? formatedContent) = (await _currentPageService.TryGetPageResult(), await _currentPageService.TryGetPageContent(formatted: true));
             if (result != null && IsPageValid(formatedContent))
                 filteredResults.Add(result);
         }
         else
         {
-            SearchResult[] rawResults = await WikipediaService.GetWikipediaSearchResultsAsync(searchBoxText, LastSearchLanguage) ?? Array.Empty<SearchResult>();
+            SearchResult[] rawResults = await _wikipediaService.GetWikipediaSearchResultsAsync(searchBoxText, _lastSearchLanguage) ?? Array.Empty<SearchResult>();
 
             foreach (var element in rawResults)
             {
-                CurrentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(element.Id, null, LastSearchLanguage);
+                _currentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(element.Id, null, _lastSearchLanguage);
 
-                string? formatedContent = await CurrentPageService.TryGetPageContent(formatted: true);
+                string? formatedContent = await _currentPageService.TryGetPageContent(formatted: true);
 
                 if (IsPageValid(formatedContent))
                     filteredResults.Add(element);
@@ -67,7 +67,7 @@ partial class SearchArticlesViewModel : AsyncViewModel
         }
 
         Results = filteredResults;
-        CurrentPageService.CurrentPageInfoArgs = null;
+        _currentPageService.CurrentPageInfoArgs = null;
         IsBusy = false;
     }
 
@@ -80,7 +80,7 @@ partial class SearchArticlesViewModel : AsyncViewModel
 
     void NavigateToChooseTextLengthViewModel(int id)
     {
-        var pageInfoArgs = new IdPageInfoArgs(id, null, LastSearchLanguage);
-        Navigation.TryNavigateWithPageInfoArgs<ChooseTextLengthViewModel>(pageInfoArgs);
+        var pageInfoArgs = new IdPageInfoArgs(id, null, _lastSearchLanguage);
+        _navigationService.TryNavigateWithPageInfoArgs<ChooseTextLengthViewModel>(pageInfoArgs);
     }
 }

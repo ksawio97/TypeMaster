@@ -5,22 +5,22 @@ namespace TypeMaster.Service;
 
 public class ColorsService
 {
-    public ICollection<string> Colors => (ICollection<string>)ColorResourceDictionary.Keys;
+    public ICollection<string> Colors => (ICollection<string>)_colorResourceDictionary.Keys;
 
-    public bool ContainsColor(string color) => ColorResourceDictionary.Contains(color);
+    public bool ContainsColor(string color) => _colorResourceDictionary.Contains(color);
 
-    readonly ResourceDictionary ColorResourceDictionary;
+    readonly ResourceDictionary _colorResourceDictionary;
 
     public ColorsService()
     {
-        ColorResourceDictionary = new ResourceDictionary();
-        ColorResourceDictionary.Source = new Uri("../ResourceDictionaries/Colors.xaml", UriKind.Relative);
+        _colorResourceDictionary = new ResourceDictionary();
+        _colorResourceDictionary.Source = new Uri("../ResourceDictionaries/Colors.xaml", UriKind.Relative);
     }
 
     public SolidColorBrush? TryGetColor(string key)
     {
         if(ContainsColor(key))
-            return (SolidColorBrush)ColorResourceDictionary[key];
+            return (SolidColorBrush)_colorResourceDictionary[key];
         return null;
     }
 }

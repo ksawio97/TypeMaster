@@ -9,17 +9,17 @@ partial class ScoreboardViewModel : BaseViewModel
     [ObservableProperty]
     WikipediaPageInfo _selectedItem;
 
-    INavigationService Navigation { get; }
+    INavigationService _navigationService { get; }
 
     public ScoreboardViewModel(INavigationService navigation, WikipediaService wikipediaService)
     {
         Scores = wikipediaService.Scores ?? new HashSet<WikipediaPageInfo>();
-        Navigation = navigation;
+        _navigationService = navigation;
     }
 
     partial void OnSelectedItemChanged(WikipediaPageInfo value)
     {
         var pageInfoArgs = new IdPageInfoArgs(value.Id, value.ProvidedTextLength, value.Language);
-        Navigation.TryNavigateWithPageInfoArgs<TypeTestViewModel>(pageInfoArgs);
+        _navigationService.TryNavigateWithPageInfoArgs<TypeTestViewModel>(pageInfoArgs);
     }
 }

@@ -2,8 +2,8 @@
 
 public class TitlebarResizeButtonBehavior : ResizingButtonBehavior
 {
-    string minimalizeIcon = "";
-    string maximalizeIcon = "";
+    string _minimalizeIcon = "";
+    string _maximalizeIcon = "";
 
     protected override void OnAttached()
     {
@@ -24,7 +24,7 @@ public class TitlebarResizeButtonBehavior : ResizingButtonBehavior
     {
         //works if fontfamily is Segoe MDL2 Assets
         if(AssociatedObject.FontFamily.FamilyNames.Values.Contains("Segoe MDL2 Assets"))
-            AssociatedObject.Content = Application.Current.MainWindow.WindowState == WindowState.Maximized ? minimalizeIcon : maximalizeIcon;
+            AssociatedObject.Content = Application.Current.MainWindow.WindowState == WindowState.Maximized ? _minimalizeIcon : _maximalizeIcon;
     }
 
     private void AssociatedObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

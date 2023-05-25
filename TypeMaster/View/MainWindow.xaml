@@ -124,7 +124,7 @@
         
         <Frame Grid.Row="1"
             Grid.Column="1"
-            Content="{Binding Path=Navigation.CurrentView}"
+            Content="{Binding Path=NavigationService.CurrentView}"
             NavigationUIVisibility="Hidden"/>
     </Grid>
 </Window>

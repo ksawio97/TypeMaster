@@ -6,15 +6,15 @@ namespace TypeMaster.Service;
 
 public partial class LanguagesService : ObservableObject
 {
-    readonly Dictionary<string, string> RegexMatchWordsInDiffrentLanguages;
+    readonly Dictionary<string, string> _regexMatchWordsInDiffrentLanguages;
 
-    public string[] AvailableLanguages => RegexMatchWordsInDiffrentLanguages.Keys.ToArray();
+    public string[] AvailableLanguages => _regexMatchWordsInDiffrentLanguages.Keys.ToArray();
 
-    public bool IsInAvailableLanguages(string language) => RegexMatchWordsInDiffrentLanguages.ContainsKey(language);
+    public bool IsInAvailableLanguages(string language) => _regexMatchWordsInDiffrentLanguages.ContainsKey(language);
 
     public LanguagesService()
     {
-        RegexMatchWordsInDiffrentLanguages = new Dictionary<string, string>
+        _regexMatchWordsInDiffrentLanguages = new Dictionary<string, string>
         {
             { "en", "(?:\\w*[^\\x00-\\x7F]+\\w*)" },
             { "pl", "(?:\\w*[^\\x00-\\x7FĄąĆćĘęŁłŃńÓóŚśŹźŻż]+\\w*)" },
@@ -24,7 +24,7 @@ public partial class LanguagesService : ObservableObject
 
     public string FilterTextByLanguage(string inputText, string language)
     {
-        if (RegexMatchWordsInDiffrentLanguages.TryGetValue(language, out string regexPattern))
+        if (_regexMatchWordsInDiffrentLanguages.TryGetValue(language, out string regexPattern))
         {
             string filteredText = Regex.Replace(inputText, regexPattern, "");
 

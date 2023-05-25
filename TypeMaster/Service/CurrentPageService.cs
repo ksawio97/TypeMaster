@@ -16,7 +16,7 @@ public partial class CurrentPageService
 
         set
         {
-            WikipediaPageResult = null;
+            _wikipediaPageResult = null;
             Content = null;
 
             _currentPageInfoArgs = value;
@@ -25,27 +25,27 @@ public partial class CurrentPageService
 
     public bool IsCurrentPageInfoArgsNull => CurrentPageInfoArgs == null;
 
-    SearchResult? WikipediaPageResult { get; set; }
+    SearchResult? _wikipediaPageResult { get; set; }
 
     public string? Content { get; private set; }
 
-    readonly WikipediaService WikipediaService;
+    readonly WikipediaService _wikipediaService;
 
-    readonly LanguagesService LanguagesService;
+    readonly LanguagesService _languagesService;
 
     public CurrentPageService(WikipediaService wikipediaService, LanguagesService languagesService)
     {
-        WikipediaService = wikipediaService;
-        LanguagesService = languagesService;
+        _wikipediaService = wikipediaService;
+        _languagesService = languagesService;
     }
 
     public async Task<SearchResult?> TryGetPageResult()
     {
-        if (!WikipediaPageResult.IsNullOrEmpty())
-            return WikipediaPageResult;
+        if (!_wikipediaPageResult.IsNullOrEmpty())
+            return _wikipediaPageResult;
 
         if (await TrySetPageInfoAndContent())
-            return WikipediaPageResult;
+            return _wikipediaPageResult;
 
         return null;
     }
@@ -81,13 +81,13 @@ public partial class CurrentPageService
 
     public WikipediaPageInfo? GetWikipediaPageInfo(int wordsCount, int wpm = 0, int secondsSpent = 0)
     {
-        if (WikipediaPageResult.IsNullOrEmpty() || CurrentPageInfoArgs == null || CurrentPageInfoArgs.ProvidedTextLength == null || wordsCount <= 0)
+        if (_wikipediaPageResult.IsNullOrEmpty() || CurrentPageInfoArgs == null || CurrentPageInfoArgs.ProvidedTextLength == null || wordsCount <= 0)
             return null;
 
         return new WikipediaPageInfo
         {
-            Id = WikipediaPageResult!.Id,
-            Title = WikipediaPageResult!.Title,
+            Id = _wikipediaPageResult!.Id,
+            Title = _wikipediaPageResult!.Title,
             WPM = wpm,
             SecondsSpent = secondsSpent,
             Words = wordsCount,
@@ -101,14 +101,14 @@ public partial class CurrentPageService
         if (CurrentPageInfoArgs == null)
             return false;
 
-        (WikipediaPageResult, Content) = await WikipediaService.TryGetWikipediaPageInfoAsync(CurrentPageInfoArgs);
+        (_wikipediaPageResult, Content) = await _wikipediaService.TryGetWikipediaPageInfoAsync(CurrentPageInfoArgs);
 
-        return !(WikipediaPageResult == null || Content == null);
+        return !(_wikipediaPageResult == null || Content == null);
     }
 
     string FormatPageContent(string content, string language)
     {
-        content = LanguagesService.FilterTextByLanguage(content, language);
+        content = _languagesService.FilterTextByLanguage(content, language);
         content = content.Replace("\n", " ");
         content = TwoOrMoreSpaces().Replace(content, " ").ToString();
 

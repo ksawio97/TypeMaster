@@ -4,21 +4,21 @@ namespace TypeMaster.Service;
 
 public class SettingsService
 {
-    readonly LanguagesService LanguagesService;
+    readonly LanguagesService _languagesService;
 
-    readonly public Settings Settings;
+    readonly public Settings _settings;
 
-    public string CurrentLanguage => Settings.CurrentLanguage;
+    public string CurrentLanguage => _settings.CurrentLanguage;
 
     public SettingsService(DataSaveLoadService dataSaveLoadService, LanguagesService languagesService)
     {
-        Settings = dataSaveLoadService.GetData<Settings>() ?? new Settings { CurrentLanguage = "en" };
-        LanguagesService = languagesService;
+        _settings = dataSaveLoadService.GetData<Settings>() ?? new Settings { CurrentLanguage = "en" };
+        _languagesService = languagesService;
     }
 
     public void TryChangeCurrentLanguage(string language)
     {
-        if (LanguagesService.IsInAvailableLanguages(language) && language != Settings.CurrentLanguage)
-            Settings.CurrentLanguage = language;
+        if (_languagesService.IsInAvailableLanguages(language) && language != _settings.CurrentLanguage)
+            _settings.CurrentLanguage = language;
     }
 }

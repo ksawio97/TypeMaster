@@ -16,7 +16,7 @@ public class NavigationService : ObservableObject, INavigationService
 
     private BaseViewModel _currentView;
 
-    readonly CurrentPageService CurrentPageService;
+    readonly CurrentPageService _currentPageService;
 
     public BaseViewModel CurrentView
     {
@@ -27,12 +27,12 @@ public class NavigationService : ObservableObject, INavigationService
     public NavigationService(Func<Type, BaseViewModel> viewModelFactory, CurrentPageService currentPageService)
     {
         ViewModelFactory = viewModelFactory;
-        CurrentPageService = currentPageService;
+        _currentPageService = currentPageService;
     }
 
     public bool TryNavigateTo<TViewModel>() where TViewModel : BaseViewModel
     {            
-        if (CurrentView is TViewModel || (typeof(TViewModel) == typeof(TypeTestViewModel) && CurrentPageService.IsCurrentPageInfoArgsNull))
+        if (CurrentView is TViewModel || (typeof(TViewModel) == typeof(TypeTestViewModel) && _currentPageService.IsCurrentPageInfoArgsNull))
             return false;
         var viewmodel = ViewModelFactory.Invoke(typeof(TViewModel));
         CurrentView = viewmodel;
@@ -41,7 +41,7 @@ public class NavigationService : ObservableObject, INavigationService
 
     public bool TryNavigateWithPageInfoArgs<TViewModel>(PageInfoArgs pageInfoArgs) where TViewModel : BaseViewModel
     {
-        CurrentPageService.CurrentPageInfoArgs = pageInfoArgs;
+        _currentPageService.CurrentPageInfoArgs = pageInfoArgs;
         return TryNavigateTo<TViewModel>();
     }
 }

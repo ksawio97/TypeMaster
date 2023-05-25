@@ -8,34 +8,34 @@ namespace TypeMaster.Service
 {
     public class DataSaveLoadService
     {
-        private readonly string FolderPath;
-        private readonly string WikipediaPageInfosFilePath;
-        private readonly string SettingsFilePath;
+        private readonly string _folderPath;
+        private readonly string _wikipediaPageInfosFilePath;
+        private readonly string _settingsFilePath;
 
-        readonly CryptographyService CryptographyService;
+        readonly CryptographyService _cryptographyService;
 
         public readonly Dictionary<Type, string> SavableData;
 
         public DataSaveLoadService(CryptographyService cryptographyService)
         {
-            CryptographyService = cryptographyService;
+            _cryptographyService = cryptographyService;
 
-            FolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TypeMaster");
-            WikipediaPageInfosFilePath = Path.Combine(FolderPath, "data.json.enc");
-            SettingsFilePath = Path.Combine(FolderPath, "settings.json.enc");
+            _folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TypeMaster");
+            _wikipediaPageInfosFilePath = Path.Combine(_folderPath, "data.json.enc");
+            _settingsFilePath = Path.Combine(_folderPath, "settings.json.enc");
 
             SavableData = new Dictionary<Type, string>
             {
-                {typeof(HashSet<WikipediaPageInfo>), WikipediaPageInfosFilePath},
-                {typeof(Settings), SettingsFilePath}
+                {typeof(HashSet<WikipediaPageInfo>), _wikipediaPageInfosFilePath},
+                {typeof(Settings), _settingsFilePath}
             };
         }
 
         private bool CheckIfPathExisted()
         {
-            if (!Directory.Exists(FolderPath))
+            if (!Directory.Exists(_folderPath))
             {
-                Directory.CreateDirectory(FolderPath);
+                Directory.CreateDirectory(_folderPath);
                 return false;
             }
             return true;
@@ -43,7 +43,7 @@ namespace TypeMaster.Service
 
         public T? GetData<T>()
         {
-            if (!CheckIfPathExisted() || !File.Exists(WikipediaPageInfosFilePath) || !SavableData.TryGetValue(typeof(T), out string? path))
+            if (!CheckIfPathExisted() || !File.Exists(_wikipediaPageInfosFilePath) || !SavableData.TryGetValue(typeof(T), out string? path))
                 return default;
             
             try
@@ -51,7 +51,7 @@ namespace TypeMaster.Service
                 using (StreamReader sr = new StreamReader(path!))
                 {
                     string encryptedJson = sr.ReadToEnd();
-                    string json = CryptographyService.Decrypt(encryptedJson);
+                    string json = _cryptographyService.Decrypt(encryptedJson);
 
                     return JsonConvert.DeserializeObject<T>(json);
                 }
@@ -72,7 +72,7 @@ namespace TypeMaster.Service
             try
             {
                 string json = JsonConvert.SerializeObject(data);
-                string encryptedJson = CryptographyService.Encrypt(json);
+                string encryptedJson = _cryptographyService.Encrypt(json);
                 if(!File.Exists(path))
                     File.Create(path).Close();
                 using (StreamWriter sw = new StreamWriter(path, false))

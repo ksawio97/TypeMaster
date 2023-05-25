@@ -7,30 +7,28 @@ namespace TypeMaster.ViewModel;
 partial class ChooseTextLengthViewModel : AsyncViewModel
 {
     [ObservableProperty]
-    ButtonBindableArgs shortButtonBindableArgs;
+    ButtonBindableArgs _shortButtonBindableArgs;
 
     [ObservableProperty]
-    ButtonBindableArgs mediumButtonBindableArgs;
+    ButtonBindableArgs _mediumButtonBindableArgs;
 
     [ObservableProperty]
-    ButtonBindableArgs longButtonBindableArgs;
+    ButtonBindableArgs _longButtonBindableArgs;
 
     [ObservableProperty]
-    string? wikiTitle;
+    string? _wikiTitle;
 
-    readonly INavigationService NavigationService;
-    readonly CurrentPageService CurrentPageService;
+    readonly INavigationService _navigationService;
+    readonly CurrentPageService _currentPageService;
 
     public ChooseTextLengthViewModel(INavigationService navigationService, CurrentPageService currentPageService)
     {
-        NavigationService = navigationService;
-        CurrentPageService = currentPageService;
+        _navigationService = navigationService;
+        _currentPageService = currentPageService;
 
         ShortButtonBindableArgs = new ButtonBindableArgs { IsEnabled = false, RepresentedLength = TextLength.Short };
         MediumButtonBindableArgs = new ButtonBindableArgs { IsEnabled = false, RepresentedLength = TextLength.Medium };
         LongButtonBindableArgs = new ButtonBindableArgs { IsEnabled = false, RepresentedLength = TextLength.Long };
-
-        //CheckIfCanBeEnabled(0);
     }
 
     [RelayCommand]
@@ -39,10 +37,10 @@ partial class ChooseTextLengthViewModel : AsyncViewModel
         if (IsBusy) return;
         IsBusy = true;
 
-        string? content = await CurrentPageService.TryGetPageContent(formatted: true);
+        string? content = await _currentPageService.TryGetPageContent(formatted: true);
         if (content != null)
         {
-            WikiTitle = (await CurrentPageService.TryGetPageResult())?.Title;
+            WikiTitle = (await _currentPageService.TryGetPageResult())?.Title;
             CheckIfCanBeEnabled(content.Length);
         }
         else
@@ -56,8 +54,8 @@ partial class ChooseTextLengthViewModel : AsyncViewModel
     [RelayCommand]
     void NavigateToTypeTest(TextLength textLength)
     {
-        CurrentPageService.CurrentPageInfoArgs!.ProvidedTextLength = textLength;
-        NavigationService.TryNavigateTo<TypeTestViewModel>();
+        _currentPageService.CurrentPageInfoArgs!.ProvidedTextLength = textLength;
+        _navigationService.TryNavigateTo<TypeTestViewModel>();
     }
 
     void CheckIfCanBeEnabled(int length)

@@ -6,7 +6,7 @@ namespace TypeMaster.DataModels;
 
 public class SetInlinesEventArgs : EventArgs
 {
-    public IEnumerable<Inline> Inlines { get; }
+    public readonly IEnumerable<Inline> Inlines;
 
     public SetInlinesEventArgs(IEnumerable<Inline> Inlines)
     {

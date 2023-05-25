@@ -54,7 +54,7 @@ namespace TypeMaster
             var settingsService = _serviceProvider.GetRequiredService<SettingsService>();
 
             dataSaveLoadService.SaveData(wikipediaService.Scores);
-            dataSaveLoadService.SaveData(settingsService.Settings);
+            dataSaveLoadService.SaveData(settingsService._settings);
 
             base.OnExit(e);
         }

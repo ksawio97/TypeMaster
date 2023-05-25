@@ -5,21 +5,21 @@ namespace TypeMaster.Behaviors;
 
 public class InlinesBindingBehavior : DynamicFontBehavior<TextBlock>
 {
-    readonly double maxFontSize;
+    readonly double _maxFontSize;
 
     double NewFontSize
     {
         set
         {
-            if (value <= maxFontSize)
+            if (value <= _maxFontSize)
                 AssociatedObject.FontSize = value;
             else
-                AssociatedObject.FontSize = maxFontSize;
+                AssociatedObject.FontSize = _maxFontSize;
         }
     }
     public InlinesBindingBehavior()
     {
-        maxFontSize = 60;
+        _maxFontSize = 60;
     }
 
     protected override void OnAttached()

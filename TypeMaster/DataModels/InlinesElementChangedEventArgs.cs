@@ -4,8 +4,8 @@ namespace TypeMaster.DataModels;
 
 public class InlinesElementChangedEventArgs : EventArgs
 {
-    public int OldInlineIndex { get; }
-    public CharStylePack[] NewInlineStyles { get; }
+    public readonly int OldInlineIndex;
+    public readonly CharStylePack[] NewInlineStyles;
 
     public InlinesElementChangedEventArgs(int OldInlineIndex, CharStylePack[] NewInlineStyles)
     {
