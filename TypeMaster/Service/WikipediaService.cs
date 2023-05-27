@@ -17,8 +17,7 @@ public partial class WikipediaService
     public WikipediaService(DataSaveLoadService dataSaveLoadService)
     {
         _dataSaveLoadService = dataSaveLoadService;
-
-        Scores = _dataSaveLoadService.GetData<HashSet<WikipediaPageInfo>>() ?? new ();
+        Scores = new HashSet<WikipediaPageInfo>();
     }
 
     public async Task<(SearchResult?, string?)> TryGetWikipediaPageInfoAsync(PageInfoArgs CurrentPageInfoArgs)
@@ -128,5 +127,22 @@ public partial class WikipediaService
             wikipediaPageInfoInScores.WPM = wikipediaPageInfo.WPM;
             wikipediaPageInfoInScores.SecondsSpent = wikipediaPageInfo.SecondsSpent;
         }
+    }
+
+    public async Task GetScoresDataAsync(bool safly = false)
+    {
+        var scores = await _dataSaveLoadService.GetDataAsync<HashSet<WikipediaPageInfo>>();
+
+        if (scores != null)
+            foreach (var score in scores)
+                if (safly)
+                    AddScore(score);
+                else
+                    Scores.Add(score);
+    }
+
+    public async Task SaveScoresDataAsync()
+    {
+        await _dataSaveLoadService.SaveDataAsync(Scores);
     }
 }

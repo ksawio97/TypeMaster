@@ -39,7 +39,7 @@
                 <TextBlock Text="TypeMaster"/>
             </Viewbox>
 
-            <Button Background="Transparent"
+            <Button Opacity="0"
                     Style="{StaticResource TitlebarStyle}"
                     FontFamily="Segoe UI">
                 <behaviors:Interaction.Behaviors>

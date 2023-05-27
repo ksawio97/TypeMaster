@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using TypeMaster.Service;
 
 namespace TypeMaster
 {
@@ -39,22 +40,27 @@ namespace TypeMaster
             _serviceProvider = services.BuildServiceProvider();
         }
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
+            var wikipediaService = _serviceProvider.GetRequiredService<WikipediaService>();
+            var settingsService = _serviceProvider.GetRequiredService<SettingsService>();
+
+            await settingsService.GetSettingsDataAsync();
+            await wikipediaService.GetScoresDataAsync();
+
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
 
             base.OnStartup(e);
         }
 
-        protected override void OnExit(ExitEventArgs e)
+        protected override async void OnExit(ExitEventArgs e)
         {
-            var dataSaveLoadService = _serviceProvider.GetRequiredService<DataSaveLoadService>();
             var wikipediaService = _serviceProvider.GetRequiredService<WikipediaService>();
             var settingsService = _serviceProvider.GetRequiredService<SettingsService>();
 
-            dataSaveLoadService.SaveData(wikipediaService.Scores);
-            dataSaveLoadService.SaveData(settingsService._settings);
+            await settingsService.SaveSettingsDataAsync();
+            await wikipediaService.SaveScoresDataAsync();
 
             base.OnExit(e);
         }
