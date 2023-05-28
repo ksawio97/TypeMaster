@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using System.Windows.Shapes;
 
@@ -89,7 +90,7 @@ public partial class MainViewModel : AsyncViewModel
     [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private async Task NavigateToRandomTypeTest()
     {
-        if (IsBusy) return;
+        if (!NetworkInterface.GetIsNetworkAvailable() || IsBusy) return;
         IsBusy = true;
 
         var pageInfoArgs = await DraftRandomPage();
@@ -107,6 +108,7 @@ public partial class MainViewModel : AsyncViewModel
 
     async Task<PageInfoArgs> DraftRandomPage()
     {
+        if (!NetworkInterface.GetIsNetworkAvailable()) return;
         PageInfoArgs pageInfoArgs;
         SearchResult? wikipediaPageInfo;
         string? content;

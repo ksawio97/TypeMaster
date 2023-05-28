@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AsyncAwaitBestPractices;
+using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading.Tasks;
 using TypeMaster.Service;
 
 namespace TypeMaster
@@ -46,7 +48,6 @@ namespace TypeMaster
             var settingsService = _serviceProvider.GetRequiredService<SettingsService>();
 
             await settingsService.GetSettingsDataAsync();
-            await wikipediaService.GetScoresDataAsync();
 
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
@@ -59,8 +60,8 @@ namespace TypeMaster
             var wikipediaService = _serviceProvider.GetRequiredService<WikipediaService>();
             var settingsService = _serviceProvider.GetRequiredService<SettingsService>();
 
-            await settingsService.SaveSettingsDataAsync();
-            await wikipediaService.SaveScoresDataAsync();
+            settingsService.SaveSettingsDataAsync().SafeFireAndForget();
+            wikipediaService.SaveScoresDataAsync().SafeFireAndForget();
 
             base.OnExit(e);
         }

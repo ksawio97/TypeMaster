@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,7 +28,7 @@ namespace TypeMaster.Service
 
             SavableData = new Dictionary<Type, string>
             {
-                {typeof(HashSet<WikipediaPageInfo>), _wikipediaPageInfosFilePath},
+                {typeof(List<WikipediaPageInfo>), _wikipediaPageInfosFilePath},
                 {typeof(Settings), _settingsFilePath}
             };
         }
@@ -85,6 +86,42 @@ namespace TypeMaster.Service
             {
                 Debug.WriteLine(ex.Message);
             }
+        }
+
+        public async IAsyncEnumerable<T> GetDataCollectionAsync<T>()
+        {
+            if (!CheckIfPathExisted() || !File.Exists(_wikipediaPageInfosFilePath))
+                yield break;
+
+            string encryptedJson;
+            try
+            {
+                using (StreamReader reader = new StreamReader(_wikipediaPageInfosFilePath))
+                {
+                    encryptedJson = await reader.ReadToEndAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                yield break;
+            }
+
+            string decryptedJson = _cryptographyService.Decrypt(encryptedJson);
+            using (JsonTextReader jsonReader = new JsonTextReader(new StringReader(decryptedJson)))
+            {
+                T? pageInfo;
+                while (jsonReader.Read())
+                {
+                    if (jsonReader.TokenType == JsonToken.StartObject)
+                    {
+                        JObject obj = await JObject.LoadAsync(jsonReader);
+                        if ( (pageInfo = JsonConvert.DeserializeObject<T>(obj.ToString())) != null)
+                            yield return pageInfo;
+                    }
+                }
+            }
+            yield break;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace TypeMaster.ViewModel;
@@ -8,10 +9,9 @@ namespace TypeMaster.ViewModel;
 partial class SearchArticlesViewModel : AsyncViewModel
 {
     [ObservableProperty]
-    List<SearchResult> _results;
-
-    [ObservableProperty]
     SearchResult _selectedItem;
+
+    public ObservableCollection<SearchResult> Results { get; }
 
     readonly INavigationService _navigationService;
 
@@ -39,7 +39,7 @@ partial class SearchArticlesViewModel : AsyncViewModel
         IsBusy = true;
 
         //filter results for only valid ones
-        List<SearchResult> filteredResults = new();
+        Results.Clear();
         _lastSearchLanguage = _settingsService.CurrentLanguage;
 
         //if it is id try show it
@@ -49,7 +49,7 @@ partial class SearchArticlesViewModel : AsyncViewModel
 
             (SearchResult? result, string? formatedContent) = (await _currentPageService.TryGetPageResult(), await _currentPageService.TryGetPageContent(formatted: true));
             if (result != null && IsPageValid(formatedContent))
-                filteredResults.Add(result);
+                Results.Add(result);
         }
         else
         {
@@ -62,11 +62,11 @@ partial class SearchArticlesViewModel : AsyncViewModel
                 string? formatedContent = await _currentPageService.TryGetPageContent(formatted: true);
 
                 if (IsPageValid(formatedContent))
-                    filteredResults.Add(element);
+                    Results.Add(element);
             }
         }
 
-        Results = filteredResults;
+        //Results = filteredResults;
         _currentPageService.CurrentPageInfoArgs = null;
         IsBusy = false;
     }
@@ -80,7 +80,7 @@ partial class SearchArticlesViewModel : AsyncViewModel
 
     void NavigateToChooseTextLengthViewModel(int id)
     {
-        var pageInfoArgs = new IdPageInfoArgs(id, null, _lastSearchLanguage);
+        var pageInfoArgs = new IdPageInfoArgs(id, null, _lastSearchLanguage!);
         _navigationService.TryNavigateWithPageInfoArgs<ChooseTextLengthViewModel>(pageInfoArgs);
     }
 }

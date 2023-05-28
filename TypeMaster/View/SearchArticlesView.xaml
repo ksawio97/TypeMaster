@@ -61,7 +61,8 @@
 
             <DataGrid 
                 Grid.Row="2"
-                SelectedItem="{Binding SelectedItem}">
+                SelectedItem="{Binding SelectedItem}"
+                >
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Id"  Binding="{Binding Id}" Width="*"/>
                     <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*"/>

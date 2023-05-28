@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
 namespace TypeMaster.Service;
@@ -12,17 +13,16 @@ public partial class WikipediaService
 {
     readonly DataSaveLoadService _dataSaveLoadService;
 
-    public readonly HashSet<WikipediaPageInfo> Scores;
-
+    readonly List<WikipediaPageInfo> _pendingScores;
     public WikipediaService(DataSaveLoadService dataSaveLoadService)
     {
         _dataSaveLoadService = dataSaveLoadService;
-        Scores = new HashSet<WikipediaPageInfo>();
+        _pendingScores = new ();
     }
 
     public async Task<(SearchResult?, string?)> TryGetWikipediaPageInfoAsync(PageInfoArgs CurrentPageInfoArgs)
     {
-        if (CurrentPageInfoArgs == null)
+        if (CurrentPageInfoArgs == null || !NetworkInterface.GetIsNetworkAvailable())
             return (null, null);
 
         return await GetWikipediaPageInfoAsync(CurrentPageInfoArgs.GetUrl(), CurrentPageInfoArgs.Language);
@@ -30,6 +30,9 @@ public partial class WikipediaService
 
     public async Task<SearchResult[]?> GetWikipediaSearchResultsAsync(string searchTitle, string language, int resultLimit = 10)
     {
+        if (!NetworkInterface.GetIsNetworkAvailable())
+            return null;
+
         var url = $"https://{language}.wikipedia.org/w/api.php?action=query&format=json&list=search&sroffset=0&srsearch={searchTitle}&srprop=&srinfo=&srlimit={resultLimit}";
         
         JToken? searchResults = null;
@@ -41,7 +44,7 @@ public partial class WikipediaService
                 JObject json = JObject.Parse(response);
                 searchResults = json?["query"]?["search"];
             }
-            catch (NullReferenceException ex)
+            catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
             }
@@ -71,6 +74,9 @@ public partial class WikipediaService
     private async Task<(SearchResult?, string?)> GetWikipediaPageInfoAsync(string url, string language)
     {
         JToken? pages = await GetWikipediaPagesFromUrl(url);
+        if (pages == null)
+            return (null, null);
+
         try
         {
             JToken? page = pages?.First?.First();
@@ -88,7 +94,7 @@ public partial class WikipediaService
                 return (pageInfo, content);
             }
         }
-        catch (NullReferenceException ex)
+        catch (Exception ex)
         {
             Debug.WriteLine(ex.Message);
         }
@@ -97,6 +103,9 @@ public partial class WikipediaService
 
     private async Task<JToken?> GetWikipediaPagesFromUrl(string url)
     {
+        if (!NetworkInterface.GetIsNetworkAvailable())
+            return null;
+
         JToken? pages = null;
         using (HttpClient client = new HttpClient())
         {
@@ -106,7 +115,7 @@ public partial class WikipediaService
                 JObject json = JObject.Parse(response);
                 pages = json["query"]?["pages"];
             }
-            catch (NullReferenceException ex)
+            catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
             }
@@ -116,10 +125,10 @@ public partial class WikipediaService
 
     public void AddScore(WikipediaPageInfo wikipediaPageInfo)
     {
-        WikipediaPageInfo wikipediaPageInfoInScores = Scores.FirstOrDefault(element => element.Id == wikipediaPageInfo.Id, wikipediaPageInfo);
-        if (wikipediaPageInfo == wikipediaPageInfoInScores)
+        WikipediaPageInfo? wikipediaPageInfoInScores = _pendingScores.Find(element => element.Id == wikipediaPageInfo.Id);
+        if (wikipediaPageInfoInScores == null)
         {
-            Scores.Add(wikipediaPageInfo);
+            _pendingScores.Add(wikipediaPageInfo);
             return;
         }
         if(wikipediaPageInfoInScores.SecondsSpent < wikipediaPageInfo.SecondsSpent)
@@ -129,20 +138,31 @@ public partial class WikipediaService
         }
     }
 
-    public async Task GetScoresDataAsync(bool safly = false)
+    public async IAsyncEnumerable<WikipediaPageInfo> GetScoresDataAsync()
     {
-        var scores = await _dataSaveLoadService.GetDataAsync<HashSet<WikipediaPageInfo>>();
-
-        if (scores != null)
-            foreach (var score in scores)
-                if (safly)
-                    AddScore(score);
-                else
-                    Scores.Add(score);
+        await foreach(var score in _dataSaveLoadService.GetDataCollectionAsync<WikipediaPageInfo>())
+        {
+            var simillarPage = _pendingScores.Find(element => element.Id == score.Id);
+            if (simillarPage == null || score.SecondsSpent < simillarPage.SecondsSpent)
+                yield return score;
+            else
+                yield return simillarPage;
+        }
+        yield break;
     }
 
     public async Task SaveScoresDataAsync()
     {
-        await _dataSaveLoadService.SaveDataAsync(Scores);
+        var scores = await _dataSaveLoadService.GetDataAsync<List<WikipediaPageInfo>>();
+        foreach(var pendingScore in _pendingScores)
+        {
+            var simillarPage = _pendingScores.Find(element => element.Id == pendingScore.Id);
+            if (simillarPage != null && pendingScore.SecondsSpent < simillarPage.SecondsSpent)
+            {
+                pendingScore.WPM = simillarPage.WPM;
+                pendingScore.SecondsSpent = simillarPage.SecondsSpent;
+            }
+        }
+        await _dataSaveLoadService.SaveDataAsync(scores);
     }
 }
