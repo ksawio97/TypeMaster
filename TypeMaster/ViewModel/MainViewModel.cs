@@ -108,7 +108,6 @@ public partial class MainViewModel : AsyncViewModel
 
     async Task<PageInfoArgs> DraftRandomPage()
     {
-        if (!NetworkInterface.GetIsNetworkAvailable()) return;
         PageInfoArgs pageInfoArgs;
         SearchResult? wikipediaPageInfo;
         string? content;
