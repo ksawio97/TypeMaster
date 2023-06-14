@@ -43,15 +43,6 @@ namespace TypeMasterTests
         }
 
         [Test]
-        public void AddScoreTest()
-        {
-            int oldCount = _wikipediaService.Scores.Count;
-            var wikipediaPageInfo = new WikipediaPageInfo();
-            _wikipediaService.AddScore(wikipediaPageInfo);
-            Assert.That(oldCount + 1, Is.EqualTo(_wikipediaService.Scores.Count));
-            Assert.True(_wikipediaService.Scores.Contains(wikipediaPageInfo));
-        }
-        [Test]
         public async Task GetWikipediaSearchResultsTest()
         {
             var result = await _wikipediaService.GetWikipediaSearchResultsAsync("Dwayne Johnson", "en", 5);

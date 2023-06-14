@@ -1,7 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
 namespace TypeMaster.ViewModel;
@@ -16,12 +14,14 @@ partial class ScoreboardViewModel : AsyncViewModel
     INavigationService _navigationService { get; }
 
     readonly WikipediaService _wikipediaService;
+    readonly NetworkAvailabilityService _networkAvailabilityService;
 
-    public ScoreboardViewModel(INavigationService navigation, WikipediaService wikipediaService)
+    public ScoreboardViewModel(INavigationService navigation, WikipediaService wikipediaService, NetworkAvailabilityService networkAvailabilityService)
     {
         Scores = new ();
         _navigationService = navigation;
         _wikipediaService = wikipediaService;
+        _networkAvailabilityService = networkAvailabilityService;
     }
 
     [RelayCommand]
@@ -39,7 +39,7 @@ partial class ScoreboardViewModel : AsyncViewModel
 
     partial void OnSelectedItemChanged(WikipediaPageInfo value)
     {
-        if (!NetworkInterface.GetIsNetworkAvailable())
+        if (!_networkAvailabilityService.CheckAvailability())
             return;
         var pageInfoArgs = new IdPageInfoArgs(value.Id, value.ProvidedTextLength, value.Language);
         _navigationService.TryNavigateWithPageInfoArgs<TypeTestViewModel>(pageInfoArgs);

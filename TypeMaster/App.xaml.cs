@@ -37,6 +37,7 @@ namespace TypeMaster
             services.AddSingleton<SettingsService>();
             services.AddSingleton<CurrentPageService>();
             services.AddSingleton<ColorsService>();
+            services.AddSingleton<NetworkAvailabilityService>();
 
             services.AddSingleton<Func<Type, BaseViewModel>>(serviceProvider => viewModelType => (BaseViewModel)serviceProvider.GetRequiredService(viewModelType));
             _serviceProvider = services.BuildServiceProvider();

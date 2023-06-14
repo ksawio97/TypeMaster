@@ -8,17 +8,17 @@ public class TitlebarMinimalizeButtonBehavior : Behavior<Button>
     {
         base.OnAttached();
 
-        AssociatedObject.PreviewMouseLeftButtonDown += AssociatedObject_PreviewMouseLeftButtonDown;
+        AssociatedObject.PreviewMouseLeftButtonUp += AssociatedObject_PreviewMouseLeftButtonUp;
     }
 
     protected override void OnDetaching()
     {
         base.OnDetaching();
 
-        AssociatedObject.PreviewMouseLeftButtonDown -= AssociatedObject_PreviewMouseLeftButtonDown;
+        AssociatedObject.PreviewMouseLeftButtonUp -= AssociatedObject_PreviewMouseLeftButtonUp;
     }
 
-    private void AssociatedObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private void AssociatedObject_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         Application.Current.MainWindow.WindowState = WindowState.Minimized;
     }

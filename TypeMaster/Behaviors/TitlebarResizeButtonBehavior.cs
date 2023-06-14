@@ -9,15 +9,20 @@ public class TitlebarResizeButtonBehavior : ResizingButtonBehavior
     {
         base.OnAttached();
 
-        AssociatedObject.PreviewMouseLeftButtonDown += AssociatedObject_PreviewMouseLeftButtonDown;
+        AssociatedObject.PreviewMouseLeftButtonUp += AssociatedObject_PreviewMouseLeftButtonUp;
         Application.Current.MainWindow.StateChanged += MainWindow_StateChanged;
+    }
+
+    private void AssociatedObject_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        ResizeWindow();
     }
 
     protected override void OnDetaching()
     {
         base.OnDetaching();
 
-        AssociatedObject.PreviewMouseLeftButtonDown -= AssociatedObject_PreviewMouseLeftButtonDown;
+        AssociatedObject.PreviewMouseLeftButtonUp -= AssociatedObject_PreviewMouseLeftButtonUp;
     }
 
     private void MainWindow_StateChanged(object? sender, System.EventArgs e)
@@ -25,10 +30,5 @@ public class TitlebarResizeButtonBehavior : ResizingButtonBehavior
         //works if fontfamily is Segoe MDL2 Assets
         if(AssociatedObject.FontFamily.FamilyNames.Values.Contains("Segoe MDL2 Assets"))
             AssociatedObject.Content = Application.Current.MainWindow.WindowState == WindowState.Maximized ? _minimalizeIcon : _maximalizeIcon;
-    }
-
-    private void AssociatedObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        ResizeWindow();
     }
 }

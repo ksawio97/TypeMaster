@@ -2,7 +2,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Documents;
@@ -200,7 +199,4 @@ public partial class TypeTestViewModel : AsyncViewModel
         string minutesText = minutes != 0 ? minutes.ToString() + ":" : "";
         InfoForUser = $"Elapsed time: {minutesText}{_elapsedTypeTime.Elapsed.Seconds.ToString().PadLeft(2, '0')}";
     }
-
-    [GeneratedRegex(" {2,}")]
-    private partial Regex TwoOrMoreSpaces();
 }

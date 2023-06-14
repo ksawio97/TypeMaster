@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using System.Windows.Shapes;
 
@@ -22,14 +21,16 @@ public partial class MainViewModel : AsyncViewModel
     readonly SettingsService _settingsService;
     readonly CurrentPageService _currentPageService;
     readonly ColorsService _colorsService;
+    readonly NetworkAvailabilityService _networkAvailabilityService;
 
-    public MainViewModel(INavigationService navigation, LanguagesService languagesService, SettingsService settingsService, CurrentPageService currentPageService, ColorsService colorsService)
+    public MainViewModel(INavigationService navigation, LanguagesService languagesService, SettingsService settingsService, CurrentPageService currentPageService, ColorsService colorsService, NetworkAvailabilityService networkAvailabilityService)
     {
         _languagesService = languagesService;
         _settingsService = settingsService;
         _currentPageService = currentPageService;
         _navigationService = navigation;
         _colorsService = colorsService;
+        _networkAvailabilityService = networkAvailabilityService;
 
         Title = "TypeMaster";
         LanguageOptions = new ();
@@ -90,23 +91,26 @@ public partial class MainViewModel : AsyncViewModel
     [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "It is used to generate RelayCommand")]
     private async Task NavigateToRandomTypeTest()
     {
-        if (!NetworkInterface.GetIsNetworkAvailable() || IsBusy) return;
+        if (IsBusy || !_networkAvailabilityService.CheckAvailability()) return;
         IsBusy = true;
 
-        var pageInfoArgs = await DraftRandomPage();
-        
-        if (_navigationService.CurrentView is not ChooseTextLengthViewModel)
-            _navigationService.TryNavigateWithPageInfoArgs<ChooseTextLengthViewModel>(pageInfoArgs);
+        var pageInfoArgs = await TryDraftRandomPage();
+
+        if (pageInfoArgs != null)
+            if (_navigationService.CurrentView is not ChooseTextLengthViewModel)
+                _navigationService.TryNavigateWithPageInfoArgs<ChooseTextLengthViewModel>(pageInfoArgs);
+            else
+            {
+                //if it's ChooseTextLengthViewModel just draft new random page
+                var chooseTextLengthViewModel = (ChooseTextLengthViewModel)_navigationService.CurrentView;
+                await chooseTextLengthViewModel.LoadDataAsync();
+            }
         else
-        {
-            //if it's ChooseTextLengthViewModel just draft new random page
-            var chooseTextLengthViewModel = (ChooseTextLengthViewModel)_navigationService.CurrentView;
-            await chooseTextLengthViewModel.LoadDataAsync();
-        }
+            _networkAvailabilityService.CheckAvailability();
         IsBusy = false;
     }
 
-    async Task<PageInfoArgs> DraftRandomPage()
+    async Task<PageInfoArgs?> TryDraftRandomPage()
     {
         PageInfoArgs pageInfoArgs;
         SearchResult? wikipediaPageInfo;
@@ -119,7 +123,7 @@ public partial class MainViewModel : AsyncViewModel
             (wikipediaPageInfo, content) = (await _currentPageService.TryGetPageResult(), await _currentPageService.TryGetPageContent());
 
             if (wikipediaPageInfo == null || content == null)
-                continue;
+                return null;
 
         } while (content!.Length < (int)TextLength.Short);
 

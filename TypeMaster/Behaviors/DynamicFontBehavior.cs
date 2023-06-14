@@ -1,8 +1,6 @@
 ﻿using Microsoft.Xaml.Behaviors;
-using System.Globalization;
-using System.Windows.Media;
-using System.Windows;
 using System;
+using System.Globalization;
 
 namespace TypeMaster.Behaviors;
 

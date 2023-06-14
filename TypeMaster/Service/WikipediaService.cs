@@ -4,25 +4,26 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
-using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
 namespace TypeMaster.Service;
 
 public partial class WikipediaService
 {
-    readonly DataSaveLoadService _dataSaveLoadService;
-
     readonly List<WikipediaPageInfo> _pendingScores;
-    public WikipediaService(DataSaveLoadService dataSaveLoadService)
+
+    readonly DataSaveLoadService _dataSaveLoadService;
+    readonly NetworkAvailabilityService _networkAvailabilityService;
+    public WikipediaService(DataSaveLoadService dataSaveLoadService, NetworkAvailabilityService networkAvailabilityService)
     {
         _dataSaveLoadService = dataSaveLoadService;
+        _networkAvailabilityService = networkAvailabilityService;
         _pendingScores = new ();
     }
 
     public async Task<(SearchResult?, string?)> TryGetWikipediaPageInfoAsync(PageInfoArgs CurrentPageInfoArgs)
     {
-        if (CurrentPageInfoArgs == null || !NetworkInterface.GetIsNetworkAvailable())
+        if (CurrentPageInfoArgs == null || !_networkAvailabilityService.CheckAvailability())
             return (null, null);
 
         return await GetWikipediaPageInfoAsync(CurrentPageInfoArgs.GetUrl(), CurrentPageInfoArgs.Language);
@@ -30,7 +31,7 @@ public partial class WikipediaService
 
     public async Task<SearchResult[]?> GetWikipediaSearchResultsAsync(string searchTitle, string language, int resultLimit = 10)
     {
-        if (!NetworkInterface.GetIsNetworkAvailable())
+        if (!_networkAvailabilityService.CheckAvailability())
             return null;
 
         var url = $"https://{language}.wikipedia.org/w/api.php?action=query&format=json&list=search&sroffset=0&srsearch={searchTitle}&srprop=&srinfo=&srlimit={resultLimit}";
@@ -103,7 +104,7 @@ public partial class WikipediaService
 
     private async Task<JToken?> GetWikipediaPagesFromUrl(string url)
     {
-        if (!NetworkInterface.GetIsNetworkAvailable())
+        if (!_networkAvailabilityService.CheckAvailability())
             return null;
 
         JToken? pages = null;
