@@ -120,7 +120,7 @@ public partial class MainViewModel : AsyncViewModel
             pageInfoArgs = new RandomPageInfoArgs(null, _settingsService.CurrentLanguage);
             _currentPageService.CurrentPageInfoArgs = pageInfoArgs;
 
-            (wikipediaPageInfo, content) = (await _currentPageService.TryGetPageResult(), await _currentPageService.TryGetPageContent());
+            (wikipediaPageInfo, content) = (await _currentPageService.TryGetPageResult(), await _currentPageService.TryGetPageContent(formatted: true));
 
             if (wikipediaPageInfo == null || content == null)
                 return null;

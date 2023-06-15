@@ -28,7 +28,7 @@ public class DynamicFontBehavior<T> : Behavior<T> where T : FrameworkElement
         Size characterSize = CalculateCharSize(fontSize, fontFamily, dpi);
         double oldCharSize = characterSize.Width * characterSize.Height;
         double idealCharSize = boxSize / (textLength == 0 ? 1 : textLength);
-        double newFontSize = oldCharSize <= idealCharSize ? fontSize : 1;
+        double newFontSize = 1;
 
         while ((characterSize = CalculateCharSize(newFontSize, fontFamily, dpi)).Width < containerSize.Width && characterSize.Height < containerSize.Height && characterSize.Width * characterSize.Height < idealCharSize)
             newFontSize += 1;

@@ -89,36 +89,36 @@
             </Grid.RowDefinitions>
             
             <RadioButton Content="Play"
-                         Style="{StaticResource MenuButtonTheme}"
-                         Command="{Binding NavigateToTypeTestCommand}"/>
+                         Style="{StaticResource MenuRadioButtonTheme}"
+                         Command="{Binding NavigateToTypeTestCommand}"
+                         IsChecked="True"/>
             
             <RadioButton Grid.Row="1"
                          Content="Play Random"
-                         Style="{StaticResource MenuButtonTheme}"
+                         Style="{StaticResource MenuRadioButtonTheme}"
                          Command="{Binding NavigateToRandomTypeTestCommand}"/>
 
             <RadioButton Grid.Row="2"
                          Content="Scoreboard"
-                         Style="{StaticResource MenuButtonTheme}"
+                         Style="{StaticResource MenuRadioButtonTheme}"
                          Command="{Binding NavigateToScoreboardCommand}"/>
 
-            <RadioButton Grid.Row="3"
+            <Button Grid.Row="3"
                     Content="Language"
                     Style="{StaticResource MenuButtonTheme}">
 
-                <RadioButton.ContextMenu>
+                <Button.ContextMenu>
                     <ContextMenu ItemsSource="{Binding LanguageOptions}"/>
-
-                </RadioButton.ContextMenu>
+                </Button.ContextMenu>
 
                 <behaviors:Interaction.Behaviors>
                     <mybehaviors:ContextMenuBehavior/>
                 </behaviors:Interaction.Behaviors>
-            </RadioButton>
+            </Button>
 
             <RadioButton Grid.Row="4"
                          Content="Quit"
-                         Style="{StaticResource MenuButtonTheme}"
+                         Style="{StaticResource MenuRadioButtonTheme}"
                          Command="{Binding QuitCommand}"/>
         </Grid>
         
