@@ -46,12 +46,11 @@
                 <behaviors:Interaction.Behaviors>
                     <mybehaviors:InlinesBindingBehavior/>
                 </behaviors:Interaction.Behaviors>
-            </TextBlock>
-
+        </TextBlock>
+        
         <TextBox
             Grid.Row="2"
             Grid.Column="1"
-            MaxLines="1"
             SpellCheck.IsEnabled="False"
             Style="{StaticResource TextBoxStyle}"
             MaxLength="{Binding CharLimit}"

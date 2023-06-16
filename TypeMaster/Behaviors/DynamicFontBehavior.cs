@@ -23,16 +23,25 @@ public class DynamicFontBehavior<T> : Behavior<T> where T : FrameworkElement
         return e.PreviousSize.Width != 0 && e.PreviousSize.Height != 0 && (Math.Abs(difference.X) > minDifference || Math.Abs(difference.Y) > minDifference);
     }
 
-    protected double ChangeFontSize(double fontSize, string fontFamily, DpiScale dpi, double boxSize, int textLength, Size containerSize)
+    bool IsCharacterSizeValid(Size containerSize, Size characterSize, double idealCharSize) => characterSize.Width < containerSize.Width && characterSize.Height < containerSize.Height && characterSize.Width * characterSize.Height < idealCharSize;
+    protected double ChangeFontSize(double fontSize, string fontFamily, DpiScale dpi, double boxSize, int textLength, Size containerSize, bool oneLiner = false)
     {
         Size characterSize = CalculateCharSize(fontSize, fontFamily, dpi);
-        double oldCharSize = characterSize.Width * characterSize.Height;
+        //double oldCharSize = characterSize.Width * characterSize.Height;
         double idealCharSize = boxSize / (textLength == 0 ? 1 : textLength);
-        double newFontSize = 1;
 
-        while ((characterSize = CalculateCharSize(newFontSize, fontFamily, dpi)).Width < containerSize.Width && characterSize.Height < containerSize.Height && characterSize.Width * characterSize.Height < idealCharSize)
-            newFontSize += 1;
-        return newFontSize - 1;
+        bool valid = IsCharacterSizeValid(containerSize, characterSize, idealCharSize);
+
+        while (IsCharacterSizeValid(containerSize, characterSize, idealCharSize) == valid)
+        {
+            if (valid)
+                fontSize += 1;
+            else
+                fontSize -= 1;
+
+            characterSize = CalculateCharSize(fontSize, fontFamily, dpi);
+        }
+        return valid ? fontSize - 1 : fontSize + 1;
     }
 
     protected Size CalculateCharSize(double fontSize, string fontFamily, DpiScale dpi)

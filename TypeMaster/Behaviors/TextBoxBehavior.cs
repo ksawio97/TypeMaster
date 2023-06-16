@@ -44,9 +44,7 @@ public class TextBoxBehavior : DynamicFontBehavior<TextBox>
     {
         if (grid != null && IsDifferenceBigEnough(e))
         {
-            var newFont = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), e.NewSize.Width * e.NewSize.Height, AssociatedObject.Text.Length, e.NewSize);
-            AssociatedObject.FontSize = newFont <= 0 ? 1 : newFont;
-
+            AssociatedObject.FontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), e.NewSize.Width * e.NewSize.Height, AssociatedObject.Text.Length, e.NewSize, AssociatedObject.MaxLines == 1);
         }
     }
 
@@ -79,7 +77,7 @@ public class TextBoxBehavior : DynamicFontBehavior<TextBox>
         {
             Size containerSize = GetGridContainerSize(grid);
             if (containerSize.Width > 0 && containerSize.Height > 0)
-                AssociatedObject.FontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), containerSize.Width * containerSize.Height, AssociatedObject.Text.Length, containerSize);
+                AssociatedObject.FontSize = ChangeFontSize(AssociatedObject.FontSize, AssociatedObject.FontFamily.Source, VisualTreeHelper.GetDpi(AssociatedObject), containerSize.Width * containerSize.Height, AssociatedObject.Text.Length, containerSize, AssociatedObject.MaxLines == 1);
         }
     }
 

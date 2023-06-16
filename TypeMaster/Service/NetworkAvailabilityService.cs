@@ -32,7 +32,7 @@ public class NetworkAvailabilityService
         {
             reply = ping.Send("www.google.com");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             if (IsAvailable)
                 IsAvailable = false;
