@@ -9,7 +9,7 @@ namespace TypeMaster.ViewModel;
 public partial class MainViewModel : AsyncViewModel
 {
     [ObservableProperty]
-    string? _title;
+    string?[] _menuButtonsTexts;
 
     [ObservableProperty]
     INavigationService _navigationService;
@@ -32,7 +32,10 @@ public partial class MainViewModel : AsyncViewModel
         _colorsService = colorsService;
         _networkAvailabilityService = networkAvailabilityService;
 
-        Title = "TypeMaster";
+        MenuButtonsTexts = new string?[5];
+        SetUIItemsText(this, new OnLanguageChangedEventArgs(_settingsService.GetUITextValue));
+        _settingsService.OnLanguageChanged += SetUIItemsText;
+
         LanguageOptions = new ();
         SetContextMenuItems();
         navigation.TryNavigateTo<SearchArticlesViewModel>();
@@ -142,5 +145,12 @@ public partial class MainViewModel : AsyncViewModel
     private void Quit()
     {
         Application.Current.Shutdown();
+    }
+
+    public override void SetUIItemsText(object? _, OnLanguageChangedEventArgs e)
+    { 
+        for (int i = 0; i < MenuButtonsTexts.Length; i++)
+            MenuButtonsTexts[i] = e.GetText($"MenuButton{i}");
+        OnPropertyChanged(nameof(MenuButtonsTexts));
     }
 }

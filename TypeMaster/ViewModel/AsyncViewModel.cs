@@ -1,6 +1,6 @@
 ﻿namespace TypeMaster.ViewModel;
 
-public partial class AsyncViewModel : BaseViewModel
+public abstract partial class AsyncViewModel : BaseViewModel
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotBusy))]

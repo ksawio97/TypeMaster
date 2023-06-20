@@ -40,6 +40,10 @@ public partial class TypeTestViewModel : AsyncViewModel
     readonly Timer _timeToStart;
     readonly Stopwatch _elapsedTypeTime;
 
+    string _elapsedTimeText;
+    [ObservableProperty]
+    string _loadingText;
+
     public TypeTestViewModel(WikipediaService wikipediaService, INavigationService navigationService, CurrentPageService currentPageService, ColorsService colorsService)
     {
         _navigationService = navigationService;
@@ -59,7 +63,7 @@ public partial class TypeTestViewModel : AsyncViewModel
         };
         _timeToStart.Elapsed += TimeToStart_Elapsed;
 
-        _infoForUser = "Loading";
+        InfoForUser = LoadingText;
     }
 
     [RelayCommand]
@@ -77,12 +81,7 @@ public partial class TypeTestViewModel : AsyncViewModel
             if (CurrWikiPageResult != null && content != null)
             {
                 _wikiContent = content.Split(" ").Select(element => element + " ").ToArray();
-
                 _currWikiPageInfo = _currentPageService.GetWikipediaPageInfo(_wikiContent.Length);
-
-                await CountDownAsync(3);
-                _timeToStart.Enabled = true;
-                _elapsedTypeTime.Start();
             }
             else
             {
@@ -92,6 +91,11 @@ public partial class TypeTestViewModel : AsyncViewModel
         });
         if(_wikiContent.Length != 0)
         {
+            await CountDownAsync(3);
+            _timeToStart.Enabled = true;
+            _elapsedTypeTime.Start();
+
+
             SetInlines(this, new SetInlinesEventArgs(_wikiContent.Select(word => new Run(word) { Foreground = _colorsService.TryGetColor("ForegroundColor") ?? Brushes.White })));
             SetCharLimit();
             CheckCurrentWord("", _wordsCompleted, (c1, c2) => _colorsService.TryGetColor("ForegroundColor") ?? Brushes.White);
@@ -105,6 +109,7 @@ public partial class TypeTestViewModel : AsyncViewModel
         string v = value ?? "";
         if (_wordsCompleted == _wikiContent.Length)
         {    
+            //end type test
             _elapsedTypeTime.Stop();
             _timeToStart.Enabled = false;
             if (_currWikiPageInfo != null)
@@ -197,6 +202,12 @@ public partial class TypeTestViewModel : AsyncViewModel
     {
         int minutes = (int)_elapsedTypeTime.Elapsed.TotalMinutes;
         string minutesText = minutes != 0 ? minutes.ToString() + ":" : "";
-        InfoForUser = $"Elapsed time: {minutesText}{_elapsedTypeTime.Elapsed.Seconds.ToString().PadLeft(2, '0')}";
+        InfoForUser = $"{_elapsedTimeText}: {minutesText}{_elapsedTypeTime.Elapsed.Seconds.ToString().PadLeft(2, '0')}";
+    }
+
+    public override void SetUIItemsText(object? _, OnLanguageChangedEventArgs e)
+    {
+        LoadingText = e.GetText("TypeTestLoading");
+        _elapsedTimeText = e.GetText("TypeTestElapsedTime");
     }
 }

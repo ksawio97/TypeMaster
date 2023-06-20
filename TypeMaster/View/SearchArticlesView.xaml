@@ -17,7 +17,7 @@
             <RowDefinition Height="8*"/>
         </Grid.RowDefinitions>
         <Viewbox>
-            <TextBlock Text="Search for wiki articles and select them"/>
+            <TextBlock Text="{Binding InfoForUser}"/>
         </Viewbox>
 
         <Grid Grid.Row="1">
@@ -40,11 +40,11 @@
                              Style="{StaticResource TextBoxStyle}"
                              IsEnabled="{Binding IsNotBusy}"
                              x:Name="SearchTextBox">
-                    
+
                     <behaviors:Interaction.Behaviors>
                         <mybehaviors:TextBoxBehavior WithSelection="True"/>
                     </behaviors:Interaction.Behaviors>
-                    
+
                     <TextBox.InputBindings>
                         <KeyBinding Key="Return" 
                                         Command="{Binding SearchButtonClickedCommand}" 
@@ -60,21 +60,42 @@
                         CommandParameter="{Binding Text, ElementName=SearchTextBox}"
                         IsEnabled="{Binding IsNotBusy}"/>
             </Grid>
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <DataGrid 
-                Grid.Row="2"
-                SelectedItem="{Binding SelectedItem}"
-                >
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Id"  Binding="{Binding Id}" Width="*"/>
-                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*"/>
-                </DataGrid.Columns>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
 
-                <DataGrid.ItemsSource>
-                    <Binding Path="Results"/>
-                </DataGrid.ItemsSource>
-            </DataGrid>
+                <StackPanel Grid.ColumnSpan="2"
+                            Grid.RowSpan="2">
+                    <DataGrid SelectedItem="{Binding SelectedItem}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Id}" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding Title}" Width="2*"/>
+                        </DataGrid.Columns>
+
+                        <DataGrid.ItemsSource>
+                            <Binding Path="Results"/>
+                        </DataGrid.ItemsSource>
+                    </DataGrid>
+                </StackPanel>
+
+                <StackPanel Style="{StaticResource ColumnHeaderStackPanelStyle}">
+                    <TextBlock Style="{StaticResource ColumnHeaderTextBlockStyle}"
+                               Text="{Binding Path=HeaderText[0]}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1"
+                            Style="{StaticResource ColumnHeaderStackPanelStyle}">
+                    <TextBlock Style="{StaticResource ColumnHeaderTextBlockStyle}"
+                               Text="{Binding Path=HeaderText[1]}"/>
+                </StackPanel>
+            </Grid>
         </Grid>
-
     </Grid>
 </Page>

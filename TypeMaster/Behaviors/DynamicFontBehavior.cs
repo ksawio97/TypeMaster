@@ -27,7 +27,6 @@ public class DynamicFontBehavior<T> : Behavior<T> where T : FrameworkElement
     protected double ChangeFontSize(double fontSize, string fontFamily, DpiScale dpi, double boxSize, int textLength, Size containerSize, bool oneLiner = false)
     {
         Size characterSize = CalculateCharSize(fontSize, fontFamily, dpi);
-        //double oldCharSize = characterSize.Width * characterSize.Height;
         double idealCharSize = boxSize / (textLength == 0 ? 1 : textLength);
 
         bool valid = IsCharacterSizeValid(containerSize, characterSize, idealCharSize);

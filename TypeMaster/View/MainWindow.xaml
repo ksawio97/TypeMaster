@@ -7,7 +7,7 @@
         xmlns:mybehaviors="clr-namespace:TypeMaster.Behaviors"
         mc:Ignorable="d"
         WindowStyle="None"
-        Title="{Binding Title}"
+        Title="TypeMaster"
         Style="{StaticResource WindowStyle}"
         Cursor="{Binding Cursor}"
         Height="450" Width="800"
@@ -87,24 +87,24 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            
-            <RadioButton Content="Play"
+
+            <RadioButton Content="{Binding Path=MenuButtonsTexts[0]}"
                          Style="{StaticResource MenuRadioButtonTheme}"
                          Command="{Binding NavigateToTypeTestCommand}"
                          IsChecked="True"/>
             
             <RadioButton Grid.Row="1"
-                         Content="Play Random"
+                         Content="{Binding Path=MenuButtonsTexts[1]}"
                          Style="{StaticResource MenuRadioButtonTheme}"
                          Command="{Binding NavigateToRandomTypeTestCommand}"/>
 
             <RadioButton Grid.Row="2"
-                         Content="Scoreboard"
+                         Content="{Binding Path=MenuButtonsTexts[2]}"
                          Style="{StaticResource MenuRadioButtonTheme}"
                          Command="{Binding NavigateToScoreboardCommand}"/>
 
             <Button Grid.Row="3"
-                    Content="Language"
+                    Content="{Binding Path=MenuButtonsTexts[3]}"
                     Style="{StaticResource MenuButtonTheme}">
 
                 <Button.ContextMenu>
@@ -117,7 +117,7 @@
             </Button>
 
             <RadioButton Grid.Row="4"
-                         Content="Quit"
+                         Content="{Binding Path=MenuButtonsTexts[4]}"
                          Style="{StaticResource MenuRadioButtonTheme}"
                          Command="{Binding QuitCommand}"/>
         </Grid>

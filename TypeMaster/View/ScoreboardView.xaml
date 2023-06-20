@@ -18,21 +18,80 @@
     </behaviors:Interaction.Behaviors>
     
     <Grid>
-        <DataGrid SelectedItem="{Binding SelectedItem}">
-            
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Page ID"  Binding="{Binding Id}" Width="*"/>
-                <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*"/>
-                <DataGridTextColumn Header="Words Per Minute" Binding="{Binding WPM}" Width="*"/>
-                <DataGridTextColumn Header="Seconds Spent" Binding="{Binding SecondsSpent}" Width="*"/>
-                <DataGridTextColumn Header="Words Count" Binding="{Binding Words}" Width="*"/>
-                <DataGridTextColumn Header="Text Length" Binding="{Binding ProvidedTextLength, StringFormat={}{0}}" Width="*"/>
-                <DataGridTextColumn Header="Text Language" Binding="{Binding Language}" Width="*"/>
-            </DataGrid.Columns>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-            <DataGrid.ItemsSource>
-                <Binding Path="Scores"/>
-            </DataGrid.ItemsSource>
-        </DataGrid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.RowSpan="2"
+                    Grid.ColumnSpan="7">
+            <DataGrid SelectedItem="{Binding SelectedItem}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Binding="{Binding Id}" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding Title}" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding WPM}" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding SecondsSpent}" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding Words}" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding TranslatedTextLength}" Width="*" />
+                    <DataGridTextColumn Binding="{Binding Language}" Width="*"/>
+                </DataGrid.Columns>
+
+                <DataGrid.ItemsSource>
+                    <Binding Path="Scores"/>
+                </DataGrid.ItemsSource>
+            </DataGrid>
+        </StackPanel>
+
+        <StackPanel Grid.Column="0" 
+                    Style="{StaticResource ColumnHeaderStackPanelStyle}">
+            <TextBlock Style="{StaticResource ColumnHeaderTextBlockStyle}"
+                       Text="{Binding Path=HeaderText[0]}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1"
+                    Style="{StaticResource ColumnHeaderStackPanelStyle}">
+            <TextBlock Style="{StaticResource ColumnHeaderTextBlockStyle}"
+                       Text="{Binding Path=HeaderText[1]}" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="2"
+                    Style="{StaticResource ColumnHeaderStackPanelStyle}">
+            <TextBlock
+                   Style="{StaticResource ColumnHeaderTextBlockStyle}"
+                   Text="{Binding Path=HeaderText[2]}" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="3"
+                    Style="{StaticResource ColumnHeaderStackPanelStyle}">
+            <TextBlock Style="{StaticResource ColumnHeaderTextBlockStyle}"
+                       Text="{Binding Path=HeaderText[3]}" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="4"
+                    Style="{StaticResource ColumnHeaderStackPanelStyle}">
+            <TextBlock Style="{StaticResource ColumnHeaderTextBlockStyle}"
+                       Text="{Binding Path=HeaderText[4]}" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="5"
+                    Style="{StaticResource ColumnHeaderStackPanelStyle}">
+            <TextBlock Style="{StaticResource ColumnHeaderTextBlockStyle}"
+                       Text="{Binding Path=HeaderText[5]}" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="6"
+                    Style="{StaticResource ColumnHeaderStackPanelStyle}">
+            <TextBlock Style="{StaticResource ColumnHeaderTextBlockStyle}"
+                       Text="{Binding Path=HeaderText[6]}" />
+        </StackPanel>
     </Grid>
 </Page>

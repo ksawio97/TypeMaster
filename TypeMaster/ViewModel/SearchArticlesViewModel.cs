@@ -10,6 +10,12 @@ partial class SearchArticlesViewModel : AsyncViewModel
     [ObservableProperty]
     SearchResult _selectedItem;
 
+    [ObservableProperty]
+    string? _infoForUser;
+
+    [ObservableProperty]
+    string?[] _headerText;
+
     public ObservableCollection<SearchResult> Results { get; }
 
     readonly INavigationService _navigationService;
@@ -27,7 +33,9 @@ partial class SearchArticlesViewModel : AsyncViewModel
         _wikipediaService = wikipediaService;
         _settingsService = settingsService;
         _currentPageService = currentPageService;
+
         Results = new();
+        HeaderText = new string[2];
     }
 
     [RelayCommand]
@@ -65,8 +73,6 @@ partial class SearchArticlesViewModel : AsyncViewModel
             }
         }
 
-        //Results = filteredResults;
-        _currentPageService.CurrentPageInfoArgs = null;
         IsBusy = false;
     }
 
@@ -81,5 +87,13 @@ partial class SearchArticlesViewModel : AsyncViewModel
     {
         var pageInfoArgs = new IdPageInfoArgs(id, null, _lastSearchLanguage!);
         _navigationService.TryNavigateWithPageInfoArgs<ChooseTextLengthViewModel>(pageInfoArgs);
+    }
+
+    public override void SetUIItemsText(object? _, OnLanguageChangedEventArgs e)
+    {
+        InfoForUser = e.GetText("SearchArticlesTextBlock");
+        for (int i = 0; i < HeaderText.Length; i++)
+            HeaderText[i] = e.GetText($"ScoreboardHeader{i}");
+        OnPropertyChanged(nameof(HeaderText));
     }
 }

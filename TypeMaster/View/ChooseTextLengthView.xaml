@@ -48,31 +48,31 @@
         <Button Grid.Column="1"
                 Grid.ColumnSpan="2"
                 Grid.Row="3"
-                Content="Short"
+                Content="{Binding Path=ButtonBindableArgs[0].Content}"
                 Style="{StaticResource GreenStyle}"
-                Visibility="{Binding ShortButtonBindableArgs.Visibility}"
-                IsEnabled="{Binding ShortButtonBindableArgs.IsEnabled}"
+                Visibility="{Binding Path=ButtonBindableArgs[0].Visibility}"
+                IsEnabled="{Binding Path=ButtonBindableArgs[0].IsEnabled}"
                 Command="{Binding NavigateToTypeTestCommand}"
-                CommandParameter="{Binding ShortButtonBindableArgs.RepresentedLength}"/>
+                CommandParameter="{Binding Path=ButtonBindableArgs[0].RepresentedLength}"/>
 
         <Button Grid.Column="4"
                 Grid.ColumnSpan="2"  
                 Grid.Row="3"
-                Content="Medium"
+                Content="{Binding Path=ButtonBindableArgs[1].Content}"
                 Style="{StaticResource YellowStyle}"
-                Visibility="{Binding MediumButtonBindableArgs.Visibility}"
-                IsEnabled="{Binding MediumButtonBindableArgs.IsEnabled}"
+                Visibility="{Binding Path=ButtonBindableArgs[1].Visibility}"
+                IsEnabled="{Binding Path=ButtonBindableArgs[1].IsEnabled}"
                 Command="{Binding NavigateToTypeTestCommand}"
-                CommandParameter="{Binding MediumButtonBindableArgs.RepresentedLength}"/>
+                CommandParameter="{Binding Path=ButtonBindableArgs[1].RepresentedLength}"/>
 
         <Button Grid.Column="7"
                 Grid.ColumnSpan="2"
                 Grid.Row="3"
-                Content="Long"
+                Content="{Binding Path=ButtonBindableArgs[2].Content}"
                 Style="{StaticResource RedStyle}"
-                Visibility="{Binding MediumButtonBindableArgs.Visibility}"
-                IsEnabled="{Binding MediumButtonBindableArgs.IsEnabled}"
+                Visibility="{Binding Path=ButtonBindableArgs[2].Visibility}"
+                IsEnabled="{Binding Path=ButtonBindableArgs[2].IsEnabled}"
                 Command="{Binding NavigateToTypeTestCommand}"
-                CommandParameter="{Binding MediumButtonBindableArgs.RepresentedLength}"/>
+                CommandParameter="{Binding Path=ButtonBindableArgs[2].RepresentedLength}"/>
     </Grid>
 </Page>

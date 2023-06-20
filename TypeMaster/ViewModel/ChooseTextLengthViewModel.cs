@@ -7,13 +7,7 @@ namespace TypeMaster.ViewModel;
 partial class ChooseTextLengthViewModel : AsyncViewModel
 {
     [ObservableProperty]
-    ButtonBindableArgs _shortButtonBindableArgs;
-
-    [ObservableProperty]
-    ButtonBindableArgs _mediumButtonBindableArgs;
-
-    [ObservableProperty]
-    ButtonBindableArgs _longButtonBindableArgs;
+    ButtonBindableArgs[] _buttonBindableArgs;
 
     [ObservableProperty]
     string? _wikiTitle;
@@ -21,14 +15,19 @@ partial class ChooseTextLengthViewModel : AsyncViewModel
     readonly INavigationService _navigationService;
     readonly CurrentPageService _currentPageService;
 
-    public ChooseTextLengthViewModel(INavigationService navigationService, CurrentPageService currentPageService)
+    public ChooseTextLengthViewModel(INavigationService navigationService, CurrentPageService currentPageService, SettingsService settingsService)
     {
         _navigationService = navigationService;
         _currentPageService = currentPageService;
 
-        ShortButtonBindableArgs = new ButtonBindableArgs { IsEnabled = false, RepresentedLength = TextLength.Short };
-        MediumButtonBindableArgs = new ButtonBindableArgs { IsEnabled = false, RepresentedLength = TextLength.Medium };
-        LongButtonBindableArgs = new ButtonBindableArgs { IsEnabled = false, RepresentedLength = TextLength.Long };
+        ButtonBindableArgs = new ButtonBindableArgs[]
+        {
+            new ButtonBindableArgs { IsEnabled = false, RepresentedLength = TextLength.Short },
+            new ButtonBindableArgs { IsEnabled = false, RepresentedLength = TextLength.Medium },
+            new ButtonBindableArgs { IsEnabled = false, RepresentedLength = TextLength.Long }
+        };
+
+        SetUIItemsText(this, new OnLanguageChangedEventArgs(settingsService.GetUITextValue));
     }
 
     [RelayCommand]
@@ -60,9 +59,14 @@ partial class ChooseTextLengthViewModel : AsyncViewModel
 
     void CheckIfCanBeEnabled(int length)
     {
-        ShortButtonBindableArgs.IsEnabled = (int)TextLength.Short <= length;
-        MediumButtonBindableArgs.IsEnabled = (int)TextLength.Medium <= length;
-        LongButtonBindableArgs.IsEnabled = (int)TextLength.Long <= length;
+        foreach (var item in ButtonBindableArgs)
+            item.IsEnabled = (int)item.RepresentedLength <= length;
+    }
+
+    public override void SetUIItemsText(object? _, OnLanguageChangedEventArgs e)
+    {
+        for(int i = 0; i < ButtonBindableArgs.Length; i++)
+            ButtonBindableArgs[i].Content = e.GetText($"TextLength{i}");
     }
 }
 
@@ -74,5 +78,8 @@ public partial class ButtonBindableArgs : ObservableObject
 
     [ObservableProperty]
     TextLength representedLength;
+
+    [ObservableProperty]
+    string? content;
     public Visibility Visibility => IsEnabled ? Visibility.Visible : Visibility.Hidden;
 }

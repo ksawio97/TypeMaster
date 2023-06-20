@@ -1,8 +1,6 @@
 ﻿using AsyncAwaitBestPractices;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Threading.Tasks;
-using TypeMaster.Service;
 
 namespace TypeMaster
 {
