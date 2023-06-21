@@ -69,14 +69,16 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.ColumnSpan="2"
+                <StackPanel Grid.ColumnSpan="3"
                             Grid.RowSpan="2">
                     <DataGrid SelectedItem="{Binding SelectedItem}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Binding="{Binding Id}" Width="*"/>
                             <DataGridTextColumn Binding="{Binding Title}" Width="2*"/>
+                            <DataGridTextColumn Binding="{Binding TranslatedTextLength}" Width="*"/>
                         </DataGrid.Columns>
 
                         <DataGrid.ItemsSource>
@@ -94,6 +96,12 @@
                             Style="{StaticResource ColumnHeaderStackPanelStyle}">
                     <TextBlock Style="{StaticResource ColumnHeaderTextBlockStyle}"
                                Text="{Binding Path=HeaderText[1]}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2"
+                            Style="{StaticResource ColumnHeaderStackPanelStyle}">
+                    <TextBlock Style="{StaticResource ColumnHeaderTextBlockStyle}"
+                               Text="{Binding Path=HeaderText[2]}"/>
                 </StackPanel>
             </Grid>
         </Grid>

@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace TypeMaster.Service;
 

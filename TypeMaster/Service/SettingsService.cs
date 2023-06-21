@@ -53,12 +53,3 @@ public class SettingsService
         return resourceManager.GetString(name, Properties.Resources.Culture) ?? "";
     }
 }
-
-public class OnLanguageChangedEventArgs : EventArgs
-{
-    public Func<string, string> GetText;
-    public OnLanguageChangedEventArgs(Func<string, string> getText)
-    {
-        GetText = getText;
-    }
-}

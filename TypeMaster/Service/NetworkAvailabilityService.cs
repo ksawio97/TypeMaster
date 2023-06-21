@@ -43,13 +43,3 @@ public class NetworkAvailabilityService
         return IsAvailable;
     }
 }
-
-public class NetworkAvailabilityChangedEventArgs : EventArgs
-{
-    public bool NewValue { get; set; }
-
-    public NetworkAvailabilityChangedEventArgs(bool newValue)
-    {
-        NewValue = newValue;
-    }
-}

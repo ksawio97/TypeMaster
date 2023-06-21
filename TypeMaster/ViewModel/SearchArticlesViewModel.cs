@@ -16,7 +16,7 @@ partial class SearchArticlesViewModel : AsyncViewModel
     [ObservableProperty]
     string?[] _headerText;
 
-    public ObservableCollection<SearchResult> Results { get; }
+    public ObservableCollection<SearchResultWithTextLength> Results { get; }
 
     readonly INavigationService _navigationService;
 
@@ -35,7 +35,7 @@ partial class SearchArticlesViewModel : AsyncViewModel
         _currentPageService = currentPageService;
 
         Results = new();
-        HeaderText = new string[2];
+        HeaderText = new string[3];
     }
 
     [RelayCommand]
@@ -56,7 +56,7 @@ partial class SearchArticlesViewModel : AsyncViewModel
 
             (SearchResult? result, string? formatedContent) = (await _currentPageService.TryGetPageResult(), await _currentPageService.TryGetPageContent(formatted: true));
             if (result != null && IsPageValid(formatedContent))
-                Results.Add(result);
+                Results.Add(new SearchResultWithTextLength(result, formatedContent!.Length, _settingsService.GetUITextValue));
         }
         else
         {
@@ -66,10 +66,10 @@ partial class SearchArticlesViewModel : AsyncViewModel
             {
                 _currentPageService.CurrentPageInfoArgs = new IdPageInfoArgs(element.Id, null, _lastSearchLanguage);
 
-                string? formatedContent = await _currentPageService.TryGetPageContent(formatted: true);
+                (SearchResult? result, string? formatedContent) = (await _currentPageService.TryGetPageResult(), await _currentPageService.TryGetPageContent(formatted: true));
 
-                if (IsPageValid(formatedContent))
-                    Results.Add(element);
+                if (result != null && IsPageValid(formatedContent))
+                    Results.Add(new SearchResultWithTextLength(result, formatedContent!.Length, _settingsService.GetUITextValue));
             }
         }
 
@@ -92,8 +92,13 @@ partial class SearchArticlesViewModel : AsyncViewModel
     public override void SetUIItemsText(object? _, OnLanguageChangedEventArgs e)
     {
         InfoForUser = e.GetText("SearchArticlesTextBlock");
-        for (int i = 0; i < HeaderText.Length; i++)
+        for (int i = 0; i < HeaderText.Length - 1; i++)
             HeaderText[i] = e.GetText($"ScoreboardHeader{i}");
+        HeaderText[HeaderText.Length - 1] = e.GetText("ScoreboardHeader5");
+
+        foreach (var item in Results)
+            item.TranslatedTextLength = SearchResultWithTextLength.TranslateTextLength(item.UnchangableTextLength, _settingsService.GetUITextValue);
+
         OnPropertyChanged(nameof(HeaderText));
     }
 }

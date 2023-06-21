@@ -127,13 +127,3 @@ public partial class CurrentPageService
     [GeneratedRegex(" {2,}")]
     private partial Regex TwoOrMoreSpaces();
 }
-
-public static class SearchResultExtensions 
-{ 
-    public static bool IsNullOrEmpty(this SearchResult? searchResult)
-    {
-        return searchResult == null ||
-               searchResult.Title.Equals(string.Empty) ||
-               searchResult.Id <= 0;
-    }
-}
