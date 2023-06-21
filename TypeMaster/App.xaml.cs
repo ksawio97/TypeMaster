@@ -43,7 +43,6 @@ namespace TypeMaster
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            var wikipediaService = _serviceProvider.GetRequiredService<WikipediaService>();
             var settingsService = _serviceProvider.GetRequiredService<SettingsService>();
 
             await settingsService.GetSettingsDataAsync();
@@ -59,8 +58,11 @@ namespace TypeMaster
             var wikipediaService = _serviceProvider.GetRequiredService<WikipediaService>();
             var settingsService = _serviceProvider.GetRequiredService<SettingsService>();
 
-            settingsService.SaveSettingsDataAsync().SafeFireAndForget();
-            wikipediaService.SaveScoresDataAsync().SafeFireAndForget();
+            settingsService.SaveSettingsData().SafeFireAndForget();
+            wikipediaService.SaveScoresData().SafeFireAndForget();
+
+            //await Task.Run(() => settingsService.SaveSettingsDataAsync());
+            //await Task.Run(() => wikipediaService.SaveScoresDataAsync());
 
             base.OnExit(e);
         }

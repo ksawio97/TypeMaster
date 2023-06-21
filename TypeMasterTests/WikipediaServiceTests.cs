@@ -5,12 +5,15 @@ namespace TypeMasterTests
         WikipediaService _wikipediaService;
         LanguagesService _languagesService;
         CurrentPageService _currentPageService;
+        NetworkAvailabilityService _networkAvailabilityService;
+        DataSaveLoadService _dataSaveLoadService;
         [SetUp]
         public void Setup()
         {
             _languagesService = new LanguagesService();
-            var saveLoadService = new DataSaveLoadService(new CryptographyService());
-            _wikipediaService = new WikipediaService(saveLoadService);
+            _dataSaveLoadService = new DataSaveLoadService(new CryptographyService());
+            _networkAvailabilityService = new NetworkAvailabilityService();
+            _wikipediaService = new WikipediaService(_dataSaveLoadService, _networkAvailabilityService);
             _currentPageService = new CurrentPageService(_wikipediaService, _languagesService);
         }
 
@@ -50,15 +53,56 @@ namespace TypeMasterTests
             Assert.IsNotNull(result);
             Assert.True(result.Length > 0);
         }
+
+        [Test]
+        public async Task SaveScoresDataAsyncTest()
+        {
+            _wikipediaService.AddScore(new WikipediaPageInfo(){ Id=213, Title="Test"});
+            _wikipediaService.AddScore(new WikipediaPageInfo(){ Id=2132, Title="Test2"});
+            _wikipediaService.AddScore(new WikipediaPageInfo(){ Id=321, Title="Test3"});
+
+            //get scores
+            List<WikipediaPageInfo> scores = new ();
+            await foreach (var score in _wikipediaService.GetScoresDataAsync())
+                scores.Add(score);
+
+            //save scores
+            await _wikipediaService.SaveScoresData();
+
+            //get scores from file
+            List<WikipediaPageInfo> results = await _dataSaveLoadService.GetDataAsync<List<WikipediaPageInfo>>() ?? new List<WikipediaPageInfo>();
+            if (results.Count != scores.Count)
+                Assert.Fail("Diffrent lengths!");
+            for(int i = 0; i < results.Count; i++)
+            {
+                if (!results[i].IsEqualTo(scores[i]))
+                    Assert.Fail("Diffrent scores!");
+            }
+        }
     }
 }
 
 public static class SearchResultExtensions
 {
-    public static bool IsEqualTo(this SearchResult thisInfo, SearchResult otherInfo)
+    public static bool IsEqualTo(this SearchResult thisResult, SearchResult otherResult)
+    {
+        return
+            thisResult.Id == otherResult.Id &&
+            thisResult.Title == otherResult.Title;
+    }
+}
+
+public static class WikipediaPageInfoExtensions
+{
+    public static bool IsEqualTo(this WikipediaPageInfo thisInfo, WikipediaPageInfo otherInfo)
     {
         return
             thisInfo.Id == otherInfo.Id &&
-            thisInfo.Title == otherInfo.Title;
+            thisInfo.Title == otherInfo.Title &&
+            thisInfo.WPM == otherInfo.WPM &&
+            thisInfo.SecondsSpent == otherInfo.SecondsSpent &&
+            thisInfo.Words == otherInfo.Words &&
+            thisInfo.ProvidedTextLength == otherInfo.ProvidedTextLength &&
+            thisInfo.Language == otherInfo.Language;
     }
 }

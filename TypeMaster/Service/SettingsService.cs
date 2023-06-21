@@ -32,9 +32,10 @@ public class SettingsService
             TryChangeCurrentLanguage(data.CurrentLanguage);
     }
 
-    public async Task SaveSettingsDataAsync()
+    public Task SaveSettingsData()
     {
-        await _dataSaveLoadService.SaveDataAsync(_settings);
+        _dataSaveLoadService.SaveData(_settings);
+        return Task.CompletedTask;
     }
     public void TryChangeCurrentLanguage(string language)
     {

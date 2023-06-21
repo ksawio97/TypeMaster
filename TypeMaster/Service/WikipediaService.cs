@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace TypeMaster.Service;
 
@@ -141,29 +142,46 @@ public partial class WikipediaService
 
     public async IAsyncEnumerable<WikipediaPageInfo> GetScoresDataAsync()
     {
-        await foreach(var score in _dataSaveLoadService.GetDataCollectionAsync<WikipediaPageInfo>())
+        await foreach (var score in _dataSaveLoadService.GetDataCollectionAsync<WikipediaPageInfo>())
         {
             var simillarPage = _pendingScores.Find(element => element.Id == score.Id);
-            if (simillarPage == null || score.SecondsSpent < simillarPage.SecondsSpent)
-                yield return score;
-            else
+            //when simillarPage has better score
+            if (simillarPage != null && score.SecondsSpent > simillarPage.SecondsSpent)
                 yield return simillarPage;
+            else
+            {
+                if(simillarPage != null)
+                    _pendingScores.Remove(simillarPage);
+                yield return score;
+            }
         }
+        //return remaining scores
+        foreach (var score in _pendingScores) yield return score;
+
         yield break;
     }
 
-    public async Task SaveScoresDataAsync()
+    public Task SaveScoresData()
     {
-        var scores = await _dataSaveLoadService.GetDataAsync<List<WikipediaPageInfo>>();
-        foreach(var pendingScore in _pendingScores)
+        var scores = new List<WikipediaPageInfo>();
+
+        foreach(var score in _dataSaveLoadService.GetData<List<WikipediaPageInfo>>() ?? new List<WikipediaPageInfo>())
         {
-            var simillarPage = _pendingScores.Find(element => element.Id == pendingScore.Id);
-            if (simillarPage != null && pendingScore.SecondsSpent < simillarPage.SecondsSpent)
+            var simillarPage = _pendingScores.Find(element => element.Id == score.Id);
+            //when simillarPage has better score
+            if (simillarPage != null && score.SecondsSpent > simillarPage.SecondsSpent)
+                scores.Add(simillarPage);
+            else
             {
-                pendingScore.WPM = simillarPage.WPM;
-                pendingScore.SecondsSpent = simillarPage.SecondsSpent;
+                if (simillarPage != null)
+                    _pendingScores.Remove(simillarPage);
+                scores.Add(score);
             }
         }
-        await _dataSaveLoadService.SaveDataAsync(scores);
+
+        scores.AddRange(_pendingScores);
+        _pendingScores.Clear();
+        _dataSaveLoadService.SaveData(scores);
+        return Task.CompletedTask;
     }
 }
