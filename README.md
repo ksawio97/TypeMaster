@@ -26,13 +26,13 @@ TypeMaster is a versatile WPF application that helps you improve your typing ski
 
 ### Option 1: Download Installer (Recommended)
 
-1. Download the [TypeMasterSetup](Installation/Installation\Installer\TypeMasterSetup.msi) installer for your operating system.
+1. Download the [TypeMasterSetup](Installation/Installer/TypeMasterSetup.msi) installer for your operating system.
 2. Run the installer and follow the on-screen instructions.
 3. Launch TypeMaster after installation.
 
 ### Option 2: Download Zip File
 
-1. Download the latest zip release [TypeMaster.zip](Installation\TypeMaster.zip).
+1. Download the latest zip release [TypeMaster.zip](Installation/TypeMaster.zip).
 2. Extract the contents of the zip file to your desired location.
 3. Open the extracted folder and locate the TypeMaster executable.
 4. Run the executable to launch TypeMaster.
