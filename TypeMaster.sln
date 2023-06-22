@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeMaster", "TypeMaster\Ty
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeMasterTests", "TypeMasterTests\TypeMasterTests.csproj", "{0FFB5260-68F6-433E-915C-2EC646051FBA}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "TypeMasterSetup", "TypeMasterSetup\TypeMasterSetup.vdproj", "{75DF95CA-4D4C-4B72-BBED-B76540A5885D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,8 @@ Global
 		{4AB6BE0A-BA85-458D-9A5E-7A6ACDCCCC5B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0FFB5260-68F6-433E-915C-2EC646051FBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0FFB5260-68F6-433E-915C-2EC646051FBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75DF95CA-4D4C-4B72-BBED-B76540A5885D}.Debug|Any CPU.ActiveCfg = Debug
+		{75DF95CA-4D4C-4B72-BBED-B76540A5885D}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

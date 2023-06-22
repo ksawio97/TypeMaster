@@ -154,7 +154,7 @@
     <value>Język tekstu</value>
   </data>
   <data name="SearchArticlesTextBlock" xml:space="preserve">
-    <value>Wyszukaj artykuły wiki i wybierz je</value>
+    <value>Wyszukaj artykuły wiki i je wybierz</value>
   </data>
   <data name="TextLength0" xml:space="preserve">
     <value>Krótki</value>
