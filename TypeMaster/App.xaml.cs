@@ -61,9 +61,6 @@ namespace TypeMaster
             settingsService.SaveSettingsData().SafeFireAndForget();
             wikipediaService.SaveScoresData().SafeFireAndForget();
 
-            //await Task.Run(() => settingsService.SaveSettingsDataAsync());
-            //await Task.Run(() => wikipediaService.SaveScoresDataAsync());
-
             base.OnExit(e);
         }
     }

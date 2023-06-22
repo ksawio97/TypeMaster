@@ -5,7 +5,9 @@ VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeMaster", "TypeMaster\TypeMaster.csproj", "{4AB6BE0A-BA85-458D-9A5E-7A6ACDCCCC5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeMasterTests", "TypeMasterTests\TypeMasterTests.csproj", "{0FFB5260-68F6-433E-915C-2EC646051FBA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeMasterTests", "TypeMasterTests\TypeMasterTests.csproj", "{0FFB5260-68F6-433E-915C-2EC646051FBA}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "TypeMasterSetup", "TypeMasterSetup\TypeMasterSetup.vdproj", "{33D569F1-DB45-4D3E-A711-ECA8CC50D2CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +15,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4AB6BE0A-BA85-458D-9A5E-7A6ACDCCCC5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4AB6BE0A-BA85-458D-9A5E-7A6ACDCCCC5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AB6BE0A-BA85-458D-9A5E-7A6ACDCCCC5B}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{4AB6BE0A-BA85-458D-9A5E-7A6ACDCCCC5B}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{4AB6BE0A-BA85-458D-9A5E-7A6ACDCCCC5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4AB6BE0A-BA85-458D-9A5E-7A6ACDCCCC5B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0FFB5260-68F6-433E-915C-2EC646051FBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0FFB5260-68F6-433E-915C-2EC646051FBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FFB5260-68F6-433E-915C-2EC646051FBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0FFB5260-68F6-433E-915C-2EC646051FBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33D569F1-DB45-4D3E-A711-ECA8CC50D2CB}.Debug|Any CPU.ActiveCfg = Debug
+		{33D569F1-DB45-4D3E-A711-ECA8CC50D2CB}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

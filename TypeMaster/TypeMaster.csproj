@@ -5,8 +5,10 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <RuntimeIdentifier>win-x86</RuntimeIdentifier>
     <ApplicationIcon>TypeMasterIcon.ico</ApplicationIcon>
+    <AssemblyName>TypeMaster</AssemblyName>
+    <StartupObject>TypeMaster.App</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
