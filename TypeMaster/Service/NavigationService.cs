@@ -8,6 +8,8 @@ public interface INavigationService
     bool TryNavigateTo<TViewModel>() where TViewModel : BaseViewModel;
 
     bool TryNavigateWithPageInfoArgs<TViewModel>(PageInfoArgs pageInfoArgs) where TViewModel : BaseViewModel;
+
+    public event EventHandler<ViewChangedEventArgs> ViewChanged;
 }
 
 public class NavigationService : ObservableObject, INavigationService
@@ -19,6 +21,7 @@ public class NavigationService : ObservableObject, INavigationService
     readonly CurrentPageService _currentPageService;
     readonly SettingsService _settingsService;
 
+    public event EventHandler<ViewChangedEventArgs> ViewChanged;
     public BaseViewModel CurrentView
     {
         get => _currentView;
@@ -30,21 +33,34 @@ public class NavigationService : ObservableObject, INavigationService
         ViewModelFactory = viewModelFactory;
         _currentPageService = currentPageService;
         _settingsService = settingsService;
+
+        ViewChanged += SetupTextLanguageTranslation;
+    }
+
+    void NavigateTo<TViewModel>() where TViewModel : BaseViewModel
+    {
+        var viewmodel = CurrentView;
+        CurrentView = ViewModelFactory.Invoke(typeof(TViewModel));
+
+        ViewChanged(this, new ViewChangedEventArgs(viewmodel, CurrentView));
     }
 
     public bool TryNavigateTo<TViewModel>() where TViewModel : BaseViewModel
-    {            
+    {
         if (CurrentView is TViewModel || (typeof(TViewModel) == typeof(TypeTestViewModel) && _currentPageService.IsCurrentPageInfoArgsNull))
             return false;
-        var viewmodel = ViewModelFactory.Invoke(typeof(TViewModel));
 
-        if(CurrentView != null)
-            _settingsService.OnLanguageChanged -= CurrentView.SetUIItemsText;
-        viewmodel.SetUIItemsText(this, new OnLanguageChangedEventArgs(_settingsService.GetUITextValue));
-        _settingsService.OnLanguageChanged += viewmodel.SetUIItemsText;
-
-        CurrentView = viewmodel;
+        NavigateTo<TViewModel>();
         return true;
+    }
+
+    private void SetupTextLanguageTranslation(object? sender, ViewChangedEventArgs e)
+    {
+        if (e.OldViewModel != null)
+            _settingsService.OnLanguageChanged -= e.OldViewModel.SetUIItemsText;
+        e.NewViewModel.SetUIItemsText(this, new OnLanguageChangedEventArgs(_settingsService.GetUITextValue));
+
+        _settingsService.OnLanguageChanged += e.NewViewModel.SetUIItemsText;
     }
 
     public bool TryNavigateWithPageInfoArgs<TViewModel>(PageInfoArgs pageInfoArgs) where TViewModel : BaseViewModel

@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,6 +10,9 @@ namespace TypeMaster.ViewModel;
 public partial class MainViewModel : AsyncViewModel
 {
     [ObservableProperty]
+    SolidColorBrush[] _buttonsBackgroundColors;
+
+    [ObservableProperty]
     string?[] _menuButtonsTexts;
 
     [ObservableProperty]
@@ -17,28 +21,70 @@ public partial class MainViewModel : AsyncViewModel
     [ObservableProperty]
     List<MenuItem> _languageOptions;
 
+    readonly string[] _brushesKeys;
+
     readonly LanguagesService _languagesService;
     readonly SettingsService _settingsService;
     readonly CurrentPageService _currentPageService;
     readonly ColorsService _colorsService;
     readonly NetworkAvailabilityService _networkAvailabilityService;
 
-    public MainViewModel(INavigationService navigation, LanguagesService languagesService, SettingsService settingsService, CurrentPageService currentPageService, ColorsService colorsService, NetworkAvailabilityService networkAvailabilityService)
+    public MainViewModel(INavigationService navigationService, LanguagesService languagesService, SettingsService settingsService, CurrentPageService currentPageService, ColorsService colorsService, NetworkAvailabilityService networkAvailabilityService)
     {
+        IsBusy = true;
+
         _languagesService = languagesService;
         _settingsService = settingsService;
         _currentPageService = currentPageService;
-        _navigationService = navigation;
+        _navigationService = navigationService;
         _colorsService = colorsService;
-        _networkAvailabilityService = networkAvailabilityService;
+        _networkAvailabilityService = networkAvailabilityService; 
 
         MenuButtonsTexts = new string?[5];
         SetUIItemsText(this, new OnLanguageChangedEventArgs(_settingsService.GetUITextValue));
         _settingsService.OnLanguageChanged += SetUIItemsText;
 
+        _brushesKeys = new string[2] { "BackgroundColor", "DarkBackgroundColor" };
+        ButtonsBackgroundColors = new SolidColorBrush[3];
+        _navigationService.ViewChanged += UpdateButtons;
+
         LanguageOptions = new ();
         SetContextMenuItems();
-        navigation.TryNavigateTo<SearchArticlesViewModel>();
+        _navigationService.TryNavigateTo<SearchArticlesViewModel>();
+
+        IsBusy = false;
+    }
+
+    private void UpdateButtons(object? sender, ViewChangedEventArgs e)
+    {
+        void CheckValues(BaseViewModel viewModel, SolidColorBrush value)
+        {
+            if (viewModel is SearchArticlesViewModel) ButtonsBackgroundColors[0] = value;
+            else if (viewModel is ChooseTextLengthViewModel) ButtonsBackgroundColors[1] = value;
+            else if (viewModel is ScoreboardViewModel) ButtonsBackgroundColors[2] = value;
+        }
+        //special case #1 if it changes from SearchArticlesViewModel to ChooseTextLengthViewModel not from user input or if ChooseTextLengthViewModel goes to TypeTestViewModel dont update buttons
+        if ((IsNotBusy && e.NewViewModel is ChooseTextLengthViewModel) || (e.OldViewModel is ChooseTextLengthViewModel && e.NewViewModel is TypeTestViewModel))
+            return;
+        //special case #2 if it changes from SearchArticlesViewModel to any viewmodel clear all other buttons
+        if (e.OldViewModel is TypeTestViewModel)
+        {
+            if (e.NewViewModel is not ScoreboardViewModel) ButtonsBackgroundColors[0] = _colorsService.TryGetColor(_brushesKeys[0]) ?? Brushes.MediumPurple;
+            if (e.NewViewModel is not ChooseTextLengthViewModel) ButtonsBackgroundColors[1] = _colorsService.TryGetColor(_brushesKeys[0]) ?? Brushes.MediumPurple;
+            if (e.NewViewModel is not ScoreboardViewModel) ButtonsBackgroundColors[2] = _colorsService.TryGetColor(_brushesKeys[0]) ?? Brushes.MediumPurple;
+        }
+        //special case #3 if CurrentView didn't changed but it drafted new page to ChooseTextLengthViewModel
+        else if (sender == this)
+        {
+            ButtonsBackgroundColors[0] = _colorsService.TryGetColor(_brushesKeys[0]) ?? Brushes.MediumPurple;
+            ButtonsBackgroundColors[1] = _colorsService.TryGetColor(_brushesKeys[0]) ?? Brushes.Purple;
+        }
+        else if (e.OldViewModel != null)
+            CheckValues(e.OldViewModel, _colorsService.TryGetColor(_brushesKeys[0]) ?? Brushes.MediumPurple);
+        CheckValues(e.NewViewModel, _colorsService.TryGetColor(_brushesKeys[1]) ?? Brushes.Purple);
+        
+
+        OnPropertyChanged(nameof(ButtonsBackgroundColors));
     }
 
     private void SetContextMenuItems()
@@ -107,6 +153,7 @@ public partial class MainViewModel : AsyncViewModel
                 //if it's ChooseTextLengthViewModel just draft new random page
                 var chooseTextLengthViewModel = (ChooseTextLengthViewModel)_navigationService.CurrentView;
                 await chooseTextLengthViewModel.LoadDataAsync();
+                UpdateButtons(this, new ViewChangedEventArgs(null, chooseTextLengthViewModel));
             }
         else
             _networkAvailabilityService.CheckAvailability();

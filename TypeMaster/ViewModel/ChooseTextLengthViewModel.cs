@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using TypeMaster.Service;
 
 namespace TypeMaster.ViewModel;
 
@@ -30,6 +31,7 @@ partial class ChooseTextLengthViewModel : AsyncViewModel
         SetUIItemsText(this, new OnLanguageChangedEventArgs(settingsService.GetUITextValue));
     }
 
+    //PageLoadedBehavior doesnt work the best bcs TryGetPageContent await doesnt work
     [RelayCommand]
     public async Task LoadDataAsync()
     {
@@ -42,10 +44,6 @@ partial class ChooseTextLengthViewModel : AsyncViewModel
             WikiTitle = (await _currentPageService.TryGetPageResult())?.Title;
             CheckIfCanBeEnabled(content.Length);
         }
-        else
-        {
-            Debug.WriteLine("Couldn't get page content!");
-        }
 
         IsBusy = false;
     }
@@ -53,6 +51,7 @@ partial class ChooseTextLengthViewModel : AsyncViewModel
     [RelayCommand]
     void NavigateToTypeTest(TextLength textLength)
     {
+        if (_currentPageService.Content == null && !IsBusy) return;
         _currentPageService.CurrentPageInfoArgs!.ProvidedTextLength = textLength;
         _navigationService.TryNavigateTo<TypeTestViewModel>();
     }
