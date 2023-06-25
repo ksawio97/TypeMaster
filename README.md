@@ -56,3 +56,18 @@ TypeMaster is a versatile WPF application that helps you improve your typing ski
 ## Acknowledgements
 
 -   The TypeMaster application utilizes the Wikipedia API for fetching articles.
+
+## Screenshots
+
+![sc1](https://github.com/ksawio97/TypeMaster/assets/96286438/344e5448-17b3-44d6-b0fd-2411c1432b67)
+![sc2](https://github.com/ksawio97/TypeMaster/assets/96286438/7ec74e0e-875f-4c5b-911f-8f5ffcd127f8)
+
+## Recordings
+
+https://github.com/ksawio97/TypeMaster/assets/96286438/c220d583-904f-455a-916e-4c927c3a47ec
+
+
+https://github.com/ksawio97/TypeMaster/assets/96286438/f9c3969a-fa4b-47db-9df8-20ff62e39bc9
+
+
+https://github.com/ksawio97/TypeMaster/assets/96286438/2057da64-b9f9-43bf-b6d7-425f70261f85
