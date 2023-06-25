@@ -69,7 +69,7 @@ public partial class MainViewModel : AsyncViewModel
         //special case #2 if it changes from SearchArticlesViewModel to any viewmodel clear all other buttons
         if (e.OldViewModel is TypeTestViewModel)
         {
-            if (e.NewViewModel is not ScoreboardViewModel) ButtonsBackgroundColors[0] = _colorsService.TryGetColor(_brushesKeys[0]) ?? Brushes.MediumPurple;
+            if (e.NewViewModel is not SearchArticlesViewModel) ButtonsBackgroundColors[0] = _colorsService.TryGetColor(_brushesKeys[0]) ?? Brushes.MediumPurple;
             if (e.NewViewModel is not ChooseTextLengthViewModel) ButtonsBackgroundColors[1] = _colorsService.TryGetColor(_brushesKeys[0]) ?? Brushes.MediumPurple;
             if (e.NewViewModel is not ScoreboardViewModel) ButtonsBackgroundColors[2] = _colorsService.TryGetColor(_brushesKeys[0]) ?? Brushes.MediumPurple;
         }
